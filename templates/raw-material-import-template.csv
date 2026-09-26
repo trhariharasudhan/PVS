@@ -1,0 +1,6 @@
+material_code,name,material_type,unit_of_measure,supplier_code,unit_cost,reorder_level,is_active
+RAW-YARN-MUL-01,Pure Mulberry Silk Warp Yarn (20/22 Denier),RAW_SILK,KILOGRAMS,SUP-SILK-001,4850.00,10.0,true
+RAW-YARN-WEFT-01,High-Twist Pure Silk Weft Yarn,RAW_SILK,KILOGRAMS,SUP-SILK-001,4600.00,10.0,true
+RAW-ZARI-GOLD-01,Tested Pure Gold & Silver Zari Spool (240gm),ZARI_GOLD,SPOOLS,SUP-ZARI-001,1850.00,20.0,true
+RAW-ZARI-SILV-01,Electroplated Pure Silver Zari Spool (240gm),ZARI_SILVER,SPOOLS,SUP-ZARI-001,1450.00,20.0,true
+RAW-DYE-CRIM-01,Crimson Red Fast Acid Dye Powder,DYE_CHEMICAL,KILOGRAMS,SUP-DYES-001,850.00,5.0,true

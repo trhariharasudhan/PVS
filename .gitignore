@@ -1,0 +1,56 @@
+# Dependency directories
+node_modules/
+backend/.venv/
+.venv/
+env/
+venv/
+ENV/
+
+# Build artifacts
+.next/
+out/
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Next.js telemetry & cache
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Environment and Secrets (CRITICAL: Never commit actual .env files)
+.env
+.env.*
+!.env.example
+!.env.production.example
+!.env.staging.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+!backend/.env.production.example
+!backend/.env.staging.example
+
+# Operating System & IDE Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Databases & local state
+*.db
+*.sqlite
+*.sqlite3
+postgres_data/

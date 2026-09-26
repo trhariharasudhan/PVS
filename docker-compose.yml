@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # -------------------------------------------------------------
+  # PostgreSQL Database Service
+  # -------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: pvs-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-pvs_silks_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-pvs_silks_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pvs-network
+
+  # -------------------------------------------------------------
+  # Python / FastAPI Backend Service
+  # -------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pvs-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-pvs_silks_db}
+      SECRET_KEY: ${SECRET_KEY:-pvs-silks-insecure-secret-key-change-in-production-2026}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    networks:
+      - pvs-network
+
+  # -------------------------------------------------------------
+  # Next.js Frontend Service
+  # -------------------------------------------------------------
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pvs-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
+    ports:
+      - "3000:3000"
+    networks:
+      - pvs-network
+
+volumes:
+  postgres_data:
+    name: pvs_postgres_data
+
+networks:
+  pvs-network:
+    name: pvs-network
+    driver: bridge

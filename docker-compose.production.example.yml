@@ -1,0 +1,139 @@
+# ==============================================================================
+# PVS SILK S — PRODUCTION DOCKER COMPOSE DEPLOYMENT TEMPLATE
+# ==============================================================================
+# Usage:
+#   1. Copy backend/.env.production.example to backend/.env.production
+#   2. Copy .env.production.example to .env.production
+#   3. Populate real verified business credentials and strong secrets
+#   4. Start: docker-compose -f docker-compose.production.example.yml --env-file backend/.env.production up -d
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Managed / Containerized PostgreSQL 15 Database
+  # ----------------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: pvs_prod_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pvs_silks_production}
+      POSTGRES_USER: ${POSTGRES_USER:-pvs_prod_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pvs_prod_db_data:/var/lib/postgresql/data
+    networks:
+      - pvs_internal_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pvs_prod_user} -d ${POSTGRES_DB:-pvs_silks_production}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+
+  # ----------------------------------------------------------------------------
+  # 2. FastAPI Backend REST Engine
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pvs_prod_backend
+    restart: always
+    env_file:
+      - ./backend/.env.production
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - pvs_internal_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+
+  # ----------------------------------------------------------------------------
+  # 3. Next.js Frontend Application
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pvs_prod_frontend
+    restart: always
+    env_file:
+      - ./.env.production
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - pvs_internal_net
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+
+  # ----------------------------------------------------------------------------
+  # 4. Nginx Edge Reverse Proxy & TLS Terminator
+  # ----------------------------------------------------------------------------
+  reverse-proxy:
+    image: nginx:1.25-alpine
+    container_name: pvs_prod_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/production.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/certbot_challenge:/var/www/certbot:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - pvs_internal_net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+
+# ------------------------------------------------------------------------------
+# Isolated Bridge Network & Persistent Volumes
+# ------------------------------------------------------------------------------
+networks:
+  pvs_internal_net:
+    driver: bridge
+    internal: false
+
+volumes:
+  pvs_prod_db_data:
+    driver: local

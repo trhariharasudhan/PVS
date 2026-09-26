@@ -1,0 +1,4 @@
+supplier_code,supplier_name,supplier_type,contact_person,phone,email,location,address,gstin,is_active
+SUP-SILK-001,Govt Silk Filature Cooperative Society,SILK_REELER,V. Ramanathan,+919842011223,reeling@silkcoop.org,Salem,"Reeling Complex, Salem - 636001, Tamil Nadu",33AAAAA1111A1Z1,true
+SUP-ZARI-001,Surat Real Gold & Silver Zari Mills,ZARI_MANUFACTURER,R. K. Shah,+919825099881,sales@suratzari.in,Surat,"Textile Park, Ring Road, Surat - 395002, Gujarat",24AAAAA2222B1Z2,true
+SUP-DYES-001,South India Chemical & Textile Dyes,DYE_CHEMICALS,M. Sundaram,+919443055443,dyes@sichem.co.in,Erode,"SIPCOT Industrial Complex, Erode - 638052, Tamil Nadu",33AAAAA3333C1Z3,true

@@ -1,0 +1,4 @@
+full_name,company_name,customer_type,phone,whatsapp_number,email,gstin,city,state,shipping_address
+K. Sundararajan,Sri Meenakshi Silk House,WHOLESALE_MERCHANT,+919842100200,+919842100200,contact@meenakshisilks.com,33AAAAA8888A1Z8,Madurai,Tamil Nadu,"12, West Masi Street, Madurai - 625001, Tamil Nadu"
+Ananya Deshmukh,Viraasat Silk Boutique,BOUTIQUE_BUYER,+919820011223,+919820011223,ananya@viraasatboutique.in,27AAAAA9999B1Z9,Mumbai,Maharashtra,"Shop 4, Linking Road, Bandra West, Mumbai - 400050, Maharashtra"
+Priya Ramesh,,DIRECT_RETAIL,+919840199887,+919840199887,priya.ramesh@gmail.com,,Chennai,Tamil Nadu,"Flat 3B, Temple View Apts, Mylapore, Chennai - 600004, Tamil Nadu"

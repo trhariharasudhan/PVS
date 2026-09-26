@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-silk-red: #7a1625;
+  --color-silk-red-hover: #541019;
+  --color-deep-maroon: #541019;
+  --color-heritage-brown: #2b1812;
+  --color-coffee-brown: #3a2118;
+  --color-zari-gold: #b08a3c;
+  --color-soft-gold: #d4b56a;
+  --color-warm-ivory: #fbf7ee;
+  --color-silk-cream: #f5ebdd;
+  --color-light-sand: #e8d7bc;
+  --color-charcoal-brown: #241613;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+    color: #241613;
+    background-color: #fbf7ee;
+  }
+
+  body {
+    overflow-x: hidden;
+    background-color: #fbf7ee;
+    color: #241613;
+  }
+
+  /* Traditional Scrollbar in Heritage Brown & Antique Zari Gold */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #2b1812;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #b08a3c;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #d4b56a;
+  }
+}
+
+/* Subtle Traditional Paper & Handwoven Silk Weave Textures */
+.bg-textile-weave {
+  background-color: #fbf7ee;
+  background-image: radial-gradient(rgba(43, 24, 18, 0.035) 1px, transparent 0);
+  background-size: 16px 16px;
+}
+
+.bg-zari-pattern {
+  background-color: #2b1812;
+  background-image: radial-gradient(rgba(176, 138, 60, 0.15) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+.bg-silk-red-gradient {
+  background: linear-gradient(135deg, #541019 0%, #7a1625 50%, #8f1d2e 100%);
+}
+
+.bg-heritage-dark {
+  background: linear-gradient(145deg, #1a0e0b 0%, #2b1812 60%, #3a2118 100%);
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #d4b56a 0%, #b08a3c 60%, #8e6923 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Micro-interactions & Smooth Transitions */
+@keyframes fadeInSubtle {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-subtle {
+  animation: fadeInSubtle 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

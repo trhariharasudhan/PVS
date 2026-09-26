@@ -1,0 +1,112 @@
+name: PVS Silk S — Continuous Integration & Quality Gate
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Job 1: Backend Test Suite & Migration Validation
+  # ----------------------------------------------------------------------------
+  backend-test:
+    name: Backend Pytest & Migration Validation
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: pvs_test_db
+          POSTGRES_USER: pvs_test_user
+          POSTGRES_PASSWORD: pvs_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio anyio httpx
+
+      - name: Validate Environment Configuration Engine
+        working-directory: ./backend
+        run: python -m app.core.validate_environment
+
+      - name: Validate CSV Master Data Templates (Dry-Run)
+        working-directory: ./backend
+        run: python -m app.core.validate_master_data --dry-run
+
+      - name: Verify Disaster Recovery & Backup Integrity (Dry-Run)
+        working-directory: ./backend
+        run: python -m app.core.verify_disaster_recovery --dry-run
+
+      - name: Evaluate Production Launch Gates (Dry-Run / JSON)
+        working-directory: ./backend
+        run: python -m app.core.check_production_gates --json
+
+      - name: Run Pytest Test Suite
+        working-directory: ./backend
+        env:
+          ENVIRONMENT: test
+          SECRET_KEY: test_secret_key_minimum_32_characters_for_ci_pipeline_only
+          DATABASE_URL: sqlite+aiosqlite:///:memory:
+        run: python -m pytest app/tests -v
+
+  # ----------------------------------------------------------------------------
+  # Job 2: Frontend Typecheck & Production Build
+  # ----------------------------------------------------------------------------
+  frontend-build:
+    name: Next.js Typecheck & Production Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Next.js Production Build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NEXT_PUBLIC_API_URL: https://api.pvssilks.com/api/v1
+        run: npm run build
+
+  # ----------------------------------------------------------------------------
+  # Job 3: Security & Secret Scan
+  # ----------------------------------------------------------------------------
+  security-scan:
+    name: Defensive Security & Credentials Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Secret Scan (Gitleaks / Trufflehog)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
