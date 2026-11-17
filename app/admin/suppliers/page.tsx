@@ -230,7 +230,7 @@ export default function AdminSuppliersPage() {
             <Building2 className="w-12 h-12 text-charcoal-300 mx-auto mb-3" />
             <p className="text-sm font-semibold text-burgundy-950">No Suppliers Found</p>
             <p className="text-xs text-charcoal-500 mt-1 max-w-sm mx-auto">
-              No suppliers match your active filter criteria. Click "Add Supplier" to register a new vendor.
+              No suppliers match your active filter criteria. Click &ldquo;Add Supplier&rdquo; to register a new vendor.
             </p>
           </div>
         ) : (

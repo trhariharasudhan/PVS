@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { siteConfig } from "@/config/site";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ArrowLeft, ShieldCheck, MessageCircle } from "lucide-react";
+import { displayPrice, formatAmount, totalForMessage, SHIPPING_TERMS } from "@/lib/pricing";
 
 export default function CartPage() {
   const { items, itemCount, subtotal, shipping, total, updateQuantity, removeItem, clearCart } =
@@ -84,7 +85,7 @@ export default function CartPage() {
                           {item.fabric} • {item.color}
                         </p>
                         <p className="text-xs font-bold text-silk-red-700 font-serif">
-                          {item.priceDisplay}
+                          {displayPrice(item.priceDisplay)}
                         </p>
                       </div>
                     </div>
@@ -113,7 +114,7 @@ export default function CartPage() {
 
                       {/* Line Total */}
                       <span className="font-serif text-sm font-bold text-heritage-brown-950 min-w-[70px] text-right">
-                        ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+                        {formatAmount(item.price * item.quantity)}
                       </span>
 
                       {/* Remove Button */}
@@ -156,19 +157,19 @@ export default function CartPage() {
                 <div className="flex justify-between">
                   <span>Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})</span>
                   <span className="font-semibold text-heritage-brown-950">
-                    ₹{subtotal.toLocaleString("en-IN")}
+                    {formatAmount(subtotal)}
                   </span>
                 </div>
 
                 <div className="flex justify-between">
                   <span>Insured Handloom Shipping</span>
-                  <span className="text-emerald-700 font-semibold">Free (All India)</span>
+                  <span className="text-emerald-700 font-semibold">{SHIPPING_TERMS}</span>
                 </div>
 
                 <div className="flex justify-between text-base font-bold text-heritage-brown-950 pt-3 border-t border-gold-200">
                   <span>Total Amount</span>
                   <span className="text-silk-red-700 font-serif text-xl">
-                    ₹{total.toLocaleString("en-IN")}
+                    {formatAmount(total)}
                   </span>
                 </div>
               </div>
@@ -184,9 +185,7 @@ export default function CartPage() {
 
                 <a
                   href={`https://wa.me/${siteConfig.business.whatsapp}?text=${encodeURIComponent(
-                    `Hi PVS, I would like to finalize my order for ${itemCount} sarees (Total: ₹${total.toLocaleString(
-                      "en-IN"
-                    )}). Please advise on payment & dispatch.`
+                    `Hi PVS, I would like to finalize my order for ${itemCount} sarees${totalForMessage(total)}. Please confirm pricing, availability & dispatch.`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"

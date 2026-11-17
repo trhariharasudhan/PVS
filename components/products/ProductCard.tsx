@@ -8,6 +8,7 @@ import { siteConfig } from "@/config/site";
 import { useCart } from "@/context/CartContext";
 import { ShoppingBag, MessageCircle, Eye, Check, X, ArrowRight } from "lucide-react";
 import { ProductItem } from "@/data/products";
+import { displayPrice } from "@/lib/pricing";
 
 interface ProductCardProps {
   product: ProductItem | any;
@@ -31,7 +32,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const name = product.name || "Traditional Pattu Saree";
   const fabric = product.fabric || "Pure Mulberry Silk";
   const color = product.color || "Rich Traditional Hue";
-  const priceDisplay = product.priceDisplay || `₹${(product.price || 15000).toLocaleString("en-IN")}`;
+  const priceDisplay = displayPrice(product.priceDisplay);
   const availability = product.availability || "In Stock";
   const isSample = product.isSample !== false; // Sample policy flag
 

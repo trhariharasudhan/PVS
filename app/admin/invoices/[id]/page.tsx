@@ -25,7 +25,7 @@ import {
   recordAdminInvoicePayment,
   updateAdminInvoiceStatus,
 } from "@/lib/api/admin";
-import { siteConfig } from "@/config/site";
+import { siteConfig, isBankConfigured } from "@/config/site";
 import {
   AdminInvoiceDetail,
   InvoiceStatus,
@@ -246,7 +246,7 @@ export default function AdminInvoiceDetailPage({ params }: InvoiceDetailPageProp
             </p>
             <div className="text-xs font-mono text-charcoal-700 mt-2 space-y-0.5">
               <div>
-                <strong>GSTIN:</strong> {siteConfig.business.gstinPlaceholder}
+                <strong>GSTIN:</strong> {siteConfig.business.gstinPlaceholder || "NOT CONFIGURED (set NEXT_PUBLIC_BUSINESS_GSTIN)"}
               </div>
               <div>
                 <strong>State:</strong> {siteConfig.business.address.state} (Code: 33)
@@ -375,13 +375,19 @@ export default function AdminInvoiceDetailPage({ params }: InvoiceDetailPageProp
               Terms & Bank Remittance Instructions
             </h4>
             <p className="whitespace-pre-line">{invoice.terms_and_conditions}</p>
-            <div className="p-3 bg-ivory-100 rounded-lg border border-gold-400/40 text-[11px] font-mono mt-3">
-              <div><strong>Bank:</strong> {siteConfig.bank.name} ({siteConfig.bank.branch})</div>
-              <div><strong>A/C Name:</strong> {siteConfig.bank.accountName}</div>
-              <div><strong>A/C No:</strong> {siteConfig.bank.accountNumber}</div>
-              <div><strong>IFSC:</strong> {siteConfig.bank.ifsc}</div>
-              <div><strong>UPI:</strong> {siteConfig.bank.upiId}</div>
-            </div>
+            {isBankConfigured() ? (
+              <div className="p-3 bg-ivory-100 rounded-lg border border-gold-400/40 text-[11px] font-mono mt-3">
+                <div><strong>Bank:</strong> {siteConfig.bank.name}{siteConfig.bank.branch ? ` (${siteConfig.bank.branch})` : ""}</div>
+                <div><strong>A/C Name:</strong> {siteConfig.bank.accountName}</div>
+                <div><strong>A/C No:</strong> {siteConfig.bank.accountNumber}</div>
+                <div><strong>IFSC:</strong> {siteConfig.bank.ifsc}</div>
+                {siteConfig.bank.upiId && <div><strong>UPI:</strong> {siteConfig.bank.upiId}</div>}
+              </div>
+            ) : (
+              <div className="p-3 bg-red-50 rounded-lg border border-red-300 text-[11px] font-mono mt-3 text-red-800">
+                Bank details are not configured. Set NEXT_PUBLIC_BANK_* environment variables before sharing this invoice.
+              </div>
+            )}
           </div>
 
           <div className="w-full md:w-80 bg-ivory-50 p-5 rounded-xl border border-charcoal-200 space-y-2.5 font-mono text-sm">

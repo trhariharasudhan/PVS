@@ -193,7 +193,7 @@ export default function AdminPaymentsPage() {
             <CreditCard className="w-12 h-12 text-charcoal-300 mx-auto mb-3" />
             <p className="text-sm font-semibold text-burgundy-950">No Payment Records Found</p>
             <p className="text-xs text-charcoal-500 mt-1 max-w-sm mx-auto">
-              No payment transactions match your filters. Click "Record Payment" to record a customer remittance or supplier payment.
+              No payment transactions match your filters. Click &ldquo;Record Payment&rdquo; to record a customer remittance or supplier payment.
             </p>
           </div>
         ) : (

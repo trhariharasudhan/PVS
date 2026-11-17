@@ -16,6 +16,7 @@ import {
   CreditCard,
   AlertCircle,
 } from "lucide-react";
+import { formatAmount, totalForMessage, SHIPPING_TERMS } from "@/lib/pricing";
 
 export default function CheckoutPage() {
   const { items, itemCount, subtotal, shipping, total, clearCart } = useCart();
@@ -67,10 +68,13 @@ export default function CheckoutPage() {
       setOrderConfirmed({ orderNumber, date });
       setIsSubmitting(false);
 
-      // If WhatsApp method selected, open WhatsApp with order details
-      if (paymentMethod === "whatsapp") {
+      // There is no order backend yet: WhatsApp is the ONLY channel that reaches PVS.
+      // Always hand the enquiry to WhatsApp, whatever payment preference was chosen,
+      // so no customer gets a "confirmed" screen that the business never receives.
+      {
+        const methodLabel = paymentMethod === "bank" ? "Bank transfer / UPI" : paymentMethod === "cod" ? "Pay on delivery" : "Confirm on WhatsApp";
         const itemSummary = items.map((i) => `${i.name} (${i.code}) x ${i.quantity}`).join(", ");
-        const text = `Hi PVS, I would like to place an order!%0A%0A*Order Number:* ${orderNumber}%0A*Name:* ${formData.fullName}%0A*Phone:* ${formData.mobile}%0A*Address:* ${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}%0A%0A*Items:* ${itemSummary}%0A*Total Amount:* ₹${total.toLocaleString("en-IN")}%0A%0APlease confirm availability and dispatch timeline.`;
+        const text = `Hi PVS, I would like to place an order!%0A%0A*Order Number:* ${orderNumber}%0A*Name:* ${formData.fullName}%0A*Phone:* ${formData.mobile}%0A*Address:* ${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}%0A%0A*Items:* ${itemSummary}%0A*Payment preference:* ${encodeURIComponent(methodLabel)}${encodeURIComponent(totalForMessage(total))}%0A%0APlease confirm pricing, availability and dispatch timeline.`;
         window.open(`https://wa.me/${siteConfig.business.whatsapp}?text=${text}`, "_blank");
       }
 
@@ -87,8 +91,13 @@ export default function CheckoutPage() {
           </div>
 
           <span className="text-xs uppercase font-mono tracking-widest text-emerald-700 font-bold block">
-            ORDER INQUIRY LOGGED SUCCESSFULLY
+            ORDER ENQUIRY PREPARED
           </span>
+
+          <p className="text-xs sm:text-sm text-heritage-brown-700 font-sans">
+            Please press <strong>Send</strong> in the WhatsApp window that opened. Your enquiry reaches PVS only after it
+            is sent on WhatsApp. If the window did not open, use the button below.
+          </p>
 
           <h1 className="font-serif text-3xl sm:text-4xl font-bold text-heritage-brown-950">
             Thank You, {formData.fullName}!
@@ -111,7 +120,7 @@ export default function CheckoutPage() {
             </div>
             <div className="flex justify-between pt-1 font-bold text-base text-heritage-brown-950">
               <span>Total Payable:</span>
-              <span className="text-silk-red-700 font-serif">₹{total.toLocaleString("en-IN")}</span>
+              <span className="text-silk-red-700 font-serif">{formatAmount(total)}</span>
             </div>
           </div>
 
@@ -125,7 +134,7 @@ export default function CheckoutPage() {
           <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
             <a
               href={`https://wa.me/${siteConfig.business.whatsapp}?text=${encodeURIComponent(
-                `Hi PVS, following up on my order reference ${orderConfirmed.orderNumber} for ₹${total.toLocaleString("en-IN")}.`
+                `Hi PVS, following up on my order reference ${orderConfirmed.orderNumber}${totalForMessage(total)}.`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -370,10 +379,10 @@ export default function CheckoutPage() {
                     <div>
                       <span className="font-serif text-sm font-bold text-heritage-brown-950 flex items-center gap-1.5">
                         <Building2 className="w-4 h-4 text-silk-red-700" />
-                        <span>Direct Bank Wire Transfer / UPI (State Bank of India)</span>
+                        <span>Bank Transfer / UPI</span>
                       </span>
                       <p className="text-xs text-heritage-brown-600 mt-0.5">
-                        Official invoice with IFSC & bank account will be generated for remittance.
+                        PVS will share official bank details with your invoice after confirming the order. Never pay to details received from anyone else.
                       </p>
                     </div>
                   </label>
@@ -396,7 +405,7 @@ export default function CheckoutPage() {
                     <div>
                       <span className="font-serif text-sm font-bold text-heritage-brown-950 flex items-center gap-1.5">
                         <Truck className="w-4 h-4 text-gold-700" />
-                        <span>Pay on Delivery / Inspection (Eligible PIN codes)</span>
+                        <span>Pay on Delivery (subject to confirmation)</span>
                       </span>
                       <p className="text-xs text-heritage-brown-600 mt-0.5">
                         Pay upon receiving and verifying your saree parcel via registered courier.
@@ -426,7 +435,7 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                     <span className="font-semibold text-heritage-brown-900 font-mono">
-                      ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+                      {formatAmount(item.price * item.quantity)}
                     </span>
                   </div>
                 ))}
@@ -435,15 +444,15 @@ export default function CheckoutPage() {
               <div className="space-y-2 pt-3 border-t border-gold-200 text-xs text-heritage-brown-700">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="font-semibold text-heritage-brown-950">₹{subtotal.toLocaleString("en-IN")}</span>
+                  <span className="font-semibold text-heritage-brown-950">{formatAmount(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Insured Handloom Shipping</span>
-                  <span className="text-emerald-700 font-semibold">Free (All India)</span>
+                  <span className="text-emerald-700 font-semibold">{SHIPPING_TERMS}</span>
                 </div>
                 <div className="flex justify-between text-base font-bold text-heritage-brown-950 pt-2 border-t border-gold-200">
                   <span>Total Amount</span>
-                  <span className="text-silk-red-700 font-serif text-xl">₹{total.toLocaleString("en-IN")}</span>
+                  <span className="text-silk-red-700 font-serif text-xl">{formatAmount(total)}</span>
                 </div>
               </div>
 

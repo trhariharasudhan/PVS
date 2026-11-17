@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { displayPrice, formatAmount, totalForMessage, SHIPPING_TERMS } from "@/lib/pricing";
 
 export function CartDrawer() {
   const { items, itemCount, subtotal, shipping, total, isOpen, closeCart, updateQuantity, removeItem } =
@@ -118,7 +119,7 @@ export function CartDrawer() {
                         Code: {item.code}
                       </p>
                       <p className="text-[11px] font-bold text-silk-red-700 mt-0.5">
-                        {item.priceDisplay}
+                        {displayPrice(item.priceDisplay)}
                       </p>
                     </div>
 
@@ -144,7 +145,7 @@ export function CartDrawer() {
                       </div>
 
                       <span className="text-xs font-bold text-heritage-brown-900">
-                        ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+                        {formatAmount(item.price * item.quantity)}
                       </span>
                     </div>
                   </div>
@@ -160,17 +161,17 @@ export function CartDrawer() {
                 <div className="flex justify-between">
                   <span>Subtotal</span>
                   <span className="font-semibold text-heritage-brown-900">
-                    ₹{subtotal.toLocaleString("en-IN")}
+                    {formatAmount(subtotal)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Insured Handloom Shipping</span>
-                  <span className="text-emerald-700 font-semibold">Free (All India)</span>
+                  <span className="text-emerald-700 font-semibold">{SHIPPING_TERMS}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold text-heritage-brown-950 pt-2 border-t border-gold-200">
                   <span>Total Amount</span>
                   <span className="text-silk-red-700 text-base">
-                    ₹{total.toLocaleString("en-IN")}
+                    {formatAmount(total)}
                   </span>
                 </div>
               </div>
@@ -196,9 +197,7 @@ export function CartDrawer() {
 
                   <a
                     href={`https://wa.me/${siteConfig.business.whatsapp}?text=${encodeURIComponent(
-                      `Hi PVS, I have ${itemCount} sarees in my cart (Total: ₹${total.toLocaleString(
-                        "en-IN"
-                      )}). Could you assist me with this order?`
+                      `Hi PVS, I have ${itemCount} sarees in my cart${totalForMessage(total)}. Could you share pricing and assist me with this order?`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"

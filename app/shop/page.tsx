@@ -7,6 +7,7 @@ import { shopCategories } from "@/data/categories";
 import { ProductCard } from "@/components/products/ProductCard";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Search, Filter, SlidersHorizontal, ShoppingBag, X } from "lucide-react";
+import { SHOW_RETAIL_PRICES } from "@/lib/pricing";
 
 function ShopContent() {
   const searchParams = useSearchParams();
@@ -137,8 +138,8 @@ function ShopContent() {
             >
               <option value="featured">Featured First</option>
               <option value="newest">Newest Looms</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
+              {SHOW_RETAIL_PRICES && <option value="price-asc">Price: Low to High</option>}
+              {SHOW_RETAIL_PRICES && <option value="price-desc">Price: High to Low</option>}
             </select>
 
             {/* Mobile Filter Toggle */}

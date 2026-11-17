@@ -1,0 +1,10 @@
+# Store text with LF in the repo; each OS checks out its native line endings.
+* text=auto
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.glb binary
+*.ktx2 binary
+*.woff2 binary
+*.pdf binary

@@ -287,7 +287,7 @@ export default function NewOrderPage() {
               </label>
               {customers.length === 0 ? (
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded text-xs text-amber-900">
-                  No existing customers found. Switch to "+ New Customer" above.
+                  No existing customers found. Switch to &ldquo;+ New Customer&rdquo; above.
                 </div>
               ) : (
                 <select

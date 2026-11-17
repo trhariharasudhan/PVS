@@ -55,18 +55,20 @@ export const siteConfig = {
     email: "contact@pvssilks.com",
     emailDisplay: "contact@pvssilks.com",
     businessHours: "Monday - Saturday: 9:00 AM - 8:00 PM (IST)",
-    gstinPlaceholder: process.env.NEXT_PUBLIC_BUSINESS_GSTIN || "33XXXXX0000X1Z5",
+    gstinPlaceholder: process.env.NEXT_PUBLIC_BUSINESS_GSTIN || "",
     loomCountPlaceholder: "Dedicated Artisanal Looms",
   },
 
   // Bank Wire Transfer Details (For official Tax Invoices and Remittance UI)
+  // SAFETY: no fallback values. Fake defaults on an invoice can make a customer pay a
+  // stranger's account. Empty means "not configured" and the invoice shows a warning.
   bank: {
-    name: process.env.NEXT_PUBLIC_BANK_NAME || "State Bank of India",
-    accountName: process.env.NEXT_PUBLIC_BANK_ACCOUNT_NAME || "PVS",
-    accountNumber: process.env.NEXT_PUBLIC_BANK_ACCOUNT_NUMBER || "39882200192",
-    ifsc: process.env.NEXT_PUBLIC_BANK_IFSC || "SBIN0000853",
-    branch: process.env.NEXT_PUBLIC_BANK_BRANCH || "Kalipatti Branch",
-    upiId: process.env.NEXT_PUBLIC_BANK_UPI_ID || "pvs@sbi",
+    name: process.env.NEXT_PUBLIC_BANK_NAME || "",
+    accountName: process.env.NEXT_PUBLIC_BANK_ACCOUNT_NAME || "",
+    accountNumber: process.env.NEXT_PUBLIC_BANK_ACCOUNT_NUMBER || "",
+    ifsc: process.env.NEXT_PUBLIC_BANK_IFSC || "",
+    branch: process.env.NEXT_PUBLIC_BANK_BRANCH || "",
+    upiId: process.env.NEXT_PUBLIC_BANK_UPI_ID || "",
   },
 
   // Social & Channels
@@ -110,4 +112,10 @@ export const siteConfig = {
 export function getWhatsAppLink(message: string): string {
   const encoded = encodeURIComponent(message);
   return `https://wa.me/${siteConfig.business.whatsapp}?text=${encoded}`;
+}
+
+/** True only when every bank field needed for a remittance is configured. */
+export function isBankConfigured(): boolean {
+  const b = siteConfig.bank;
+  return Boolean(b.name && b.accountName && b.accountNumber && b.ifsc);
 }

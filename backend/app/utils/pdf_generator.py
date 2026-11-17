@@ -18,6 +18,26 @@ from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 from app.core.config import settings
 
 
+def _bank_details_markup() -> str:
+    """Bank block for the invoice. Never prints partial / unconfigured remittance details."""
+    if not (settings.BANK_NAME and settings.BANK_ACCOUNT_NAME and settings.BANK_ACCOUNT_NUMBER and settings.BANK_IFSC):
+        return (
+            "<b>Bank NEFT/RTGS Transfer Details:</b><br/>"
+            "<font color='#B91C1C'><b>Bank details not configured.</b> "
+            "Contact PVS directly to confirm payment details.</font>"
+        )
+    branch = f" ({settings.BANK_BRANCH})" if settings.BANK_BRANCH else ""
+    upi = f"<br/>UPI ID: <b>{settings.BANK_UPI_ID}</b>" if settings.BANK_UPI_ID else ""
+    return (
+        "<b>Bank NEFT/RTGS Transfer Details:</b><br/>"
+        f"Bank Name: <b>{settings.BANK_NAME}</b><br/>"
+        f"Account Name: <b>{settings.BANK_ACCOUNT_NAME}</b><br/>"
+        f"Account Number: <b>{settings.BANK_ACCOUNT_NUMBER}</b><br/>"
+        f"IFSC Code: <b>{settings.BANK_IFSC}</b>{branch}"
+        f"{upi}"
+    )
+
+
 def generate_invoice_pdf(invoice_data: dict[str, Any]) -> bytes:
     """
     Generates a production-grade, print-ready PDF Tax Invoice for PVS Silk S
@@ -258,12 +278,7 @@ def generate_invoice_pdf(invoice_data: dict[str, Any]) -> bytes:
 
     totals_data = [
         [
-            Paragraph("<b>Bank NEFT/RTGS Transfer Details:</b><br/>"
-                      f"Bank Name: <b>{settings.BANK_NAME}</b><br/>"
-                      f"Account Name: <b>{settings.BANK_ACCOUNT_NAME}</b><br/>"
-                      f"Account Number: <b>{settings.BANK_ACCOUNT_NUMBER}</b><br/>"
-                      f"IFSC Code: <b>{settings.BANK_IFSC}</b> ({settings.BANK_BRANCH})<br/>"
-                      f"UPI ID: <b>{settings.BANK_UPI_ID}</b>", meta_value_style),
+            Paragraph(_bank_details_markup(), meta_value_style),
             Paragraph("Subtotal Taxable Amount:", meta_value_style),
             Paragraph(f"₹{subtotal:,.2f}", table_cell_right),
         ],

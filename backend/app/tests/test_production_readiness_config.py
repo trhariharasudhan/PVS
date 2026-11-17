@@ -48,9 +48,29 @@ async def test_production_readiness_validation_passes_on_valid_config():
         BUSINESS_GSTIN="33AAECP1234F1Z5",
         GST_ENABLED=True,
         CORS_ORIGINS=["https://pvssilks.com", "https://admin.pvssilks.com"],
+        BANK_ACCOUNT_NUMBER="40991122334",
+        BANK_IFSC="SBIN0001234",
     )
     errors = prod_cfg.validate_production_readiness()
     assert len(errors) == 0
+
+
+@pytest.mark.asyncio
+async def test_production_readiness_rejects_missing_or_demo_bank_details():
+    """Bank details have no defaults; empty or known demo accounts must block production."""
+    base = dict(
+        ENVIRONMENT="production",
+        SECRET_KEY="a" * 64,
+        DATABASE_URL="postgresql+asyncpg://user:pass@prod-db.internal:5432/pvs_db",
+        BUSINESS_GSTIN="33AAECP1234F1Z5",
+        GST_ENABLED=True,
+        CORS_ORIGINS=["https://pvssilks.com"],
+    )
+    missing = Settings(**base).validate_production_readiness()
+    assert any("BANK_ACCOUNT_NUMBER" in e for e in missing)
+
+    demo = Settings(**base, BANK_ACCOUNT_NUMBER="39882200192", BANK_IFSC="SBIN0001234").validate_production_readiness()
+    assert any("BANK_ACCOUNT_NUMBER" in e for e in demo)
 
 
 @pytest.mark.asyncio

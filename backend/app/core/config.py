@@ -5,6 +5,10 @@ from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+# Demo account numbers that shipped in early templates; never valid in production.
+KNOWN_DEMO_BANK_ACCOUNTS = frozenset({"39882200192"})
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -78,12 +82,14 @@ class Settings(BaseSettings):
     INVOICE_PREFIX: str = "INV"
 
     # Bank Remittance Instructions for Invoices
-    BANK_NAME: str = "State Bank of India"
-    BANK_ACCOUNT_NAME: str = "PVS Silk S Private Limited"
-    BANK_ACCOUNT_NUMBER: str = "39882200192"
-    BANK_IFSC: str = "SBIN0000853"
-    BANK_BRANCH: str = "Kanchipuram Main Branch"
-    BANK_UPI_ID: str = "pvssilks@sbi"
+    # SAFETY: no demo defaults. A fake account printed on an invoice can send a
+    # customer's payment to a stranger. Empty = "not configured" on generated PDFs.
+    BANK_NAME: str = ""
+    BANK_ACCOUNT_NAME: str = ""
+    BANK_ACCOUNT_NUMBER: str = ""
+    BANK_IFSC: str = ""
+    BANK_BRANCH: str = ""
+    BANK_UPI_ID: str = ""
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
@@ -205,7 +211,11 @@ class Settings(BaseSettings):
                     errors.append(f"BUSINESS_GSTIN ('{self.BUSINESS_GSTIN}') must be a valid 15-character Indian GSTIN format when GST_ENABLED is True.")
             
             # 4. Banking validation
-            if not self.BANK_ACCOUNT_NUMBER or "REPLACE" in self.BANK_ACCOUNT_NUMBER:
+            if (
+                not self.BANK_ACCOUNT_NUMBER
+                or "REPLACE" in self.BANK_ACCOUNT_NUMBER
+                or self.BANK_ACCOUNT_NUMBER in KNOWN_DEMO_BANK_ACCOUNTS
+            ):
                 errors.append("BANK_ACCOUNT_NUMBER is required for production invoice remittance.")
             if not self.BANK_IFSC or len(self.BANK_IFSC) != 11:
                 errors.append("BANK_IFSC must be a valid 11-character Indian Financial System Code.")

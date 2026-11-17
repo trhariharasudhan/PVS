@@ -21,6 +21,7 @@ import {
   Maximize2,
   X,
 } from "lucide-react";
+import { displayPrice, SHOW_RETAIL_PRICES } from "@/lib/pricing";
 
 export default function CollectionDetailPage() {
   const params = useParams();
@@ -149,10 +150,10 @@ export default function CollectionDetailPage() {
 
               <div className="mt-3 flex items-baseline gap-3">
                 <span className="font-serif text-2xl sm:text-3xl font-bold text-silk-red-700">
-                  {product.priceDisplay}
+                  {displayPrice(product.priceDisplay)}
                 </span>
                 <span className="text-xs text-heritage-brown-600 font-sans">
-                  Direct Loom Price (All India Insured Shipping)
+                  {SHOW_RETAIL_PRICES ? "Direct Loom Price (All India Insured Shipping)" : "Wholesale & bulk pricing shared on enquiry"}
                 </span>
               </div>
             </div>

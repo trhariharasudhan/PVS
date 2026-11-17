@@ -296,7 +296,7 @@ export default function AdminRawMaterialsPage() {
             <Scissors className="w-12 h-12 text-charcoal-300 mx-auto mb-3" />
             <p className="text-sm font-semibold text-burgundy-950">No Raw Materials Found</p>
             <p className="text-xs text-charcoal-500 mt-1 max-w-sm mx-auto">
-              No material specifications match your active filters. Click "Add Raw Material" to create one.
+              No material specifications match your active filters. Click &ldquo;Add Raw Material&rdquo; to create one.
             </p>
           </div>
         ) : (

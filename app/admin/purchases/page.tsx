@@ -150,7 +150,7 @@ export default function AdminPurchasesPage() {
             <FileText className="w-12 h-12 text-charcoal-300 mx-auto mb-3" />
             <p className="text-sm font-semibold text-burgundy-950">No Purchase Orders Found</p>
             <p className="text-xs text-charcoal-500 mt-1 max-w-sm mx-auto">
-              No procurement orders match your filter criteria. Click "New Purchase Order" to draft one.
+              No procurement orders match your filter criteria. Click &ldquo;New Purchase Order&rdquo; to draft one.
             </p>
           </div>
         ) : (

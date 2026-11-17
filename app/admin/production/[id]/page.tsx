@@ -498,7 +498,7 @@ export default function AdminProductionBatchDetailPage() {
 
         {consumedMaterials.length === 0 ? (
           <div className="p-8 text-center text-xs text-charcoal-500">
-            No raw materials logged for this production batch yet. Click "Issue Raw Material" to deduct mulberry silk or zari from warehouse inventory.
+            No raw materials logged for this production batch yet. Click &ldquo;Issue Raw Material&rdquo; to deduct mulberry silk or zari from warehouse inventory.
           </div>
         ) : (
           <div className="overflow-x-auto">
