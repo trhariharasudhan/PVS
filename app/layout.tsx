@@ -101,7 +101,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${playfair.variable} ${jakarta.variable}`}>
+    <html lang="en" className={`${playfair.variable} ${jakarta.variable}`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"

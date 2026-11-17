@@ -68,7 +68,7 @@ export function Navbar() {
       <nav
         className={`sticky top-0 z-40 transition-all duration-300 ${
           isScrolled
-            ? "bg-ivory-50/98 backdrop-blur-md shadow-luxury border-b border-gold-400/50 py-3"
+            ? "bg-ivory-50/95 backdrop-blur-md shadow-luxury border-b border-gold-400/50 py-3"
             : "bg-ivory-50 border-b border-gold-300/60 py-3.5 sm:py-4"
         }`}
       >

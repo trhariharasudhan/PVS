@@ -88,3 +88,19 @@
 .animate-fade-in-subtle {
   animation: fadeInSubtle 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ------------------------------------------------------------------ */
+/* 3D hero mode switch — data-hero3d is set before first paint by      */
+/* components/home/hero3d/HeroExperience.tsx                           */
+/* ------------------------------------------------------------------ */
+.hero-3d,
+.hero-3d-placeholder {
+  display: none;
+}
+html[data-hero3d="1"] .hero-3d,
+html[data-hero3d="1"] .hero-3d-placeholder {
+  display: block;
+}
+html[data-hero3d="1"] .hero-fallback {
+  display: none;
+}
