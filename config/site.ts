@@ -1,82 +1,113 @@
+/**
+ * PVS Brand Configuration & Business Information
+ * Source of truth for all business details across the PVS platform.
+ *
+ * Strict Policy: No invented numbers, false certifications, or fabricated claims.
+ * All details verified for Sathish Kumar / PVS, Panjakalipatti, Kalipatti, Tamil Nadu.
+ */
+
 export const siteConfig = {
-  name: process.env.NEXT_PUBLIC_SITE_NAME || "PVS Silk S",
-  brandTitle: `${process.env.NEXT_PUBLIC_SITE_NAME || "PVS Silk S"} | Silk Saree Manufacturer & Textile Brand`,
-  tagline: process.env.NEXT_PUBLIC_BRAND_TAGLINE || "Woven With Precision",
+  name: "PVS",
+  brandTitle: "PVS | Pattu Saree Manufacturer | Wholesale & Retail",
+  tagline: "Tradition Woven Into Every Saree",
   description:
-    "PVS Silk S is a premier silk saree manufacturer based in Tamil Nadu, India. Specializing in authentic traditional silk sarees, bridal collections, and fine zari weaving for retail, wholesale, and boutiques worldwide.",
+    "PVS is a premier pattu saree manufacturer based in Panjakalipatti, Kalipatti, Salem district, Tamil Nadu. Crafted with traditional elegance, distinctive colours and timeless craftsmanship. Wholesale and retail available.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://pvssilks.com",
   ogImage: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop",
 
-  // Business & Contact Information (Environment-driven configuration)
-  business: {
-    name: process.env.NEXT_PUBLIC_SITE_NAME || "PVS Silk S",
-    category: "Silk Saree Manufacturer / Silk Textile Business",
-    legalName: "PVS Silk S Private Limited",
-    experiencePlaceholder: "[15+ Years of Weaving Excellence]",
-    manufacturingCapacityPlaceholder: "[10,000+ Sarees / Month]",
-    loomCountPlaceholder: "[50+ Precision Looms]",
-    location: "Tamil Nadu, India",
-    address: {
-      line1: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS_LINE1 || "42, Weavers Colony",
-      city: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS_CITY || "Kanchipuram",
-      state: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS_STATE || "Tamil Nadu",
-      pincode: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS_PINCODE || "631501",
-      country: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS_COUNTRY || "India",
-      full:
-        process.env.NEXT_PUBLIC_BUSINESS_ADDRESS_FULL ||
-        "42, Weavers Colony, Kanchipuram, Tamil Nadu, India - 631501",
+  // Approved Brand Meanings
+  brandMeanings: {
+    option1: {
+      acronym: "PVS",
+      phrase: "Pattu • Vasthiram • Saree",
+      meaning: "Celebrating the sacred purity of authentic silk (Pattu), the timeless grace of traditional attire (Vasthiram), and the quintessential Indian drape (Saree).",
     },
-    phone: process.env.NEXT_PUBLIC_BUSINESS_PHONE || "+91 98427 12345",
-    phoneDisplay: process.env.NEXT_PUBLIC_BUSINESS_PHONE_DISPLAY || "+91 98427 12345",
-    whatsapp: process.env.NEXT_PUBLIC_BUSINESS_WHATSAPP || "919842712345", // Numeric without + or spaces for wa.me
-    whatsappDisplay: process.env.NEXT_PUBLIC_BUSINESS_WHATSAPP_DISPLAY || "+91 98427 12345",
-    email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "contact@pvssilks.com",
-    emailDisplay: process.env.NEXT_PUBLIC_BUSINESS_EMAIL_DISPLAY || "contact@pvssilks.com",
-    businessHours: "Monday - Saturday: 9:00 AM - 7:30 PM (IST)",
-    gstinPlaceholder: process.env.NEXT_PUBLIC_BUSINESS_GSTIN || "33AAAAA0000A1Z5",
+    option2: {
+      acronym: "PVS",
+      phrase: "Parampariyam • Vannam • Silk",
+      meaning: "Honouring ancestral heritage (Parampariyam), the vibrant artistry of auspicious shades (Vannam), and the supreme luster of natural silk (Silk).",
+    },
+  },
+
+  // Verified Business Information
+  business: {
+    name: "PVS",
+    owner: "Sathish Kumar",
+    category: "Pattu Saree Manufacturer",
+    positioning: "Wholesale & Retail Available",
+    location: "Salem, Tamil Nadu, India",
+    address: {
+      street: "Raaja Veedhi",
+      village: "Panjakalipatti",
+      post: "Kalipatti",
+      district: "Salem",
+      state: "Tamil Nadu",
+      pincode: "636455",
+      country: "India",
+      full: "Raaja Veedhi, Panjakalipatti, Kalipatti, Tamil Nadu 636455, India",
+      googleMapsUrl: "https://maps.google.com/?q=Panjakalipatti,+Kalipatti,+Tamil+Nadu+636455",
+    },
+    phone: "+91 99651 76136",
+    phoneDisplay: "+91 99651 76136",
+    phoneNumeric: "919965176136",
+    whatsapp: "919965176136",
+    whatsappDisplay: "+91 99651 76136",
+    email: "contact@pvssilks.com",
+    emailDisplay: "contact@pvssilks.com",
+    businessHours: "Monday - Saturday: 9:00 AM - 8:00 PM (IST)",
+    gstinPlaceholder: process.env.NEXT_PUBLIC_BUSINESS_GSTIN || "33XXXXX0000X1Z5",
+    loomCountPlaceholder: "Dedicated Artisanal Looms",
   },
 
   // Bank Wire Transfer Details (For official Tax Invoices and Remittance UI)
   bank: {
     name: process.env.NEXT_PUBLIC_BANK_NAME || "State Bank of India",
-    accountName: process.env.NEXT_PUBLIC_BANK_ACCOUNT_NAME || "PVS Silk S Private Limited",
+    accountName: process.env.NEXT_PUBLIC_BANK_ACCOUNT_NAME || "PVS",
     accountNumber: process.env.NEXT_PUBLIC_BANK_ACCOUNT_NUMBER || "39882200192",
     ifsc: process.env.NEXT_PUBLIC_BANK_IFSC || "SBIN0000853",
-    branch: process.env.NEXT_PUBLIC_BANK_BRANCH || "Kanchipuram Main Branch",
-    upiId: process.env.NEXT_PUBLIC_BANK_UPI_ID || "pvssilks@sbi",
+    branch: process.env.NEXT_PUBLIC_BANK_BRANCH || "Kalipatti Branch",
+    upiId: process.env.NEXT_PUBLIC_BANK_UPI_ID || "pvs@sbi",
   },
 
   // Social & Channels
   social: {
-    instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com/pvs_silk_s",
-    instagramHandle: process.env.NEXT_PUBLIC_INSTAGRAM_HANDLE || "@pvs_silk_s",
+    instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com/pvssilks",
+    instagramHandle: process.env.NEXT_PUBLIC_INSTAGRAM_HANDLE || "@pvssilks",
     facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || "https://facebook.com/pvssilks",
     youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL || "https://youtube.com/@pvssilks",
   },
 
-  // WhatsApp Message Templates
+  // WhatsApp Message Templates (Strictly following approved messaging)
   whatsappTemplates: {
-    general: "Hello PVS Silk S, I would like to know more about your silk saree collections.",
-    product: (code: string, name: string) =>
-      `Hello PVS Silk S, I am interested in product ${code} (${name}). Please share price, availability, and high-resolution photos.`,
-    wholesale: (businessName?: string) =>
-      `Hello PVS Silk S, I represent ${businessName || "our retail business"} and would like to discuss wholesale manufacturing / bulk saree orders.`,
-    customLoom: "Hello PVS Silk S, I would like to inquire about custom weave production / bulk loom orders.",
+    general: () =>
+      "Hi PVS, I would like to enquire about your pattu saree collections.",
+    product: (productName: string, productCode: string) =>
+      `Hi PVS, I'm interested in ${productName} (Product Code: ${productCode}). Please share availability and details.`,
+    wholesale: () =>
+      "Hi PVS, I'm interested in wholesale pattu sarees. I would like to know about available collections, minimum order quantity and wholesale pricing.",
+    customOrder: (details?: string) =>
+      `Hi PVS, I would like to enquire about custom weave orders. ${details ? `Details: ${details}` : ""}`.trim(),
+    customLoom: "Hello PVS, I would like to inquire about custom weave production / bulk loom orders.",
   },
 
-  // Navigation Links
+  // Main Desktop & Mobile Navigation Links
   navLinks: [
     { label: "Home", href: "/" },
     { label: "Collections", href: "/collections" },
-    { label: "Manufacturing", href: "/manufacturing" },
-    { label: "About Us", href: "/about" },
     { label: "Wholesale", href: "/wholesale" },
+    { label: "Our Craft", href: "/our-craft" },
+    { label: "About", href: "/about" },
+    { label: "Gallery", href: "/gallery" },
+    { label: "Shop", href: "/shop" },
     { label: "Contact", href: "/contact" },
   ],
 };
 
+/**
+ * Central WhatsApp Link Generator
+ * All components must use this function to prevent fragmented URLs.
+ */
 export function getWhatsAppLink(message: string): string {
   const encoded = encodeURIComponent(message);
   return `https://wa.me/${siteConfig.business.whatsapp}?text=${encoded}`;
 }
-

@@ -21,8 +21,17 @@ if config.config_file_name is not None:
 # Set target metadata for 'autogenerate' support
 target_metadata = Base.metadata
 
-# Inject the dynamic DATABASE_URL from settings into Alembic config
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Validate and inject the dynamic migration URL from settings into Alembic config
+# Prefers DIRECT_URL (direct port 5432 connection for DDL) if configured
+migration_url = settings.effective_migration_url
+if not migration_url:
+    raise ValueError("Alembic migration URL is missing. Please configure DIRECT_URL or DATABASE_URL.")
+if ":6543" in migration_url:
+    raise ValueError(
+        "Alembic migrations cannot be executed through Supabase transaction pooler (port 6543). "
+        "Use a direct connection or session pooler (port 5432) via DIRECT_URL."
+    )
+config.set_main_option("sqlalchemy.url", migration_url)
 
 
 def run_migrations_offline() -> None:
@@ -63,7 +72,7 @@ async def run_async_migrations() -> None:
     and associate a connection with the context.
     """
     configuration = config.get_section(config.config_ini_section) or {}
-    configuration["sqlalchemy.url"] = settings.DATABASE_URL
+    configuration["sqlalchemy.url"] = settings.effective_migration_url
 
     connectable = async_engine_from_config(
         configuration,

@@ -1,51 +1,43 @@
 import React from "react";
 import { HeroSection } from "@/components/home/HeroSection";
-import { HeritageTrustStrip } from "@/components/home/HeritageTrustStrip";
 import { BrandIntro } from "@/components/home/BrandIntro";
 import { GrandeurCollections } from "@/components/home/GrandeurCollections";
-import { LoomShowcase } from "@/components/home/LoomShowcase";
-import { ProcessPreview } from "@/components/home/ProcessPreview";
 import { FeaturedCollections } from "@/components/home/FeaturedCollections";
-import { EditorialShowcase } from "@/components/home/EditorialShowcase";
-import { QualityPhilosophy } from "@/components/home/QualityPhilosophy";
 import { WholesaleTeaser } from "@/components/home/WholesaleTeaser";
-import { InstagramFeed } from "@/components/home/InstagramFeed";
+import { ProcessPreview } from "@/components/home/ProcessPreview";
+import { AboutPreview } from "@/components/home/AboutPreview";
+import { LocationSection } from "@/components/home/LocationSection";
+import { FinalCTA } from "@/components/home/FinalCTA";
 
 export default function HomePage() {
   return (
     <>
-      {/* 1. Cinematic Hero Section */}
+      {/* 1. Hero: Tradition Woven Into Every Saree */}
       <HeroSection />
 
-      {/* 2. Heritage Trust Strip */}
-      <HeritageTrustStrip />
-
-      {/* 3. Brand Introduction & Heritage Statement */}
+      {/* 2. Brand Introduction: PVS — Where Tradition Meets Craft */}
       <BrandIntro />
 
-      {/* 4. The Grandeur of South Indian Silk (4 Iconic Collections) */}
+      {/* 3. Collections: Explore Our Collections */}
       <GrandeurCollections />
 
-      {/* 5. The Loom & Manufacturing Story (From Loom to Legacy) */}
-      <LoomShowcase />
-
-      {/* 6. Saree Craft Journey (7 Stages) */}
-      <ProcessPreview />
-
-      {/* 7. Featured Saree Catalogue Grid */}
+      {/* 4. Featured Products: Featured Sarees */}
       <FeaturedCollections />
 
-      {/* 8. The Art of the Drape (Editorial Showcase) */}
-      <EditorialShowcase />
-
-      {/* 9. Quality Philosophy (We do not simply weave sarees. We preserve a tradition.) */}
-      <QualityPhilosophy />
-
-      {/* 10. B2B Wholesale Trade Partnership (For Those Who Carry the Tradition Forward) */}
+      {/* 5. Wholesale Section: Built for Wholesale */}
       <WholesaleTeaser />
 
-      {/* 11. Follow The Weaving Journey (Instagram Feed) */}
-      <InstagramFeed />
+      {/* 6. Manufacturing Story: From Thread to Saree */}
+      <ProcessPreview />
+
+      {/* 7. About Preview: The Story Behind PVS (Sathish Kumar) */}
+      <AboutPreview />
+
+      {/* 8. Location: Visit Our Manufacturing Unit (Panjakalipatti, Kalipatti) */}
+      <LocationSection />
+
+      {/* 9. Final CTA: Looking for Pattu Sarees? */}
+      <FinalCTA />
     </>
   );
 }

@@ -9,10 +9,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     "",
     "/collections",
+    "/shop",
+    "/wholesale",
+    "/our-craft",
     "/manufacturing",
     "/about",
-    "/wholesale",
+    "/gallery",
     "/contact",
+    "/cart",
+    "/checkout",
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
@@ -21,7 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // Dynamic product routes
-  const productRoutes = products.map((product) => ({
+  const productRoutes = products.map((product: (typeof products)[0]) => ({
     url: `${baseUrl}/collections/${product.id}`,
     lastModified: new Date(),
     changeFrequency: "monthly" as const,

@@ -44,6 +44,14 @@ class Settings(BaseSettings):
 
     # Database Configuration
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/pvs_silks_db"
+    # Optional direct migration connection for Alembic DDL (recommended for Supabase direct/session port 5432)
+    DIRECT_URL: Optional[str] = None
+    # Connection Pooler configuration (e.g., 'session' or 'transaction', None for auto-detect based on port)
+    DB_POOL_MODE: Optional[str] = None
+    DB_POOL_SIZE: int = 5
+    DB_MAX_OVERFLOW: int = 10
+    DB_POOL_TIMEOUT: int = 30
+    DB_POOL_RECYCLE: int = 1800
 
     # Business Identity Configuration
     BUSINESS_NAME: str = "PVS Silk S"
@@ -114,6 +122,67 @@ class Settings(BaseSettings):
             self.BUSINESS_COUNTRY,
         ]
         return ", ".join([p for p in parts if p])
+
+    @property
+    def is_transaction_pooler(self) -> bool:
+        """
+        Determines whether the database connection targets a transaction-mode pooler
+        (such as Supavisor / PgBouncer in transaction mode on port 6543).
+        """
+        if self.DB_POOL_MODE:
+            return self.DB_POOL_MODE.lower() in ("transaction", "tx")
+        return ":6543" in str(self.DATABASE_URL).lower()
+
+    @staticmethod
+    def _normalize_asyncpg_url(raw: Optional[str]) -> str:
+        """
+        Normalizes a database URL for asyncpg and SQLAlchemy compatibility:
+        1. Ensures the async driver prefix: postgresql+asyncpg://
+        2. Normalizes SSL query parameter: converts 'sslmode=' to 'ssl=' because asyncpg
+           specifically expects 'ssl=' and rejects 'sslmode=' with TypeError.
+        3. Preserves all other query parameters, ports, and percent-encoded passwords.
+        """
+        url = str(raw or "").strip()
+        if not url:
+            return ""
+
+        # Scheme normalization
+        if url.startswith("postgres://"):
+            url = "postgresql+asyncpg://" + url[len("postgres://"):]
+        elif url.startswith("postgresql://"):
+            url = "postgresql+asyncpg://" + url[len("postgresql://"):]
+
+        # SSL parameter normalization for asyncpg:
+        # In libpq / psycopg connection strings, 'sslmode=require' is standard.
+        # asyncpg.connect() does not accept 'sslmode' keyword argument, raising:
+        # TypeError: connect() got an unexpected keyword argument 'sslmode'
+        # Instead, asyncpg expects 'ssl=require' (or boolean/SSLContext).
+        # We safely replace 'sslmode=' only in the query string (after the last '?')
+        # to avoid mutating passwords that might contain 'sslmode='.
+        if "?" in url and "sslmode=" in url:
+            base, query = url.rsplit("?", 1)
+            query = re.sub(r"(^|&)sslmode=", r"\1ssl=", query)
+            url = f"{base}?{query}"
+
+        return url
+
+    @property
+    def effective_database_url(self) -> str:
+        """
+        Returns an asyncpg-compatible URL for the SQLAlchemy runtime engine.
+        Normalizes standard postgresql:// or postgres:// schemes to postgresql+asyncpg://,
+        and translates 'sslmode=' to 'ssl=' for asyncpg driver compatibility.
+        """
+        return self._normalize_asyncpg_url(self.DATABASE_URL)
+
+    @property
+    def effective_migration_url(self) -> str:
+        """
+        Returns the database URL for Alembic migrations.
+        Prefers DIRECT_URL (direct port 5432 connection), falling back to DATABASE_URL.
+        Normalizes schemes and SSL parameters for asyncpg driver compatibility.
+        """
+        return self._normalize_asyncpg_url(self.DIRECT_URL or self.DATABASE_URL)
 
     def validate_production_readiness(self) -> List[str]:
         """

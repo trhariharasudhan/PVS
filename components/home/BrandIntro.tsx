@@ -1,130 +1,111 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { siteConfig } from "@/config/site";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { ShieldCheck, Sparkles, Building2, Layers, ArrowRight } from "lucide-react";
+import { Sparkles, Layers, Building2, ShoppingBag, ArrowRight } from "lucide-react";
 
 export function BrandIntro() {
+  const highlights = [
+    {
+      title: "Traditional Craft",
+      desc: "Rooted in authentic handloom and Jacquard techniques, weaving timeless motifs that honor South Indian heritage.",
+      icon: <Sparkles className="w-5 h-5 text-silk-red-700" />,
+      tag: "Craftsmanship",
+    },
+    {
+      title: "Quality Materials",
+      desc: "Selected pure mulberry silk yarns and tested zari crafted for natural biological sheen, weight, and durability.",
+      icon: <Layers className="w-5 h-5 text-gold-700" />,
+      tag: "Pure Silk",
+    },
+    {
+      title: "Wholesale Supply",
+      desc: "Direct manufacturer supply for retail stores, boutiques, merchants, and resellers with volume terms.",
+      icon: <Building2 className="w-5 h-5 text-silk-red-700" />,
+      tag: "B2B Supply",
+    },
+    {
+      title: "Retail Availability",
+      desc: "Individual retail customers can purchase authentic pattu sarees directly from our manufacturing source.",
+      icon: <ShoppingBag className="w-5 h-5 text-gold-700" />,
+      tag: "Direct to You",
+    },
+  ];
+
   return (
     <section id="brand-intro" className="py-20 sm:py-28 bg-ivory-50 text-heritage-brown-950 border-b border-gold-400/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Left Column: Brand Statement & Asymmetric Narrative */}
+          {/* Left Column: Heading & Narrative */}
           <div className="lg:col-span-6 space-y-6">
             <SectionHeading
-              subtitle="OUR HERITAGE"
-              title="A TRADITION WOVEN INTO EVERY THREAD"
+              subtitle="PATTU SAREE MANUFACTURER"
+              title="PVS — Where Tradition Meets Craft"
               align="left"
               className="mb-2"
             />
 
             <p className="font-serif text-xl sm:text-2xl text-silk-red-700 font-normal leading-snug">
-              Every PVS Silk S creation carries the profound spirit of South Indian handloom mastery,
-              crafted with devotion for life&apos;s most sacred and celebratory moments.
+              PVS is a pattu saree manufacturing business based in Salem, Tamil Nadu, offering sarees
+              for wholesale buyers, retailers, resellers and individual customers.
             </p>
 
             <p className="text-sm sm:text-base text-heritage-brown-700 font-sans leading-relaxed">
-              Rooted in the revered weaving tradition of Tamil Nadu, our family enterprise honors
-              generations of craftsmanship. From the careful inspection of Grade-A mulberry silk to
-              the precision interlacing of electroplated zari motifs, we ensure that every saree
-              stands as an enduring masterpiece of heritage and grace.
+              From Raaja Veedhi, Panjakalipatti, Kalipatti, PVS operates with direct control over weaving,
+              yarn selection, and finish quality. We eliminate intermediary layers, allowing both bulk
+              retailers and discerning saree patrons to access genuine silk artistry directly from the makers.
             </p>
 
-            {/* Editable Configuration Highlights */}
-            <div className="grid grid-cols-2 gap-4 pt-2">
-              <div className="p-4 bg-white border border-gold-300/80 rounded-[4px] shadow-sm">
-                <div className="text-[11px] uppercase tracking-wider text-heritage-brown-600 font-medium">
-                  Weaving Heritage
-                </div>
-                <div className="font-serif text-lg sm:text-xl font-bold text-silk-red-700 mt-1">
-                  {siteConfig.business.experiencePlaceholder}
-                </div>
-                <div className="text-[10px] text-heritage-brown-500 mt-0.5">
-                  Direct Loom Artistry
-                </div>
+            {/* Approved Brand Meanings Callout */}
+            <div className="p-4 bg-white border border-gold-300 rounded-[4px] shadow-sm space-y-2 text-xs">
+              <div className="font-serif font-bold text-heritage-brown-950">
+                PVS — Pattu • Vasthiram • Saree
               </div>
-
-              <div className="p-4 bg-white border border-gold-300/80 rounded-[4px] shadow-sm">
-                <div className="text-[11px] uppercase tracking-wider text-heritage-brown-600 font-medium">
-                  Loom Infrastructure
-                </div>
-                <div className="font-serif text-lg sm:text-xl font-bold text-silk-red-700 mt-1">
-                  {siteConfig.business.manufacturingCapacityPlaceholder}
-                </div>
-                <div className="text-[10px] text-heritage-brown-500 mt-0.5">
-                  Wholesale & Custom Weaves
-                </div>
+              <div className="text-heritage-brown-600 font-sans">
+                PVS — Parampariyam • Vannam • Silk
               </div>
             </div>
 
-            <div className="pt-2 flex items-center gap-4">
+            <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
                 href="/about"
                 className="inline-flex items-center gap-2 text-xs uppercase tracking-widest font-semibold text-silk-red-700 hover:text-silk-red-900 transition-colors group"
               >
-                <span>Read Our Heritage Story</span>
+                <span>The Story Behind PVS</span>
                 <ArrowRight className="w-4 h-4 text-gold-600 group-hover:translate-x-1 transition-transform" />
               </Link>
               <span className="text-gold-400">•</span>
               <Link
-                href="/manufacturing"
+                href="/our-craft"
                 className="inline-flex items-center gap-2 text-xs uppercase tracking-widest font-semibold text-heritage-brown-700 hover:text-silk-red-700 transition-colors"
               >
-                <span>Explore Looms & Craft</span>
+                <span>Explore Our Craft</span>
               </Link>
             </div>
           </div>
 
-          {/* Right Column: 4 Credibility Pillars */}
+          {/* Right Column: 4 Highlights */}
           <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div className="p-6 bg-white border border-gold-300/80 rounded-[4px] shadow-sm hover:shadow-luxury hover:border-gold-500 transition-all duration-300">
-              <div className="w-10 h-10 rounded-[4px] bg-silk-red-50 border border-silk-red-200 flex items-center justify-center text-silk-red-700 mb-4">
-                <Building2 className="w-5 h-5" />
+            {highlights.map((item) => (
+              <div
+                key={item.title}
+                className="p-6 bg-white border border-gold-300/80 rounded-[4px] shadow-sm hover:shadow-luxury hover:border-gold-500 transition-all duration-300 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="w-10 h-10 rounded-[4px] bg-gold-50 border border-gold-200 flex items-center justify-center mb-4">
+                    {item.icon}
+                  </div>
+                  <span className="text-[10px] uppercase font-mono tracking-widest text-gold-700 font-bold block mb-1">
+                    {item.tag}
+                  </span>
+                  <h4 className="font-serif text-lg font-bold text-heritage-brown-950">
+                    {item.title}
+                  </h4>
+                  <p className="text-xs text-heritage-brown-700 mt-2 leading-relaxed font-sans">
+                    {item.desc}
+                  </p>
+                </div>
               </div>
-              <h4 className="font-serif text-base font-bold text-heritage-brown-950">
-                Direct Looms
-              </h4>
-              <p className="text-xs text-heritage-brown-700 mt-2 leading-relaxed font-sans">
-                In-house production utilizing calibrated electronic Jacquards and traditional shuttle looms in Tamil Nadu.
-              </p>
-            </div>
-
-            <div className="p-6 bg-white border border-gold-300/80 rounded-[4px] shadow-sm hover:shadow-luxury hover:border-gold-500 transition-all duration-300">
-              <div className="w-10 h-10 rounded-[4px] bg-gold-50 border border-gold-200 flex items-center justify-center text-gold-700 mb-4">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <h4 className="font-serif text-base font-bold text-heritage-brown-950">
-                Pure Mulberry Silk
-              </h4>
-              <p className="text-xs text-heritage-brown-700 mt-2 leading-relaxed font-sans">
-                Certified high-density mulberry silk warp and weft filaments tested for lasting luster, tensile strength, and drape.
-              </p>
-            </div>
-
-            <div className="p-6 bg-white border border-gold-300/80 rounded-[4px] shadow-sm hover:shadow-luxury hover:border-gold-500 transition-all duration-300">
-              <div className="w-10 h-10 rounded-[4px] bg-gold-50 border border-gold-200 flex items-center justify-center text-gold-700 mb-4">
-                <Layers className="w-5 h-5" />
-              </div>
-              <h4 className="font-serif text-base font-bold text-heritage-brown-950">
-                Sacred Motifs
-              </h4>
-              <p className="text-xs text-heritage-brown-700 mt-2 leading-relaxed font-sans">
-                Traditional Temple Gopuram, Mayil (Peacock), Rudraksham, and floral vines woven with architectural symmetry.
-              </p>
-            </div>
-
-            <div className="p-6 bg-white border border-gold-300/80 rounded-[4px] shadow-sm hover:shadow-luxury hover:border-gold-500 transition-all duration-300">
-              <div className="w-10 h-10 rounded-[4px] bg-silk-red-50 border border-silk-red-200 flex items-center justify-center text-silk-red-700 mb-4">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <h4 className="font-serif text-base font-bold text-heritage-brown-950">
-                Honest Provenance
-              </h4>
-              <p className="text-xs text-heritage-brown-700 mt-2 leading-relaxed font-sans">
-                Direct manufacturer-to-patron transparency without inflated retail distributor markups.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </div>

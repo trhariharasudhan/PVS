@@ -5,6 +5,8 @@ import { siteConfig } from "@/config/site";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { FloatingWhatsApp } from "@/components/layout/FloatingWhatsApp";
+import { CartProvider } from "@/context/CartContext";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -20,28 +22,32 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: siteConfig.brandTitle,
+    default: `${siteConfig.name} | Pattu Saree Manufacturer | Wholesale & Retail`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
   keywords: [
-    "silk saree manufacturer",
-    "silk sarees Tamil Nadu",
+    "pattu sarees",
+    "pattu saree manufacturer",
+    "silk sarees",
+    "wholesale pattu sarees",
+    "pattu saree manufacturer salem",
+    "silk saree wholesale tamil nadu",
+    "PVS",
+    "PVS pattu sarees",
+    "Kalipatti silk sarees",
+    "Panjakalipatti manufacturer",
+    "bridal pattu saree wholesale",
     "traditional silk sarees",
-    "pure kanchipuram silk saree",
-    "bridal silk saree manufacturer",
-    "silk saree wholesale Tamil Nadu",
-    "zari weaving loom",
-    "PVS Silk S",
   ],
-  authors: [{ name: siteConfig.name }],
+  authors: [{ name: `${siteConfig.name} - Sathish Kumar` }],
   creator: siteConfig.name,
   metadataBase: new URL(siteConfig.url),
   openGraph: {
     type: "website",
     locale: "en_IN",
     url: siteConfig.url,
-    title: siteConfig.brandTitle,
+    title: `${siteConfig.name} | Pattu Saree Manufacturer | Wholesale & Retail`,
     description: siteConfig.description,
     siteName: siteConfig.name,
     images: [
@@ -49,13 +55,13 @@ export const metadata: Metadata = {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: `${siteConfig.name} - Silk Saree Manufacturer`,
+        alt: `${siteConfig.name} - Pattu Saree Manufacturer`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: siteConfig.brandTitle,
+    title: `${siteConfig.name} | Pattu Saree Manufacturer`,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
   },
@@ -70,7 +76,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // JSON-LD structured data for Silk Saree Manufacturer
+  // JSON-LD structured data for PVS Pattu Saree Manufacturer
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -79,16 +85,19 @@ export default function RootLayout({
     image: siteConfig.ogImage,
     url: siteConfig.url,
     telephone: siteConfig.business.phone,
+    founder: {
+      "@type": "Person",
+      name: siteConfig.business.owner,
+    },
     priceRange: "₹₹₹",
     address: {
       "@type": "PostalAddress",
-      streetAddress: siteConfig.business.address.line1,
-      addressLocality: siteConfig.business.address.city,
+      streetAddress: `${siteConfig.business.address.street}, ${siteConfig.business.address.village}`,
+      addressLocality: siteConfig.business.address.post,
       addressRegion: siteConfig.business.address.state,
       postalCode: siteConfig.business.address.pincode,
       addressCountry: "IN",
     },
-    sameAs: [siteConfig.social.instagram, siteConfig.social.facebook].filter(Boolean),
   };
 
   return (
@@ -99,11 +108,14 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="min-h-screen flex flex-col bg-ivory-50 text-charcoal-900 antialiased selection:bg-burgundy-900 selection:text-gold-200">
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
-        <FloatingWhatsApp />
+      <body className="min-h-screen flex flex-col bg-ivory-50 text-charcoal-900 antialiased selection:bg-silk-red-700 selection:text-gold-200">
+        <CartProvider>
+          <Navbar />
+          <main className="flex-grow">{children}</main>
+          <Footer />
+          <FloatingWhatsApp />
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );

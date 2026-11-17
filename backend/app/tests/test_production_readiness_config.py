@@ -109,3 +109,52 @@ async def test_pdf_invoice_generation_uses_config():
     assert isinstance(pdf_bytes, bytes)
     assert len(pdf_bytes) > 1000
     assert pdf_bytes.startswith(b"%PDF-")
+
+
+def test_asyncpg_ssl_normalization_preserves_query_params():
+    """Verify that sslmode is converted to ssl for asyncpg while preserving all other query parameters."""
+    cfg = Settings(
+        DATABASE_URL="postgresql://postgres.testref:secretpass@aws-0-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require&connect_timeout=10",
+        DIRECT_URL="postgres://postgres.testref:secretpass@aws-0-ap-south-1.pooler.supabase.com:5432/postgres?channel=app&sslmode=prefer&other=1",
+    )
+    db_url = cfg.effective_database_url
+    mig_url = cfg.effective_migration_url
+
+    # Check scheme and ssl normalization
+    assert db_url.startswith("postgresql+asyncpg://")
+    assert "ssl=require" in db_url
+    assert "sslmode=" not in db_url
+    assert "connect_timeout=10" in db_url
+
+    assert mig_url.startswith("postgresql+asyncpg://")
+    assert "ssl=prefer" in mig_url
+    assert "sslmode=" not in mig_url
+    assert "channel=app" in mig_url
+    assert "other=1" in mig_url
+
+
+def test_asyncpg_ssl_normalization_preserves_passwords_and_special_chars():
+    """Verify that passwords containing percent-encoding or special characters are not modified or double-encoded."""
+    raw_url = "postgresql://user_app:p%20ss#w?rd@host.pooler.supabase.com:6543/postgres?sslmode=require"
+    cfg = Settings(DATABASE_URL=raw_url)
+    normalized = cfg.effective_database_url
+
+    assert normalized.startswith("postgresql+asyncpg://")
+    assert "user_app:p%20ss#w?rd@host.pooler.supabase.com:6543" in normalized
+    assert normalized.endswith("?ssl=require")
+
+
+def test_asyncpg_ssl_compatibility_direct_connect_args():
+    """Verify that SQLAlchemy asyncpg dialect generates 'ssl' argument and rejects 'sslmode'."""
+    from sqlalchemy.engine import make_url
+    from sqlalchemy.dialects.postgresql.asyncpg import PGDialect_asyncpg
+
+    cfg = Settings(
+        DATABASE_URL="postgresql://user:pass@host:5432/postgres?sslmode=require"
+    )
+    url_obj = make_url(cfg.effective_database_url)
+    dialect = PGDialect_asyncpg()
+    _, opts = dialect.create_connect_args(url_obj)
+
+    assert opts["ssl"] == "require"
+    assert "sslmode" not in opts

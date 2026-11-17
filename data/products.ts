@@ -1,87 +1,116 @@
-import { Product } from "@/types";
+export interface ProductItem {
+  id: string;
+  code: string;
+  name: string;
+  category: "Bridal" | "Wedding" | "Traditional" | "Designer" | "Silk" | "New Arrivals";
+  categorySlug: string;
+  collection: string;
+  fabric: string;
+  color: string;
+  border: string;
+  pallu: string;
+  weaveType: string;
+  price: number;
+  priceDisplay: string;
+  wholesaleNote?: string;
+  availability: "In Stock" | "Made to Order" | "Bulk Available" | "Limited Weave";
+  description: string;
+  length: string;
+  blousePiece: string;
+  weightApprox: string;
+  careInstructions: string[];
+  images: {
+    src: string;
+    alt: string;
+    tag?: string;
+  }[];
+  isSample: boolean; // Flag marking sample/demo catalogue entry as per policy
+  featured?: boolean;
+}
 
-export const products: Product[] = [
+export const sampleProducts: ProductItem[] = [
   {
     id: "pvs-001",
     code: "PVS-001",
-    name: "Aadrika Crimson Bridal Kanchipuram Silk",
-    category: "Bridal & Wedding",
-    fabric: "100% Pure Mulberry Silk (3-Ply Warp & Weft)",
-    color: "Deep Crimson Red with Antique Gold Zari",
+    name: "Aadrika Crimson Bridal Pattu Saree",
+    category: "Bridal",
+    categorySlug: "bridal",
+    collection: "Bridal Collection",
+    fabric: "Pure Mulberry Silk (3-Ply)",
+    color: "Deep Crimson Red & Antique Gold",
     border: "Broad Korvai Temple Border with Mayil (Peacock) & Rudraksham Motifs",
-    pallu: "Rich Floral Brocade Pallu with Heavy Gold Zari Work",
-    weaveType: "Traditional Korvai Interlocking Jacquard Weave",
-    description:
-      "A masterwork of traditional Tamil Nadu weaving, this deep crimson bridal silk saree features authentic Korvai interlocking borders with intricate temple spires and majestic peacock motifs.",
-    detailedStory:
-      "Crafted across 120 hours of continuous loom precision, this saree embodies the solemn dignity of South Indian bridal traditions. The body is woven with subtle micro-buttas, framed by a rich antique gold zari border that shines with subdued luxury.",
-    priceDisplay: "Enquire for Price",
-    priceNote: "Direct Manufacturer Pricing / Bulk Discounts for Boutiques",
+    pallu: "Rich Floral Brocade Pallu with Heavy Zari Work",
+    weaveType: "Traditional Handloom Korvai Jacquard Weave",
+    price: 18500,
+    priceDisplay: "₹18,500",
+    wholesaleNote: "Wholesale & bulk pricing available for retailers and boutiques",
     availability: "In Stock",
-    featured: true,
-    isNewArrival: false,
-    dimensions: {
-      sareeLength: "5.5 Metres",
-      blousePiece: "0.8 Metres Contrast Brocade Included",
-      weightApprox: "780 grams",
-    },
+    description:
+      "A quintessential bridal creation crafted with deep crimson mulberry silk and heavy antique gold zari. Features authentic Korvai temple spires and delicate floral brocade.",
+    length: "5.5 Metres",
+    blousePiece: "0.8 Metres Contrast Brocade Included",
+    weightApprox: "780 grams",
+    careInstructions: [
+      "Dry clean only to maintain silk luster and zari integrity.",
+      "Store wrapped in pure cotton or muslin fabric away from moisture.",
+      "Avoid direct perfume or chemical spray on zari surfaces.",
+      "Iron on low-medium silk setting on reverse side.",
+    ],
     images: [
       {
         src: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop",
-        alt: "Full Saree Drape - Aadrika Crimson Bridal Kanchipuram Silk",
+        alt: "Aadrika Crimson Bridal Pattu Saree - Full View",
         tag: "Full Saree",
       },
       {
         src: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?q=80&w=1200&auto=format&fit=crop",
-        alt: "Border & Zari Close-up Detail",
+        alt: "Aadrika Crimson Saree - Border Detail",
         tag: "Border Detail",
       },
       {
         src: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=1200&auto=format&fit=crop",
-        alt: "Rich Floral Brocade Pallu",
+        alt: "Aadrika Crimson Saree - Pallu Detail",
         tag: "Pallu Weave",
       },
       {
         src: "https://images.unsplash.com/photo-1610030469668-93530c17b58f?q=80&w=1200&auto=format&fit=crop",
-        alt: "Fabric Texture & Pure Silk Sheen",
+        alt: "Aadrika Crimson Saree - Texture",
         tag: "Fabric Texture",
       },
     ],
-    careInstructions: [
-      "Dry clean only to maintain zari luster and silk protein integrity.",
-      "Store wrapped in pure cotton or muslin fabric away from direct sunlight.",
-      "Never spray perfumes or deodorants directly onto zari surfaces.",
-      "Iron on low-medium silk setting strictly on the reverse side.",
-    ],
+    isSample: true,
+    featured: true,
   },
   {
     id: "pvs-002",
     code: "PVS-002",
-    name: "Mayuri Emerald & Mustard Traditional Silk",
-    category: "Traditional Weaves",
+    name: "Mayuri Emerald & Mustard Wedding Pattu",
+    category: "Wedding",
+    categorySlug: "wedding",
+    collection: "Wedding Collection",
     fabric: "Pure Silk (Double Warp)",
     color: "Emerald Green with Warm Mustard Gold",
     border: "Dual Ganga-Jamuna Contrast Border with Paisley Motifs",
     pallu: "Geometric Diamond & Elephant Motif Zari Pallu",
-    weaveType: "High-Density Precision Loom Weave",
+    weaveType: "Precision Loom Jacquard Weave",
+    price: 15200,
+    priceDisplay: "₹15,200",
+    wholesaleNote: "Special rate tiers for wedding orders and boutique stockists",
+    availability: "In Stock",
     description:
       "A classic heritage pairing of rich emerald green and warm mustard, finished with dual Ganga-Jamuna border accents and finely detailed elephant crests.",
-    detailedStory:
-      "This creation captures the timeless aesthetic of heritage celebrations. The lustrous green body reflects natural light gracefully, while the mustard border adds depth and festive warmth.",
-    priceDisplay: "Enquire for Price",
-    priceNote: "Wholesale MOQ: 5 units per colorway",
-    availability: "In Stock",
-    featured: true,
-    isNewArrival: false,
-    dimensions: {
-      sareeLength: "5.5 Metres",
-      blousePiece: "0.8 Metres Plain Mustard with Border",
-      weightApprox: "720 grams",
-    },
+    length: "5.5 Metres",
+    blousePiece: "0.8 Metres Plain Mustard with Border",
+    weightApprox: "720 grams",
+    careInstructions: [
+      "Dry clean only.",
+      "Change fold lines every 3-4 months to prevent crease stress.",
+      "Store in a cool, dry place.",
+    ],
     images: [
       {
         src: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?q=80&w=1200&auto=format&fit=crop",
-        alt: "Emerald Green Silk Saree Full Drape",
+        alt: "Mayuri Emerald & Mustard Wedding Pattu Saree",
         tag: "Full Saree",
       },
       {
@@ -95,268 +124,250 @@ export const products: Product[] = [
         tag: "Folding & Finish",
       },
     ],
-    careInstructions: [
-      "Dry clean only.",
-      "Change fold lines every 3-4 months to prevent crease stress.",
-      "Store in breathable cotton saree bags.",
-    ],
+    isSample: true,
+    featured: true,
   },
   {
     id: "pvs-003",
     code: "PVS-003",
-    name: "Rukmani Royal Violet & Muted Gold Brocade",
-    category: "Pure Silk Sarees",
+    name: "Ratna Deep Royal Blue Traditional Silk",
+    category: "Traditional",
+    categorySlug: "traditional",
+    collection: "Traditional Collection",
     fabric: "100% Pure Mulberry Silk",
-    color: "Imperial Royal Violet with Soft Champagne Zari",
-    border: "Intricate Floral Jaal with Scalloped Zari Edge",
-    pallu: "Grand Architectural Arch Pattern Pallu",
-    weaveType: "Full Body Jacquard Weave",
-    description:
-      "An imperial violet silk masterpiece featuring subtle all-over floral vines and a grand architectural pallu woven with muted champagne gold zari.",
-    detailedStory:
-      "Engineered for evening receptions and prestigious gatherings, the deep violet body provides high contrast to the soft champagne zari, avoiding harsh glitter while commanding regal presence.",
-    priceDisplay: "Enquire for Price",
-    priceNote: "Direct from manufacturing looms",
+    color: "Royal Midnight Blue & Copper Gold",
+    border: "Temple Spire (Gopuram) Interlocked Border",
+    pallu: "Traditional Peacock (Mayil) & Chakra Motif Pallu",
+    weaveType: "Traditional Korvai Interlocking Weave",
+    price: 16800,
+    priceDisplay: "₹16,800",
+    wholesaleNote: "Bulk wholesale pricing available upon enquiry",
     availability: "In Stock",
-    featured: true,
-    isNewArrival: true,
-    dimensions: {
-      sareeLength: "5.5 Metres",
-      blousePiece: "0.8 Metres Violet Brocade Included",
-      weightApprox: "740 grams",
-    },
+    description:
+      "Deep royal blue body framed with copper gold zari in authentic temple spire geometry. A timeless drape representing South Indian temple craftsmanship.",
+    length: "5.5 Metres",
+    blousePiece: "0.8 Metres Contrast Copper Brocade",
+    weightApprox: "750 grams",
+    careInstructions: [
+      "Strictly dry clean only.",
+      "Wrap in breathable muslin or cotton cloth.",
+      "Do not hang on metal hangers.",
+    ],
     images: [
       {
         src: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=1200&auto=format&fit=crop",
-        alt: "Royal Violet Silk Saree Drape",
+        alt: "Ratna Royal Blue Traditional Silk",
         tag: "Full Saree",
       },
       {
         src: "https://images.unsplash.com/photo-1610030469668-93530c17b58f?q=80&w=1200&auto=format&fit=crop",
-        alt: "Intricate Floral Jaal Weave Close Up",
-        tag: "Fabric Texture",
-      },
-      {
-        src: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop",
-        alt: "Zari Border Finishing",
+        alt: "Gopuram Border Detail",
         tag: "Border Detail",
       },
     ],
-    careInstructions: [
-      "Professional dry clean recommended.",
-      "Store horizontally in cool, dry climate.",
-      "Reverse iron on low heat.",
-    ],
+    isSample: true,
+    featured: true,
   },
   {
     id: "pvs-004",
     code: "PVS-004",
-    name: "Saundarya Pastel Blush Soft Silk Saree",
-    category: "Soft Silk",
-    fabric: "Featherlight Pure Soft Silk",
-    color: "Pastel Blush Rose with Silver & Copper Zari",
-    border: "Minimalist Sleek Zari Piping with Chevron Trim",
-    pallu: "Modern Linear Geometric Stripes with Micro Tassels",
-    weaveType: "Contemporary Lightweight Silk Weave",
-    description:
-      "Crafted for modern sensibilities, this pastel blush soft silk saree merges airy comfort with dual-tone silver and copper zari accents.",
-    detailedStory:
-      "Weighing under 500 grams, this soft silk saree is specially woven on high-tension looms to achieve a butter-soft drape that cascades effortlessly.",
-    priceDisplay: "Enquire for Price",
-    priceNote: "Ideal for modern brides and bridesmaid collections",
+    name: "Swarna Honey Gold Designer Pattu",
+    category: "Designer",
+    categorySlug: "designer",
+    collection: "Designer Collection",
+    fabric: "Pure Silk with Metallic Zari Weft",
+    color: "Honey Gold with Magenta Accent",
+    border: "Delicate Floral Vine with Contrast Magenta Piping",
+    pallu: "Contemporary Chevron & Floral Jaal Brocade",
+    weaveType: "Jacquard Handloom Weave",
+    price: 13900,
+    priceDisplay: "₹13,900",
+    wholesaleNote: "Retailers and boutique bulk packs available",
     availability: "In Stock",
-    featured: true,
-    isNewArrival: true,
-    dimensions: {
-      sareeLength: "5.5 Metres",
-      blousePiece: "0.8 Metres Matching Blush Silk",
-      weightApprox: "480 grams",
-    },
+    description:
+      "A luminous honey gold body with a modern magenta selvedge. Designed for festive gatherings, cocktail drapes, and boutique collections.",
+    length: "5.5 Metres",
+    blousePiece: "0.8 Metres Magenta Silk Included",
+    weightApprox: "640 grams",
+    careInstructions: [
+      "Dry clean recommended.",
+      "Store flat in protective cotton bag.",
+    ],
     images: [
       {
-        src: "https://images.unsplash.com/photo-1610030469854-41125208f237?q=80&w=1200&auto=format&fit=crop",
-        alt: "Pastel Blush Soft Silk Saree",
+        src: "https://images.unsplash.com/photo-1610030469668-93530c17b58f?q=80&w=1200&auto=format&fit=crop",
+        alt: "Swarna Honey Gold Designer Pattu Saree",
         tag: "Full Saree",
       },
       {
-        src: "https://images.unsplash.com/photo-1590736969955-71cc94801759?q=80&w=1200&auto=format&fit=crop",
-        alt: "Soft Silk Drape and Texture",
-        tag: "Fabric Texture",
+        src: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop",
+        alt: "Zari and Vine Border",
+        tag: "Border Detail",
       },
     ],
-    careInstructions: [
-      "Dry clean or gentle hand wash with mild protein shampoo.",
-      "Dry in shade on a flat surface.",
-    ],
+    isSample: true,
+    featured: true,
   },
   {
     id: "pvs-005",
     code: "PVS-005",
-    name: "Kalyani Temple Gold Tissue Silk Saree",
-    category: "Bridal & Wedding",
-    fabric: "Pure Silk-Zari Tissue Blend",
-    color: "Liquid Antique Gold with Subtle Vermillion Sheen",
-    border: "Traditional Temple G願i Border with Yali Crests",
-    pallu: "Ornate Full-Zari Tree of Life Pallu",
-    weaveType: "Double Zari Metallic Warp Weave",
-    description:
-      "An ethereal liquid gold tissue silk saree designed for the bride's ceremonial muhurtham, reflecting pure luminescence under traditional temple lamps.",
-    detailedStory:
-      "Woven with fine metallic zari twisted along with mulberry silk threads, creating a shimmering, non-stiff fabric that holds pleats crisply without bulk.",
-    priceDisplay: "Enquire for Price",
-    priceNote: "Exclusive Ceremonial Masterpiece",
-    availability: "Limited Weave",
-    featured: false,
-    isNewArrival: false,
-    dimensions: {
-      sareeLength: "5.5 Metres",
-      blousePiece: "0.8 Metres Heavy Zari Tissue Included",
-      weightApprox: "820 grams",
-    },
-    images: [
-      {
-        src: "https://images.unsplash.com/photo-1590736969955-71cc94801759?q=80&w=1200&auto=format&fit=crop",
-        alt: "Kalyani Gold Tissue Saree Full View",
-        tag: "Full Saree",
-      },
-      {
-        src: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop",
-        alt: "Golden Zari Border Detail",
-        tag: "Border Detail",
-      },
-    ],
-    careInstructions: [
-      "Strictly dry clean only.",
-      "Wrap in acid-free tissue and store in cedar-lined chests or cotton covers.",
-    ],
-  },
-  {
-    id: "pvs-006",
-    code: "PVS-006",
-    name: "Meenakshi Peacock Teal & Coral Korvai Silk",
-    category: "Traditional Weaves",
-    fabric: "100% Pure Mulberry Silk",
-    color: "Deep Peacock Teal with Vibrant Coral Red",
-    border: "Korvai Contrast Border with Annapakshi (Mythical Bird) Motifs",
-    pallu: "Rich Chevron and Diamond Brocade",
-    weaveType: "Handcrafted Korvai Technique",
-    description:
-      "A quintessential South Indian color harmony of oceanic teal and auspicious coral red, woven using the demanding Korvai interlocking method.",
-    detailedStory:
-      "The distinct hallmark of a genuine Korvai saree is the seamless joining of border and body with no visible seam lines on the front face.",
-    priceDisplay: "Enquire for Price",
-    priceNote: "Direct Factory Wholesale Available",
+    name: "Kalyani Rani Pink Pure Silk Saree",
+    category: "Silk",
+    categorySlug: "silk",
+    collection: "Silk Collection",
+    fabric: "High-Twist Mulberry Silk",
+    color: "Rani Pink with Muted Antique Gold",
+    border: "Medium Temple Border with Diamond Buttas",
+    pallu: "Traditional Zari Stripes & Mango Motifs",
+    weaveType: "Precision Loom Silk Weave",
+    price: 12400,
+    priceDisplay: "₹12,400",
+    wholesaleNote: "Direct loom wholesale quotes available",
     availability: "In Stock",
-    featured: false,
-    isNewArrival: false,
-    dimensions: {
-      sareeLength: "5.5 Metres",
-      blousePiece: "0.8 Metres Coral Red Included",
-      weightApprox: "750 grams",
-    },
+    description:
+      "Vibrant Rani pink silk with soft drape qualities and authentic luster. Perfect for poojas, traditional functions, and day celebrations.",
+    length: "5.5 Metres",
+    blousePiece: "0.8 Metres Running Rani Pink with Border",
+    weightApprox: "620 grams",
+    careInstructions: [
+      "Dry clean only.",
+      "Store wrapped in breathable cloth.",
+    ],
     images: [
       {
-        src: "https://images.unsplash.com/photo-1610030469668-93530c17b58f?q=80&w=1200&auto=format&fit=crop",
-        alt: "Peacock Teal Korvai Silk Saree",
+        src: "https://images.unsplash.com/photo-1610030469854-41125208f237?q=80&w=1200&auto=format&fit=crop",
+        alt: "Kalyani Rani Pink Pure Silk Saree",
         tag: "Full Saree",
       },
       {
         src: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?q=80&w=1200&auto=format&fit=crop",
-        alt: "Border & Annapakshi Motifs",
+        alt: "Rani Pink Texture & Zari",
+        tag: "Fabric Texture",
+      },
+    ],
+    isSample: true,
+    featured: true,
+  },
+  {
+    id: "pvs-006",
+    code: "PVS-006",
+    name: "Varnam Plum & Copper New Arrival Pattu",
+    category: "New Arrivals",
+    categorySlug: "new-arrivals",
+    collection: "New Arrivals",
+    fabric: "Pure Mulberry Silk",
+    color: "Deep Plum Purple & Copper Zari",
+    border: "Contemporary Slender Border with Micro Buttas",
+    pallu: "Linear Geometric Zari Brocade",
+    weaveType: "Fresh Electronic Jacquard Weave",
+    price: 14800,
+    priceDisplay: "₹14,800",
+    wholesaleNote: "Fresh release from our Kalipatti looms",
+    availability: "In Stock",
+    description:
+      "A freshly unwoven colorway combining deep plum with warm copper zari threads. Modernized motifs over an uncompromising pure silk foundation.",
+    length: "5.5 Metres",
+    blousePiece: "0.8 Metres Contrast Copper Brocade",
+    weightApprox: "680 grams",
+    careInstructions: [
+      "Dry clean only.",
+      "Iron strictly on low reverse setting.",
+    ],
+    images: [
+      {
+        src: "https://images.unsplash.com/photo-1590736969955-71cc94801759?q=80&w=1200&auto=format&fit=crop",
+        alt: "Varnam Plum & Copper New Arrival",
+        tag: "Full Saree",
+      },
+      {
+        src: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop",
+        alt: "Plum Saree Close-up",
         tag: "Border Detail",
       },
     ],
-    careInstructions: [
-      "Dry clean only.",
-      "Avoid exposure to humidity or moisture.",
-    ],
+    isSample: true,
+    featured: true,
   },
   {
     id: "pvs-007",
     code: "PVS-007",
-    name: "Divya Maroon & Olive Vintage Border Silk",
-    category: "Pure Silk Sarees",
-    fabric: "Pure Silk (Heavy Gsm)",
-    color: "Deep Maroon Wine with Muted Olive Green",
-    border: "Vintage Temple Spire & Rudraksh Row Border",
-    pallu: "Heavy Zari Coin Butta Pallu",
-    weaveType: "Dobby & Jacquard Combination",
+    name: "Tarika Mustard & Maroon Traditional Pattu",
+    category: "Traditional",
+    categorySlug: "traditional",
+    collection: "Traditional Collection",
+    fabric: "Pure Silk (Double Warp)",
+    color: "Warm Mustard Gold & Maroon",
+    border: "Intricate Rudraksham & Annapakshi Temple Border",
+    pallu: "Heavy Brocade Traditional Motif Pallu",
+    weaveType: "Korvai Three-Shuttle Weave",
+    price: 17200,
+    priceDisplay: "₹17,200",
+    wholesaleNote: "Wholesale MOQ 5 pieces per colorway",
+    availability: "Bulk Available",
     description:
-      "A distinguished vintage color palette featuring deep maroon wine with olive green selvedge and gleaming coin buttas throughout.",
-    detailedStory:
-      "A tribute to century-old weaving patterns, reviving traditional temple border geometry with modernized high-tension weaving precision.",
-    priceDisplay: "Enquire for Price",
-    priceNote: "Popular for festive ceremonies and anniversaries",
-    availability: "In Stock",
-    featured: false,
-    isNewArrival: false,
-    dimensions: {
-      sareeLength: "5.5 Metres",
-      blousePiece: "0.8 Metres Contrast Olive Silk",
-      weightApprox: "710 grams",
-    },
+      "The warmth of mustard yellow paired with deep maroon. Handcrafted with traditional Korvai border interlocking for sacred occasions.",
+    length: "5.5 Metres",
+    blousePiece: "0.8 Metres Plain Maroon with Zari Border",
+    weightApprox: "760 grams",
+    careInstructions: [
+      "Dry clean only.",
+      "Store in moisture-free fabric pouches.",
+    ],
     images: [
       {
-        src: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop",
-        alt: "Maroon & Olive Silk Saree Drape",
+        src: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?q=80&w=1200&auto=format&fit=crop",
+        alt: "Tarika Mustard & Maroon Traditional Pattu",
         tag: "Full Saree",
       },
       {
         src: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=1200&auto=format&fit=crop",
-        alt: "Pallu Weave Detail",
-        tag: "Pallu Weave",
+        alt: "Temple Border & Zari",
+        tag: "Border Detail",
       },
     ],
-    careInstructions: ["Dry clean only.", "Store in cool dry conditions."],
+    isSample: true,
+    featured: false,
   },
   {
     id: "pvs-008",
     code: "PVS-008",
-    name: "Ananya Lavender Mist Floral Soft Silk",
-    category: "Soft Silk",
-    fabric: "Premium Micro-Mulberry Soft Silk",
-    color: "Lavender Mist with Matte Silver Zari",
-    border: "Subtle 2-inch Silver Zari Border with Floral Vines",
-    pallu: "Understated Stripe Pallu with Hand-knotted Tassels",
-    weaveType: "Ultra-Fine Lightweight Weave",
-    description:
-      "A serene and refreshing lavender silk saree featuring matte silver zari accents designed for morning celebrations and corporate festivities.",
-    detailedStory:
-      "Engineered with ultra-fine silk denier to provide maximum drape flow while retaining the crisp richness expected of pure silk.",
-    priceDisplay: "Enquire for Price",
-    priceNote: "Boutique bestseller",
+    name: "Manasa Pastel Lavender Designer Silk",
+    category: "Designer",
+    categorySlug: "designer",
+    collection: "Designer Collection",
+    fabric: "Lightweight Pure Mulberry Silk",
+    color: "Pastel Lavender with Silver Zari",
+    border: "Fine Silver Zari Threadwork with Pearl Buttas",
+    pallu: "Minimalist Silver Leaf Motifs",
+    weaveType: "Modern Jacquard Loom Weave",
+    price: 13500,
+    priceDisplay: "₹13,500",
+    wholesaleNote: "High demand with boutique buyers",
     availability: "In Stock",
-    featured: false,
-    isNewArrival: true,
-    dimensions: {
-      sareeLength: "5.5 Metres",
-      blousePiece: "0.8 Metres Lavender Silk",
-      weightApprox: "460 grams",
-    },
+    description:
+      "A serene pastel lavender creation illuminated by subtle silver zari threadwork. Offers a graceful, airy drape with subtle festive sparkle.",
+    length: "5.5 Metres",
+    blousePiece: "0.8 Metres Lavender with Silver Border",
+    weightApprox: "580 grams",
+    careInstructions: [
+      "Dry clean only.",
+      "Keep away from direct heat and damp environments.",
+    ],
     images: [
       {
-        src: "https://images.unsplash.com/photo-1610030469854-41125208f237?q=80&w=1200&auto=format&fit=crop",
-        alt: "Lavender Soft Silk Saree",
+        src: "https://images.unsplash.com/photo-1610030469668-93530c17b58f?q=80&w=1200&auto=format&fit=crop",
+        alt: "Manasa Pastel Lavender Designer Silk",
         tag: "Full Saree",
       },
       {
-        src: "https://images.unsplash.com/photo-1590736969955-71cc94801759?q=80&w=1200&auto=format&fit=crop",
-        alt: "Fabric Fold and Sheen",
-        tag: "Fabric Texture",
+        src: "https://images.unsplash.com/photo-1610030469854-41125208f237?q=80&w=1200&auto=format&fit=crop",
+        alt: "Silver Zari Leaf Details",
+        tag: "Pallu Weave",
       },
     ],
-    careInstructions: ["Dry clean only.", "Steam iron on silk mode."],
+    isSample: true,
+    featured: false,
   },
 ];
 
-export function getProductByCode(code: string): Product | undefined {
-  return products.find((p) => p.code.toLowerCase() === code.toLowerCase() || p.id.toLowerCase() === code.toLowerCase());
-}
-
-export function getFeaturedProducts(): Product[] {
-  return products.filter((p) => p.featured);
-}
-
-export function getNewArrivals(): Product[] {
-  return products.filter((p) => p.isNewArrival);
-}
+export const products = sampleProducts;
