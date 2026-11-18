@@ -188,3 +188,26 @@ async def test_admin_pipeline_and_attachment_download(async_client, staff_tokens
 
     bad = await async_client.patch(f"/api/v1/admin/custom-orders/{oid}", json={"status": "FLYING"}, headers=staff_tokens["sales"])
     assert bad.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_design_options_saved_and_validated(async_client, db_session, staff_tokens):
+    opts = {
+        "border_style": "gangaJamuna",
+        "border_motif": "elephant",
+        "body_pattern": "buttas",
+        "body_motif": "peacock",
+        "pallu_style": "grand",
+        "pallu_motif": "lotus",
+        "second_border_colour": "#c2185b",
+    }
+    r = await post(async_client, spec(design_options=opts))
+    assert r.status_code == 201, r.text
+    lst = await async_client.get("/api/v1/admin/custom-orders", headers=staff_tokens["sales"])
+    oid = lst.json()["items"][0]["id"]
+    det = await async_client.get(f"/api/v1/admin/custom-orders/{oid}", headers=staff_tokens["sales"])
+    assert det.json()["design_options"]["second_border_colour"] == "#C2185B"
+    assert det.json()["design_options"]["border_style"] == "gangaJamuna"
+
+    assert (await post(async_client, spec(design_options={"border_style": "dragon"}))).status_code == 422
+    assert (await post(async_client, spec(design_options={"hack": "x"}))).status_code == 422

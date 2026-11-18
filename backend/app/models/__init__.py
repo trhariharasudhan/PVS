@@ -7,6 +7,7 @@ from app.models.customer import Customer, CustomerType
 from app.models.order import Order, OrderItem, OrderType, OrderStatus, PaymentStatus
 from app.models.wholesale import WholesaleEnquiry, EnquiryStatus
 from app.models.custom_order import CustomOrderRequest, CustomOrderStatus, CustomerSegment
+from app.models.contact_message import ContactMessage, ContactMessageStatus
 from app.models.production import ProductionBatch, ProductionStage, BatchStatus, StageStatus
 from app.models.production_material import ProductionBatchMaterial
 from app.models.supplier import Supplier, SupplierType
@@ -65,6 +66,8 @@ __all__ = [
     "PaymentStatus",
     "WholesaleEnquiry",
     "EnquiryStatus",
+    "ContactMessage",
+    "ContactMessageStatus",
     "ProductionBatch",
     "ProductionStage",
     "BatchStatus",

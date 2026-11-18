@@ -183,17 +183,11 @@ class ProductionContractValidator:
         from alembic.script import ScriptDirectory
 
         backend_dir = self.root_dir / "backend"
-        alembic_cfg = Config(str(backend_dir / "alembic.ini"))
-        alembic_cfg.set_main_option("script_location", str(backend_dir / "alembic"))
-        script = ScriptDirectory.from_config(alembic_cfg)
-        heads = script.get_heads()
-        is_single_head = len(heads) == 1 and heads[0] in [
-            "0007_custom_order_requests",
-            "0006_phase_6_04_communication_events",
-            "0005_phase_6_03_payment_webhook_events",
-            "0004_phase_6_01_dealer_pricing_tiers",
-            "0003_phase_4c_d_finance_invoicing",
-        ]
+        from app.core.migration_chain import check_linear_chain
+
+        report = check_linear_chain(backend_dir)
+        heads = [report.head] if report.head else []
+        is_single_head = report.ok
 
 
 

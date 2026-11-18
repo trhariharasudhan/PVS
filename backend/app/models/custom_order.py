@@ -60,6 +60,8 @@ class CustomOrderRequest(Base, UUIDPrimaryKeyMixin, TimeStampedModel):
     zari_type: Mapped[str] = mapped_column(String(100), nullable=False)
     border_style: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     design_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # {"border_style": "temple", "border_motif": "peacock", "body_pattern": "buttas", ...}
+    design_options: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
     # Order
     quantity: Mapped[int] = mapped_column(Integer, nullable=False, default=1)

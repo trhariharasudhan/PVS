@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { QUALITY, type QualitySettings } from "./sceneConfig";
 import { HeroFallback } from "./HeroFallback";
 import { HeroScrollStory } from "./HeroScrollStory";
+import { canRun3d } from "@/lib/device";
 
 /**
  * Homepage hero entry point.
@@ -26,23 +27,6 @@ var cv=document.createElement('canvas');var gl=cv.getContext('webgl2')||cv.getCo
 var l=gl.getExtension('WEBGL_lose_context');if(l)l.loseContext();
 d.setAttribute('data-hero3d','1');
 }catch(e){}})();`;
-
-/** Same checks as DECIDE_SCRIPT, for client-side navigations (inline scripts don't run then). */
-function canRun3d(): boolean {
-  try {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-    const n = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
-    if (n.connection?.saveData) return false;
-    if ((n.deviceMemory && n.deviceMemory <= 2) || (n.hardwareConcurrency && n.hardwareConcurrency <= 2)) return false;
-    const cv = document.createElement("canvas");
-    const gl = (cv.getContext("webgl2") || cv.getContext("webgl")) as WebGLRenderingContext | null;
-    if (!gl) return false;
-    gl.getExtension("WEBGL_lose_context")?.loseContext();
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 function pickQuality(): QualitySettings {
   const w = window.innerWidth;

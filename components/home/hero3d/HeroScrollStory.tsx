@@ -7,7 +7,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SCENES, type QualitySettings, type SceneId } from "./sceneConfig";
 import type { ProgressStore } from "./math";
-import { HERO_COPY } from "./heroCopy";
+import { useI18n } from "@/i18n/I18nProvider";
 import { HeroCtas } from "./HeroCtas";
 
 if (typeof window !== "undefined") {
@@ -48,6 +48,7 @@ interface Props {
  * reverses naturally when scrolling up.
  */
 export function HeroScrollStory({ quality, onFatal }: Props) {
+  const { t } = useI18n();
   const section = useRef<HTMLElement>(null);
   const progress = useRef<ProgressStore>({ value: 0 }).current;
   const [active, setActive] = useState(true);
@@ -61,7 +62,7 @@ export function HeroScrollStory({ quality, onFatal }: Props) {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         defaults: { ease: "none" },
-        scrollTrigger: { trigger: el, start: "top top", end: "bottom bottom", scrub: 0.7 },
+        scrollTrigger: { trigger: el, start: "top top", end: "bottom bottom", scrub: 1.1 },
       });
       tl.to(progress, { value: 1, duration: 1 }, 0);
       tl.fromTo("[data-hero-progress]", { scaleX: 0 }, { scaleX: 1, duration: 1 }, 0);
@@ -107,7 +108,7 @@ export function HeroScrollStory({ quality, onFatal }: Props) {
     <section
       ref={section}
       className="hero-3d relative bg-[#140c0a] h-[420vh] md:h-[550vh] xl:h-[650vh]"
-      aria-label="The PVS story: from the loom to your store"
+      aria-label={t.hero.storyLabel}
     >
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
         {/* 3D canvas */}
@@ -127,7 +128,7 @@ export function HeroScrollStory({ quality, onFatal }: Props) {
         >
           <div className="flex flex-col items-center gap-3 text-gold-300">
             <span className="h-8 w-8 rounded-full border-2 border-gold-500/30 border-t-gold-300 animate-spin" />
-            <span className="text-[11px] tracking-widest uppercase">Preparing the loom…</span>
+            <span className="text-[11px] tracking-widest uppercase">{t.hero.loading}</span>
           </div>
         </div>
 
@@ -135,7 +136,7 @@ export function HeroScrollStory({ quality, onFatal }: Props) {
         <div className="pointer-events-none absolute inset-0 z-10">
           <div className="relative h-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
             {ORDER.map((id, i) => {
-              const c = HERO_COPY[id];
+              const c = t.hero.scenes[id];
               const isFinal = id === "final";
               const isBrand = id === "brand";
               const Heading = i === 0 ? "h1" : "h2";
@@ -155,7 +156,7 @@ export function HeroScrollStory({ quality, onFatal }: Props) {
                   <Heading
                     className={`mt-3 font-serif font-bold leading-[1.05] text-ivory-50 drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)] ${
                       // the woven 3D mark is the visual; keep the DOM title for screen readers only
-                      isBrand ? "sr-only" : "text-4xl sm:text-5xl lg:text-6xl"
+                      isBrand ? "sr-only" : "hero-title text-4xl sm:text-5xl lg:text-6xl"
                     }`}
                   >
                     {c.title}
@@ -178,7 +179,7 @@ export function HeroScrollStory({ quality, onFatal }: Props) {
 
         {/* Scroll hint */}
         <div data-hero-hint className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 z-10 hidden lg:flex flex-col items-center gap-1 text-gold-300/90">
-          <span className="text-[10px] tracking-widest uppercase">Scroll to weave</span>
+          <span className="text-[10px] tracking-widest uppercase">{t.hero.scrollHint}</span>
           <ChevronDown className="w-4 h-4 animate-bounce" aria-hidden="true" />
         </div>
 
@@ -190,7 +191,7 @@ export function HeroScrollStory({ quality, onFatal }: Props) {
           href="#after-hero"
           className="absolute z-20 top-24 right-4 sm:right-6 text-[10px] sm:text-[11px] tracking-widest uppercase text-ivory-200/80 hover:text-gold-200 border border-ivory-200/25 hover:border-gold-300/60 rounded-[4px] px-3 py-1.5 backdrop-blur-sm bg-black/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-200"
         >
-          Skip intro
+          {t.hero.skip}
         </a>
       </div>
     </section>

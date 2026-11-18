@@ -5,20 +5,14 @@ import { useSearchParams } from "next/navigation";
 import { Check, Loader2, MessageCircle } from "lucide-react";
 import { getCustomOrderStatus, type CustomOrderStatus } from "@/lib/api/customOrders";
 import { getWhatsAppLink } from "@/config/site";
+import { fmt, useI18n } from "@/i18n/I18nProvider";
 
 /** Customer-facing order journey (cancelled is shown separately). */
-const JOURNEY = [
-  ["NEW", "Request received"],
-  ["CONTACTED", "We contacted you"],
-  ["DESIGN_REVIEW", "Design review"],
-  ["QUOTED", "Quotation shared"],
-  ["CONFIRMED", "Order confirmed"],
-  ["IN_PRODUCTION", "On the loom"],
-  ["READY", "Ready for dispatch"],
-  ["DELIVERED", "Delivered"],
-] as const;
+const JOURNEY = ["NEW", "CONTACTED", "DESIGN_REVIEW", "QUOTED", "CONFIRMED", "IN_PRODUCTION", "READY", "DELIVERED"] as const;
 
 export function OrderStatusLookup() {
+  const { t, locale } = useI18n();
+  const st = t.status;
   const params = useSearchParams();
   const [ref, setRef] = useState(params.get("ref") ?? "");
   const [phone, setPhone] = useState("");
@@ -30,20 +24,20 @@ export function OrderStatusLookup() {
     e.preventDefault();
     setError(null);
     setData(null);
-    if (!/^PVS-[A-Z0-9]{6}$/i.test(ref.trim())) return setError("Reference code looks like PVS-XXXXXX.");
-    if (phone.replace(/\D/g, "").length < 10) return setError("Enter the phone number you used for the order.");
+    if (!/^PVS-[A-Z0-9]{6}$/i.test(ref.trim())) return setError(st.badRef);
+    if (phone.replace(/\D/g, "").length < 10) return setError(st.badPhone);
     setLoading(true);
     try {
       setData(await getCustomOrderStatus(ref, phone));
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
-      setError(/fetch|network/i.test(msg) || !msg ? "We couldn't reach our server. Please try again or ask us on WhatsApp." : msg);
+      setError(/fetch|network/i.test(msg) || !msg ? t.common.serverDown : msg);
     } finally {
       setLoading(false);
     }
   };
 
-  const current = data ? JOURNEY.findIndex(([k]) => k === data.status) : -1;
+  const current = data ? JOURNEY.findIndex((k) => k === data.status) : -1;
   const input =
     "w-full rounded-xl border border-heritage-brown-200 bg-white px-4 py-3 text-sm focus:border-silk-red-600 focus:outline-none focus:ring-2 focus:ring-silk-red-600/20";
 
@@ -51,15 +45,15 @@ export function OrderStatusLookup() {
     <div className="mt-10">
       <form onSubmit={lookup} className="grid sm:grid-cols-[1fr_1fr_auto] gap-3" noValidate>
         <label className="block">
-          <span className="sr-only">Reference code</span>
+          <span className="sr-only">{st.ref}</span>
           <input className={`${input} font-mono uppercase`} placeholder="PVS-XXXXXX" value={ref} onChange={(e) => setRef(e.target.value)} />
         </label>
         <label className="block">
-          <span className="sr-only">Phone number</span>
-          <input className={input} type="tel" inputMode="tel" autoComplete="tel" placeholder="Phone number" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <span className="sr-only">{st.phone}</span>
+          <input className={input} type="tel" inputMode="tel" autoComplete="tel" placeholder={st.phone} value={phone} onChange={(e) => setPhone(e.target.value)} />
         </label>
         <button type="submit" disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl bg-silk-red-700 hover:bg-heritage-brown-950 text-ivory-50 px-6 py-3 text-sm font-semibold disabled:opacity-60">
-          {loading && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />} Check status
+          {loading && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />} {st.check}
         </button>
       </form>
 
@@ -74,16 +68,18 @@ export function OrderStatusLookup() {
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="font-mono text-lg tracking-widest">{data.reference_code}</p>
             <p className="text-sm text-heritage-brown-600">
-              {data.saree_type} × {data.quantity} · updated {new Date(data.updated_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+              {data.saree_type} × {data.quantity} ·{" "}
+              {fmt(st.updated, { date: new Date(data.updated_at).toLocaleDateString(locale === "ta" ? "ta-IN" : "en-IN", { day: "numeric", month: "short" }) })}
             </p>
           </div>
-          <p className="mt-4 font-serif text-3xl text-heritage-brown-950">{data.status_label}</p>
+          <p className="mt-4 font-serif text-3xl text-heritage-brown-950">{st.journey[data.status as keyof typeof st.journey] ?? data.status_label}</p>
 
           {data.status === "CANCELLED" ? (
-            <p className="mt-4 text-sm text-heritage-brown-700">This request was cancelled. Contact us if you&apos;d like to restart it.</p>
+            <p className="mt-4 text-sm text-heritage-brown-700">{st.cancelled}</p>
           ) : (
             <ol className="mt-8 space-y-0">
-              {JOURNEY.map(([key, label], i) => {
+              {JOURNEY.map((key, i) => {
+                const label = st.journey[key];
                 const done = i <= current;
                 return (
                   <li key={key} className="relative flex gap-4 pb-6 last:pb-0">
@@ -104,12 +100,12 @@ export function OrderStatusLookup() {
             </ol>
           )}
           <a
-            href={getWhatsAppLink(`Hello PVS, any update on my order ${data.reference_code}?`)}
+            href={getWhatsAppLink(fmt(st.askPhotoMsg, { ref: data.reference_code }))}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-silk-red-700"
           >
-            <MessageCircle className="w-4 h-4" aria-hidden="true" /> Ask for a progress photo
+            <MessageCircle className="w-4 h-4" aria-hidden="true" /> {st.askPhoto}
           </a>
         </div>
       )}

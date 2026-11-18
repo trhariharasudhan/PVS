@@ -1,320 +1,160 @@
 "use client";
 
-import React, { useState } from "react";
-import { siteConfig } from "@/config/site";
-import { Send, CheckCircle2, MessageCircle, AlertCircle, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, Loader2, MessageCircle, Send } from "lucide-react";
+import { getWhatsAppLink } from "@/config/site";
+import { submitWholesale, isNetworkError } from "@/lib/api/contact";
+import { en } from "@/i18n/dictionaries/en";
+import { useI18n } from "@/i18n/I18nProvider";
 
+const TYPES = ["shop", "boutique", "online", "distributor", "other"] as const;
+const QTYS = ["q10", "q25", "q50", "q100"] as const;
+const INTERESTS = ["bridal", "traditional", "soft", "silkCotton", "mixed"] as const;
+
+const input =
+  "w-full rounded-xl border border-heritage-brown-200 bg-white px-4 py-3 text-sm text-heritage-brown-950 placeholder:text-heritage-brown-400 focus:border-silk-red-600 focus:outline-none focus:ring-2 focus:ring-silk-red-600/20 transition";
+
+/**
+ * Wholesale enquiry → saved in the admin wholesale CRM.
+ * Success is shown ONLY when the server confirms; otherwise the visitor is told and offered WhatsApp.
+ */
 export function WholesaleForm() {
-  const [formData, setFormData] = useState({
-    name: "",
-    businessName: "",
-    mobile: "",
-    whatsapp: "",
+  const { t } = useI18n();
+  const w = t.wholesale;
+  const [f, setF] = useState({
+    contact: "",
+    business: "",
+    phone: "",
     email: "",
     city: "",
-    businessType: "Retail Shop",
-    requiredQuantity: "10-25 Sarees",
-    interestedCollection: "Bridal Collection",
+    type: "shop" as (typeof TYPES)[number],
+    qty: "q10" as (typeof QTYS)[number],
+    interest: "bridal" as (typeof INTERESTS)[number],
     message: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [sending, setSending] = useState(false);
+  const [done, setDone] = useState<string | null>(null);
+  const [failure, setFailure] = useState<string | null>(null);
 
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const set = (k: keyof typeof f, v: string) => {
+    setF((p) => ({ ...p, [k]: v }));
+    setErrors((e) => ({ ...e, [k]: "" }));
+  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const waText = [
+    `PVS — ${w.formTitle}`,
+    `• ${w.business}: ${f.business}`,
+    `• ${w.contact}: ${f.contact}`,
+    `• ${w.city}: ${f.city}`,
+    `• ${w.type}: ${w.types[f.type]}`,
+    `• ${w.qty}: ${w.qtys[f.qty]}`,
+    `• ${w.interest}: ${w.interests[f.interest]}`,
+    f.message ? `• ${f.message}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-
+    const er: Record<string, string> = {};
+    if (f.contact.trim().length < 2) er.contact = w.errRequired;
+    if (f.business.trim().length < 2) er.business = w.errRequired;
+    if (f.city.trim().length < 2) er.city = w.errRequired;
+    const digits = f.phone.replace(/\D/g, "");
+    if (digits.length < 10 || digits.length > 15) er.phone = w.errPhone;
+    setErrors(er);
+    if (Object.values(er).some(Boolean)) return;
+    setSending(true);
+    setFailure(null);
     try {
-      // Send to backend API or simulate successful submission
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/wholesale-enquiries`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contact_person: formData.name,
-          business_name: formData.businessName,
-          phone: formData.mobile,
-          email: formData.email || undefined,
-          city: formData.city,
-          business_type: formData.businessType,
-          interested_collection: formData.interestedCollection,
-          expected_quantity: formData.requiredQuantity,
-          message: formData.message || undefined,
-        }),
+      // Staff read the CRM in English, whatever language the visitor used.
+      const res = await submitWholesale({
+        contact_person: f.contact.trim(),
+        business_name: f.business.trim(),
+        phone: f.phone.trim(),
+        email: f.email.trim() || undefined,
+        city: f.city.trim(),
+        business_type: en.wholesale.types[f.type],
+        expected_quantity: en.wholesale.qtys[f.qty],
+        interested_collection: en.wholesale.interests[f.interest],
+        message: f.message.trim() || undefined,
       });
-
-      if (!response.ok) {
-        // Fallback for offline API - still proceed to success
-        console.warn("Backend API not reachable, logged locally");
-      }
-      setSubmitted(true);
+      setDone(res.enquiry_id);
     } catch (err) {
-      console.warn("API offline fallback", err);
-      setSubmitted(true);
+      setFailure(isNetworkError(err) ? t.common.serverDown : err instanceof Error ? err.message : t.common.serverDown);
     } finally {
-      setLoading(false);
+      setSending(false);
     }
   };
 
-  const generateWhatsAppUrl = () => {
-    const text = `*WHOLESALE ENQUIRY - PVS*
-• *Name:* ${formData.name}
-• *Business:* ${formData.businessName}
-• *Mobile:* ${formData.mobile}
-• *WhatsApp:* ${formData.whatsapp || formData.mobile}
-• *City:* ${formData.city}
-• *Type:* ${formData.businessType}
-• *Quantity:* ${formData.requiredQuantity}
-• *Collection:* ${formData.interestedCollection}
-• *Message:* ${formData.message || "General wholesale inquiry"}`;
+  if (done) {
+    return (
+      <div role="status" className="rounded-3xl bg-heritage-brown-950 text-ivory-50 p-8 text-center">
+        <CheckCircle2 className="mx-auto w-10 h-10 text-gold-300" aria-hidden="true" />
+        <p className="mt-4 font-serif text-2xl">{w.sent}</p>
+        <p className="mt-3 text-xs text-ivory-300">
+          {w.ref}: <span className="font-mono">{done.slice(0, 8).toUpperCase()}</span>
+        </p>
+      </div>
+    );
+  }
 
-    return `https://wa.me/${siteConfig.business.whatsapp}?text=${encodeURIComponent(text)}`;
-  };
+  const field = (k: "contact" | "business" | "phone" | "email" | "city", label: string, extra: React.InputHTMLAttributes<HTMLInputElement> = {}) => (
+    <label className="block">
+      <span className="block text-[13px] font-semibold text-heritage-brown-900">{label}</span>
+      <input className={`${input} mt-1.5`} value={f[k]} onChange={(e) => set(k, e.target.value)} aria-invalid={!!errors[k]} {...extra} />
+      {errors[k] && <span role="alert" className="mt-1 block text-xs text-silk-red-700">{errors[k]}</span>}
+    </label>
+  );
+
+  const select = <K extends "type" | "qty" | "interest">(k: K, label: string, ids: readonly string[], labels: Record<string, string>) => (
+    <label className="block">
+      <span className="block text-[13px] font-semibold text-heritage-brown-900">{label}</span>
+      <select className={`${input} mt-1.5`} value={f[k]} onChange={(e) => set(k, e.target.value)}>
+        {ids.map((id) => (
+          <option key={id} value={id}>
+            {labels[id]}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
 
   return (
-    <div className="bg-white border border-gold-300/80 rounded-[4px] shadow-luxury p-6 sm:p-10">
-      {submitted ? (
-        <div className="text-center py-8 space-y-4 animate-fade-in-subtle">
-          <div className="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center mx-auto border border-emerald-300">
-            <CheckCircle2 className="w-8 h-8" />
-          </div>
-          <h3 className="font-serif text-2xl font-bold text-heritage-brown-950">
-            Wholesale Enquiry Submitted
-          </h3>
-          <p className="text-xs sm:text-sm text-heritage-brown-700 max-w-md mx-auto leading-relaxed font-sans">
-            Thank you, <span className="font-semibold text-heritage-brown-950">{formData.name}</span>.
-            Sathish Kumar and our manufacturing desk have received your inquiry for{" "}
-            <span className="font-semibold text-heritage-brown-950">{formData.businessName}</span>.
-          </p>
+    <form onSubmit={submit} noValidate className="space-y-4">
+      <div className="grid sm:grid-cols-2 gap-4">
+        {field("contact", w.contact, { autoComplete: "name" })}
+        {field("business", w.business, { autoComplete: "organization" })}
+        {field("phone", w.phone, { type: "tel", inputMode: "tel", autoComplete: "tel", placeholder: "+91" })}
+        {field("email", w.email, { type: "email", autoComplete: "email" })}
+        {field("city", w.city, { autoComplete: "address-level2" })}
+        {select("type", w.type, TYPES, w.types)}
+        {select("qty", w.qty, QTYS, w.qtys)}
+        {select("interest", w.interest, INTERESTS, w.interests)}
+      </div>
+      <label className="block">
+        <span className="block text-[13px] font-semibold text-heritage-brown-900">{w.message}</span>
+        <textarea className={`${input} mt-1.5`} rows={4} maxLength={2000} value={f.message} onChange={(e) => set("message", e.target.value)} />
+      </label>
 
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a
-              href={generateWhatsAppUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs uppercase tracking-widest font-semibold px-6 py-3.5 rounded-[4px] shadow-md transition-all"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span>Forward to Wholesale WhatsApp</span>
-            </a>
-
-            <button
-              type="button"
-              onClick={() => {
-                setSubmitted(false);
-                setFormData({
-                  name: "",
-                  businessName: "",
-                  mobile: "",
-                  whatsapp: "",
-                  email: "",
-                  city: "",
-                  businessType: "Retail Shop",
-                  requiredQuantity: "10-25 Sarees",
-                  interestedCollection: "Bridal Collection",
-                  message: "",
-                });
-              }}
-              className="text-xs text-heritage-brown-600 hover:text-silk-red-700 underline"
-            >
-              Submit Another Inquiry
-            </button>
-          </div>
+      {failure && (
+        <div role="alert" className="rounded-2xl border border-silk-red-200 bg-silk-red-50 p-4 text-sm text-silk-red-800">
+          <p>{failure}</p>
+          <a href={getWhatsAppLink(waText)} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-2 font-semibold underline">
+            <MessageCircle className="w-4 h-4" aria-hidden="true" /> {t.common.sendOnWhatsapp}
+          </a>
         </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-5 font-sans">
-          <div>
-            <h3 className="font-serif text-xl sm:text-2xl font-bold text-heritage-brown-950">
-              Wholesale Enquiry Form
-            </h3>
-            <p className="text-xs text-heritage-brown-600 mt-1">
-              Direct loom quotations will be provided for retailers, boutiques, and bulk buyers.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Name */}
-            <div>
-              <label className="block text-xs font-semibold text-heritage-brown-900 uppercase tracking-wider mb-1">
-                Your Name *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs bg-ivory-50/70 border border-gold-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-silk-red-700 text-heritage-brown-950"
-              />
-            </div>
-
-            {/* Business Name */}
-            <div>
-              <label className="block text-xs font-semibold text-heritage-brown-900 uppercase tracking-wider mb-1">
-                Business Name *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="Store / Boutique / Brand Name"
-                value={formData.businessName}
-                onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs bg-ivory-50/70 border border-gold-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-silk-red-700 text-heritage-brown-950"
-              />
-            </div>
-
-            {/* Mobile */}
-            <div>
-              <label className="block text-xs font-semibold text-heritage-brown-900 uppercase tracking-wider mb-1">
-                Mobile Number *
-              </label>
-              <input
-                type="tel"
-                required
-                placeholder="+91 99651 xxxxx"
-                value={formData.mobile}
-                onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs bg-ivory-50/70 border border-gold-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-silk-red-700 text-heritage-brown-950"
-              />
-            </div>
-
-            {/* WhatsApp */}
-            <div>
-              <label className="block text-xs font-semibold text-heritage-brown-900 uppercase tracking-wider mb-1">
-                WhatsApp Number
-              </label>
-              <input
-                type="tel"
-                placeholder="If different from mobile"
-                value={formData.whatsapp}
-                onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs bg-ivory-50/70 border border-gold-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-silk-red-700 text-heritage-brown-950"
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-xs font-semibold text-heritage-brown-900 uppercase tracking-wider mb-1">
-                Email Address
-              </label>
-              <input
-                type="email"
-                placeholder="name@business.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs bg-ivory-50/70 border border-gold-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-silk-red-700 text-heritage-brown-950"
-              />
-            </div>
-
-            {/* City */}
-            <div>
-              <label className="block text-xs font-semibold text-heritage-brown-900 uppercase tracking-wider mb-1">
-                City / Town *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Salem, Chennai, Bengaluru"
-                value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs bg-ivory-50/70 border border-gold-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-silk-red-700 text-heritage-brown-950"
-              />
-            </div>
-
-            {/* Business Type */}
-            <div>
-              <label className="block text-xs font-semibold text-heritage-brown-900 uppercase tracking-wider mb-1">
-                Business Type *
-              </label>
-              <select
-                value={formData.businessType}
-                onChange={(e) => setFormData({ ...formData, businessType: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs bg-ivory-50/70 border border-gold-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-silk-red-700 text-heritage-brown-950"
-              >
-                <option value="Retail Shop">Retail Shop</option>
-                <option value="Boutique">Boutique</option>
-                <option value="Reseller">Reseller</option>
-                <option value="Distributor">Distributor</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            {/* Required Quantity */}
-            <div>
-              <label className="block text-xs font-semibold text-heritage-brown-900 uppercase tracking-wider mb-1">
-                Required Quantity *
-              </label>
-              <select
-                value={formData.requiredQuantity}
-                onChange={(e) => setFormData({ ...formData, requiredQuantity: e.target.value })}
-                className="w-full px-3.5 py-2.5 text-xs bg-ivory-50/70 border border-gold-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-silk-red-700 text-heritage-brown-950"
-              >
-                <option value="Sample Pack (5-10 Sarees)">Sample Pack (5-10 Sarees)</option>
-                <option value="10-25 Sarees">10-25 Sarees</option>
-                <option value="25-50 Sarees">25-50 Sarees</option>
-                <option value="50-100 Sarees">50-100 Sarees</option>
-                <option value="100+ Bulk Run">100+ Bulk Run</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Interested Collection */}
-          <div>
-            <label className="block text-xs font-semibold text-heritage-brown-900 uppercase tracking-wider mb-1">
-              Interested Collection *
-            </label>
-            <select
-              value={formData.interestedCollection}
-              onChange={(e) => setFormData({ ...formData, interestedCollection: e.target.value })}
-              className="w-full px-3.5 py-2.5 text-xs bg-ivory-50/70 border border-gold-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-silk-red-700 text-heritage-brown-950"
-            >
-              <option value="Bridal Collection">Bridal Collection</option>
-              <option value="Wedding Collection">Wedding Collection</option>
-              <option value="Traditional Collection">Traditional Collection</option>
-              <option value="Designer Collection">Designer Collection</option>
-              <option value="Silk Collection">Silk Collection</option>
-              <option value="New Arrivals">New Arrivals</option>
-              <option value="All Collections">All Collections</option>
-            </select>
-          </div>
-
-          {/* Message */}
-          <div>
-            <label className="block text-xs font-semibold text-heritage-brown-900 uppercase tracking-wider mb-1">
-              Message / Specific Requirements
-            </label>
-            <textarea
-              rows={3}
-              placeholder="Tell us about your target price points, preferred colors, or custom requirements..."
-              value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              className="w-full px-3.5 py-2.5 text-xs bg-ivory-50/70 border border-gold-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-silk-red-700 text-heritage-brown-950"
-            />
-          </div>
-
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full inline-flex items-center justify-center gap-2 bg-silk-red-700 hover:bg-deep-maroon-800 text-ivory-50 text-xs sm:text-sm font-semibold uppercase tracking-widest py-4 rounded-[4px] border border-silk-red-700 shadow-luxury transition-all disabled:opacity-70"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Submitting to Wholesale Desk...</span>
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4 text-gold-300" />
-                  <span>Submit Wholesale Enquiry</span>
-                </>
-              )}
-            </button>
-          </div>
-        </form>
       )}
-    </div>
+
+      <button
+        type="submit"
+        disabled={sending}
+        className="inline-flex items-center gap-2 rounded-full bg-silk-red-700 hover:bg-heritage-brown-950 disabled:opacity-60 text-ivory-50 px-7 py-3.5 text-sm font-semibold transition-colors"
+      >
+        {sending ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Send className="w-4 h-4" aria-hidden="true" />}
+        {sending ? t.common.sending : w.send}
+      </button>
+    </form>
   );
 }

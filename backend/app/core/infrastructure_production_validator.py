@@ -289,21 +289,17 @@ class InfrastructureProductionValidator:
                 "owner": "Database Engineer",
             }
 
-        config = AlembicConfig(str(alembic_ini))
-        config.set_main_option("script_location", str(self.root_dir / "backend" / "alembic"))
-        script = ScriptDirectory.from_config(config)
-        heads = script.get_heads()
+        from app.core.migration_chain import check_linear_chain
 
-        if len(heads) == 1:
-            head_rev = heads[0]
+        report = check_linear_chain(self.root_dir / "backend")
+        if report.ok:
+            head_rev = report.head
             status = InfraCheckStatus.PASS
-            details = f"Single head verified: '{head_rev}' (Linear chain verified: 0001 -> 0002 -> 0003 -> 0004 -> 0005 -> 0006)."
-
-
+            details = report.summary
         else:
-            head_rev = str(heads)
+            head_rev = str(report.head)
             status = InfraCheckStatus.INVALID
-            details = f"Multiple or branching migration heads detected: {heads}."
+            details = f"Migration history is not a single linear chain: {'; '.join(report.problems)}"
 
         return {
             "check_id": "INFRA-MIG-01",

@@ -2,10 +2,12 @@ import { HeroExperience } from "@/components/home/hero3d/HeroExperience";
 import {
   AudienceSection,
   CraftMarquee,
+  FaqTeaser,
   FounderTeaser,
   IntroSection,
   JourneySection,
   ProblemsSection,
+  TrendsSection,
 } from "@/components/sections/HomeSections";
 
 export default function HomePage() {
@@ -20,12 +22,16 @@ export default function HomePage() {
         <CraftMarquee />
         {/* Five-step made-to-order journey */}
         <JourneySection />
+        {/* Trending designs people ask for — opens the designer with that design */}
+        <TrendsSection />
         {/* Real buyer worries and how PVS answers them */}
         <ProblemsSection />
         {/* Families (retail) vs boutiques & wholesale */}
         <AudienceSection />
         {/* Founder journey teaser (unconfirmed facts hidden in production) */}
         <FounderTeaser />
+        {/* Quick answers to the most common questions */}
+        <FaqTeaser />
       </div>
     </>
   );

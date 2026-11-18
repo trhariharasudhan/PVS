@@ -56,26 +56,16 @@ class ReleaseCandidateVerifier:
             self.audit_items.append(item)
             return item
 
-        alembic_cfg = Config(str(alembic_ini))
-        alembic_cfg.set_main_option("script_location", str(backend_dir / "alembic"))
-        script = ScriptDirectory.from_config(alembic_cfg)
-        heads = script.get_heads()
-        is_single_head = len(heads) == 1 and heads[0] in [
-            "0007_custom_order_requests",
-            "0006_phase_6_04_communication_events",
-            "0005_phase_6_03_payment_webhook_events",
-            "0004_phase_6_01_dealer_pricing_tiers",
-            "0003_phase_4c_d_finance_invoicing",
-        ]
+        from app.core.migration_chain import check_linear_chain
 
+        report = check_linear_chain(backend_dir)
         item = {
             "id": "RC-02",
             "category": "Database Architecture",
             "name": "Linear Alembic Single-Head Migration Chain",
-            "status": "PASS" if is_single_head else "FAIL",
-            "details": f"Single head verified: {heads[0] if heads else 'None'} (Chain: 0001 -> 0002 -> 0003 -> 0004 -> 0005 -> 0006 -> 0007)",
+            "status": "PASS" if report.ok else "FAIL",
+            "details": report.summary,
         }
-
 
         self.audit_items.append(item)
         return item

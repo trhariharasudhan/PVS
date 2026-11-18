@@ -134,9 +134,10 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["var(--font-serif)", "Georgia", "serif"],
+        // Tamil glyphs fall through to the Tamil faces automatically (Latin fonts have none).
+        serif: ["var(--font-serif)", "var(--font-tamil)", "Georgia", "serif"],
         tamil: ["var(--font-tamil)", "Noto Serif Tamil", "Latha", "serif"],
-        sans: ["var(--font-sans)", "Plus Jakarta Sans", "Inter", "DM Sans", "sans-serif"],
+        sans: ["var(--font-sans)", "var(--font-tamil-sans)", "Plus Jakarta Sans", "Inter", "sans-serif"],
       },
       letterSpacing: {
         widest: ".2em",

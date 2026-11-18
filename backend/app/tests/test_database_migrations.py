@@ -22,71 +22,22 @@ def test_alembic_migration_chain_is_linear_and_single_headed():
     alembic_cfg = Config(str(alembic_ini_path))
     alembic_cfg.set_main_option("script_location", str(backend_dir / "alembic"))
 
-    script = ScriptDirectory.from_config(alembic_cfg)
-    heads = script.get_heads()
+    from app.core.migration_chain import check_linear_chain
 
-    # 1. Assert exactly one head
-    assert len(heads) == 1, f"Expected exactly 1 migration head, found {len(heads)}: {heads}"
-    head_rev = heads[0]
-    assert head_rev in [
-        "0007_custom_order_requests",
-        "0006_phase_6_04_communication_events",
-        "0005_phase_6_03_payment_webhook_events",
-        "0004_phase_6_01_dealer_pricing_tiers",
+    report = check_linear_chain(backend_dir)
+    assert report.ok, report.problems
+    # the chain must contain every known milestone, in order
+    for rev in [
+        "0001_initial_schema",
+        "0002_phase_4c_c_procurement_payments",
         "0003_phase_4c_d_finance_invoicing",
-    ]
-
-    # 2. Trace chain backwards
-    revisions = []
-    curr = script.get_revision(head_rev)
-    while curr is not None:
-        revisions.append(curr.revision)
-        if curr.down_revision:
-            curr = script.get_revision(curr.down_revision)
-        else:
-            break
-
-    if head_rev == "0007_custom_order_requests":
-        expected_chain = [
-            "0007_custom_order_requests",
-            "0006_phase_6_04_communication_events",
-            "0005_phase_6_03_payment_webhook_events",
-            "0004_phase_6_01_dealer_pricing_tiers",
-            "0003_phase_4c_d_finance_invoicing",
-            "0002_phase_4c_c_procurement_payments",
-            "0001_initial_schema",
-        ]
-    elif head_rev == "0006_phase_6_04_communication_events":
-        expected_chain = [
-            "0006_phase_6_04_communication_events",
-            "0005_phase_6_03_payment_webhook_events",
-            "0004_phase_6_01_dealer_pricing_tiers",
-            "0003_phase_4c_d_finance_invoicing",
-            "0002_phase_4c_c_procurement_payments",
-            "0001_initial_schema",
-        ]
-    elif head_rev == "0005_phase_6_03_payment_webhook_events":
-        expected_chain = [
-            "0005_phase_6_03_payment_webhook_events",
-            "0004_phase_6_01_dealer_pricing_tiers",
-            "0003_phase_4c_d_finance_invoicing",
-            "0002_phase_4c_c_procurement_payments",
-            "0001_initial_schema",
-        ]
-    elif head_rev == "0004_phase_6_01_dealer_pricing_tiers":
-        expected_chain = [
-            "0004_phase_6_01_dealer_pricing_tiers",
-            "0003_phase_4c_d_finance_invoicing",
-            "0002_phase_4c_c_procurement_payments",
-            "0001_initial_schema",
-        ]
-    else:
-        expected_chain = [
-            "0003_phase_4c_d_finance_invoicing",
-            "0002_phase_4c_c_procurement_payments",
-            "0001_initial_schema",
-        ]
-    assert revisions == expected_chain, f"Migration chain mismatch. Found: {revisions}"
+        "0004_phase_6_01_dealer_pricing_tiers",
+        "0005_phase_6_03_payment_webhook_events",
+        "0006_phase_6_04_communication_events",
+        "0007_custom_order_requests",
+        "0008_custom_order_design_options",
+    ]:
+        assert rev in report.chain, f"{rev} missing from chain {report.chain}"
 
 
 def test_sqlalchemy_metadata_tables_and_foreign_keys():

@@ -91,7 +91,8 @@ export function CameraRig({ progress, framing }: Props) {
       st.curTgt.copy(st.tgt);
       st.initialised = true;
     } else {
-      const k = 1 - Math.exp(-Math.min(dt, 0.1) * 6);
+      // lower rate = silkier glide (scroll scrub already smooths the input)
+      const k = 1 - Math.exp(-Math.min(dt, 0.1) * 4.2);
       camera.position.lerp(st.pos, k);
       st.curTgt.lerp(st.tgt, k);
     }

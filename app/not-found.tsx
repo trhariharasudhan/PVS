@@ -1,41 +1,23 @@
-import React from "react";
 import Link from "next/link";
-import { ArrowLeft, Home, Sparkles } from "lucide-react";
+import { ArrowUpRight, Home } from "lucide-react";
+import { Kolam } from "@/components/ui/Ornament";
+import { getI18n } from "@/i18n/server";
 
 export default function NotFound() {
+  const { t } = getI18n();
+  const n = t.notFound;
   return (
-    <div className="min-h-[75vh] flex flex-col items-center justify-center text-center px-4 py-20 bg-ivory-50 text-charcoal-900">
-      <div className="w-16 h-16 rounded-full bg-gold-100 border border-gold-300/80 flex items-center justify-center text-burgundy-900 mb-6">
-        <Sparkles className="w-8 h-8 text-gold-700" />
-      </div>
-
-      <span className="text-xs font-mono tracking-widest uppercase text-gold-700 font-bold">
-        Error 404
-      </span>
-
-      <h1 className="font-serif text-3xl sm:text-5xl font-bold text-burgundy-950 mt-2">
-        Page Not Found
-      </h1>
-
-      <p className="text-xs sm:text-sm text-charcoal-600 max-w-md mx-auto mt-3 font-sans leading-relaxed">
-        The page or saree collection you are looking for has been moved, renamed, or is currently
-        being re-woven on our looms.
-      </p>
-
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 bg-burgundy-900 hover:bg-burgundy-950 text-gold-200 px-6 py-3 text-xs uppercase tracking-widest font-semibold rounded-sm shadow transition-all"
-        >
-          <Home className="w-4 h-4" />
-          <span>Return Home</span>
+    <div className="relative min-h-[75vh] flex flex-col items-center justify-center text-center px-4 py-20 bg-ivory-50 bg-weave overflow-hidden">
+      <Kolam className="pointer-events-none absolute -right-16 -top-10 w-72 text-gold-400/25" />
+      <p className="font-mono text-xs tracking-widest uppercase text-gold-700 font-bold">404</p>
+      <h1 className="mt-3 max-w-2xl font-serif text-4xl sm:text-6xl font-medium text-heritage-brown-950 text-balance">{n.title}</h1>
+      <p className="mt-4 max-w-md text-heritage-brown-700 leading-relaxed">{n.body}</p>
+      <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <Link href="/" className="inline-flex items-center gap-2 rounded-full bg-heritage-brown-950 hover:bg-silk-red-700 text-ivory-50 px-6 py-3.5 text-sm font-semibold transition-colors">
+          <Home className="w-4 h-4" aria-hidden="true" /> {n.home}
         </Link>
-        <Link
-          href="/custom-order"
-          className="inline-flex items-center gap-2 bg-white hover:bg-gold-50 text-charcoal-800 border border-gold-300 px-6 py-3 text-xs uppercase tracking-widest font-semibold rounded-sm transition-all"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Start a Custom Order</span>
+        <Link href="/custom-order" className="inline-flex items-center gap-2 rounded-full border border-gold-400 px-6 py-3.5 text-sm font-semibold text-heritage-brown-900 hover:bg-gold-50 transition-colors">
+          {n.order} <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
         </Link>
       </div>
     </div>

@@ -434,12 +434,9 @@ def test_alembic_single_head_chain_through_0004():
     script = ScriptDirectory.from_config(alembic_cfg)
     heads = script.get_heads()
 
+    from app.core.migration_chain import check_linear_chain
+
     assert len(heads) == 1, f"Expected 1 single migration head, got: {heads}"
-    assert heads[0] in [
-        "0007_custom_order_requests",
-        "0006_phase_6_04_communication_events",
-        "0005_phase_6_03_payment_webhook_events",
-        "0004_phase_6_01_dealer_pricing_tiers",
-    ]
+    assert check_linear_chain(backend_dir).ok
 
 

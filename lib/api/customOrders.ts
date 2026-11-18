@@ -20,6 +20,15 @@ export interface CustomOrderSpec {
   zari_type: string;
   border_style?: string;
   design_notes?: string;
+  design_options?: {
+    border_style?: string;
+    border_motif?: string;
+    body_pattern?: string;
+    body_motif?: string;
+    pallu_style?: string;
+    pallu_motif?: string;
+    second_border_colour?: string;
+  };
   quantity: number;
   needed_by?: string | null;
   budget_range?: string;

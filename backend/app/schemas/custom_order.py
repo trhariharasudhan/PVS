@@ -21,6 +21,43 @@ STATUS_LABELS = {
 }
 
 
+# Allowed design vocabulary (mirrors lib/saree/render.ts on the frontend)
+DESIGN_VALUES = {
+    "border_style": {"temple", "rettaiPettu", "gangaJamuna", "vairaoosi", "kattam", "minimal"},
+    "border_motif": {"peacock", "elephant", "lotus", "annam", "mango", "chakram", "rudraksha", "flower", "none"},
+    "body_pattern": {"plain", "buttas", "checks", "stripes", "vairaoosi", "jaal"},
+    "body_motif": {"peacock", "elephant", "lotus", "annam", "mango", "chakram", "rudraksha", "flower", "none"},
+    "pallu_style": {"grand", "motifRows", "stripes", "minimal"},
+    "pallu_motif": {"peacock", "elephant", "lotus", "annam", "mango", "chakram", "rudraksha", "flower", "none"},
+}
+
+
+class DesignOptions(BaseModel):
+    border_style: Optional[str] = None
+    border_motif: Optional[str] = None
+    body_pattern: Optional[str] = None
+    body_motif: Optional[str] = None
+    pallu_style: Optional[str] = None
+    pallu_motif: Optional[str] = None
+    second_border_colour: Optional[str] = None
+
+    model_config = ConfigDict(extra="forbid")
+
+    @field_validator("border_style", "border_motif", "body_pattern", "body_motif", "pallu_style", "pallu_motif")
+    @classmethod
+    def _known(cls, v: Optional[str], info) -> Optional[str]:
+        if v is not None and v not in DESIGN_VALUES[info.field_name]:
+            raise ValueError(f"Unknown {info.field_name.replace('_', ' ')}: {v}")
+        return v
+
+    @field_validator("second_border_colour")
+    @classmethod
+    def _hex2(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and not HEX_COLOUR.match(v):
+            raise ValueError("Colour must be a hex value like #8E1426")
+        return v.upper() if v else v
+
+
 class CustomOrderCreate(BaseModel):
     """Saree specification submitted from the Custom Order Builder."""
 
@@ -42,6 +79,7 @@ class CustomOrderCreate(BaseModel):
     zari_type: str = Field(..., min_length=2, max_length=100)
     border_style: Optional[str] = Field(None, max_length=100)
     design_notes: Optional[str] = Field(None, max_length=3000)
+    design_options: Optional[DesignOptions] = None
 
     quantity: int = Field(1, ge=1, le=10000)
     needed_by: Optional[date] = None
@@ -133,6 +171,7 @@ class AdminCustomOrderDetail(BaseModel):
     zari_type: str
     border_style: Optional[str]
     design_notes: Optional[str]
+    design_options: Optional[dict]
     quantity: int
     needed_by: Optional[date]
     budget_range: Optional[str]

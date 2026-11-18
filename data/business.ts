@@ -96,69 +96,52 @@ export const ORDER_TERMS = {
   advance: { value: "Advance confirmed with quotation", confirmed: false, ask: "Advance payment terms" } as Fact,
 };
 
-export const SAREE_TYPES = [
-  "Wedding / bridal pattu saree",
-  "Traditional pattu saree",
-  "Soft silk saree",
-  "Silk cotton saree",
-  "Festive / function saree",
-  "Uniform / group order",
-  "Something else (describe below)",
-];
-
-export const OCCASIONS = ["Wedding", "Engagement", "Festival", "Temple / pooja", "Gift", "Store stock", "Other"];
+/**
+ * Option ids. Labels live in the dictionaries (i18n/dictionaries/*.ts → options.*), so the
+ * same id shows in Tamil or English. Orders are stored with the ENGLISH label so PVS staff
+ * always read one language in the admin.
+ */
+export const SAREE_TYPE_IDS = ["wedding", "traditional", "soft", "silkCotton", "festive", "group", "other"] as const;
+export const OCCASION_IDS = ["wedding", "engagement", "festival", "temple", "gift", "stock", "other"] as const;
+export const BUDGET_IDS = ["u5", "r5_10", "r10_20", "r20_40", "o40", "discuss"] as const;
 
 /**
  * Material options a customer can REQUEST. PVS confirms feasibility and price on the quotation;
  * these are standard industry options, not a claim that every one is in stock.
  */
-export const SILK_TYPES: { id: string; label: string; help: string; fixedPercent?: number }[] = [
-  { id: "pure-mulberry", label: "Pure mulberry silk", help: "100% silk warp and weft. Richest drape and lustre.", fixedPercent: 100 },
-  { id: "soft-silk", label: "Soft silk", help: "Lighter, softer silk. Easy to wear all day.", fixedPercent: 100 },
-  { id: "silk-cotton", label: "Silk cotton", help: "Silk blended with cotton. Breathable and lighter on the budget." },
-  { id: "art-silk-blend", label: "Art silk / blend", help: "Silk-look fibres blended for an affordable option." },
-  { id: "not-sure", label: "Not sure — please advise", help: "Tell us the occasion and budget; we'll suggest the right silk." },
-];
+export const SILK_OPTIONS = [
+  { id: "pureMulberry", fixedPercent: 100 },
+  { id: "softSilk", fixedPercent: 100 },
+  { id: "silkCotton" },
+  { id: "artSilk" },
+  { id: "notSure" },
+] as const satisfies readonly { id: string; fixedPercent?: number }[];
 
-export const ZARI_TYPES: { id: string; label: string; help: string; tone: string }[] = [
-  { id: "pure", label: "Pure zari", help: "Silver thread with gold coating. Highest value; holds resale value.", tone: "#C9A24E" },
-  { id: "tested", label: "Tested / half-fine zari", help: "Copper with silver & gold plating. Durable and widely used.", tone: "#D8B25C" },
-  { id: "silver", label: "Silver-look zari", help: "Silver-toned zari for a contemporary finish.", tone: "#C8C8CC" },
-  { id: "thread", label: "No zari (silk thread work)", help: "Motifs in contrasting silk thread only.", tone: "" },
-  { id: "not-sure", label: "Not sure — please advise", help: "We'll explain the difference and price for each.", tone: "#D8B25C" },
-];
+export const ZARI_OPTIONS = [
+  { id: "pure", tone: "gold" },
+  { id: "tested", tone: "gold" },
+  { id: "silver", tone: "silver" },
+  { id: "antique", tone: "antique" },
+  { id: "thread", tone: "none" },
+  { id: "notSure", tone: "gold" },
+] as const;
 
-export const BORDER_STYLES = ["Temple (kovil) border", "Plain zari border", "Contrast korvai-style border", "Small butta border", "Borderless / minimal", "As per my design"];
-
-export const BUDGET_RANGES = ["Under ₹5,000", "₹5,000 – ₹10,000", "₹10,000 – ₹20,000", "₹20,000 – ₹40,000", "Above ₹40,000", "Discuss with me"];
-
-/* ------------------------------------------------------------------ */
-/* Customer problems → how PVS solves them (home + how-we-weave)       */
-/* ------------------------------------------------------------------ */
-
-export const PROBLEMS_WE_SOLVE = [
-  {
-    problem: "“Is this really pure silk?”",
-    solution: "Every order gets a written spec: silk type, silk %, zari type. What we write is what we weave.",
-  },
-  {
-    problem: "Confusing zari grades",
-    solution: "We explain pure, tested and silver-look zari in plain words before you decide — and the price of each.",
-  },
-  {
-    problem: "The colour came out different",
-    solution: "Choose exact colours online, then approve a photo or colour swatch before weaving starts.",
-  },
-  {
-    problem: "“I can't explain the design I want”",
-    solution: "Upload a photo, sketch or screenshot. We'll tell you honestly what can be woven and how.",
-  },
-  {
-    problem: "No updates, missed dates",
-    solution: "A reference code to track your order, plus progress photos from the loom on WhatsApp.",
-  },
-  {
-    problem: "Middlemen markup",
-    solution: "You order directly from the weaving unit in Salem district — no showroom margin in between.",
-  },
-];
+/** Traditional colour names customers use, with the hex we preview. */
+export const SWATCHES = [
+  { id: "arakku", hex: "#7A1022" },
+  { id: "kumkumam", hex: "#B3122E" },
+  { id: "rani", hex: "#C2185B" },
+  { id: "onion", hex: "#E7A1A8" },
+  { id: "manjal", hex: "#E9B21B" },
+  { id: "mustard", hex: "#C48A12" },
+  { id: "kili", hex: "#5DA130" },
+  { id: "bottle", hex: "#0F4D3A" },
+  { id: "mayilKazhuthu", hex: "#0E6E73" },
+  { id: "peacockBlue", hex: "#0B4F8A" },
+  { id: "royal", hex: "#23338F" },
+  { id: "midnight", hex: "#121B3D" },
+  { id: "vadamalli", hex: "#5B1E5E" },
+  { id: "lavender", hex: "#9C86C4" },
+  { id: "offWhite", hex: "#F2E8D5" },
+  { id: "black", hex: "#141113" },
+] as const;

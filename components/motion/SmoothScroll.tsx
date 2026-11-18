@@ -11,6 +11,34 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
  * Disabled for prefers-reduced-motion and on touch devices (native scroll is better there).
  */
 export function SmoothScroll() {
+  // Keep every ScrollTrigger's start/end in sync with the real layout. Page height changes
+  // after first paint (web fonts — Tamil glyphs are much taller — canvases, the 3D hero);
+  // without this, reveal triggers computed too early can sit at the wrong scroll position.
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const refresh = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => ScrollTrigger.refresh(), 200);
+    };
+    document.fonts?.ready.then(refresh).catch(() => {});
+    window.addEventListener("load", refresh);
+    let lastH = document.body.scrollHeight;
+    const ro = new ResizeObserver(() => {
+      const h = document.body.scrollHeight;
+      if (Math.abs(h - lastH) > 40) {
+        lastH = h;
+        refresh();
+      }
+    });
+    ro.observe(document.body);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("load", refresh);
+      ro.disconnect();
+    };
+  }, []);
+
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (reduce.matches) return;

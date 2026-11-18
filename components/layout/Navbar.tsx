@@ -5,8 +5,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, Menu, MessageCircle, Phone, Search, X } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { useI18n } from "@/i18n/I18nProvider";
+import { LanguageSwitch } from "@/components/layout/LanguageSwitch";
 
-const WHATSAPP_MSG = "Hello PVS, I'd like to enquire about a custom silk saree order.";
+const NAV_KEYS: Record<string, "home" | "craft" | "weave" | "wholesale" | "about" | "contact"> = {
+  "/": "home",
+  "/our-craft": "craft",
+  "/what-we-weave": "weave",
+  "/wholesale": "wholesale",
+  "/about": "about",
+  "/contact": "contact",
+};
 
 function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -14,6 +23,8 @@ function isActive(pathname: string, href: string) {
 
 export function Navbar() {
   const pathname = usePathname();
+  const { t, locale } = useI18n();
+  const label = (l: { href: string; label: string }) => (NAV_KEYS[l.href] ? t.nav[NAV_KEYS[l.href]] : l.label);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -60,7 +71,7 @@ export function Navbar() {
     };
   }, [open]);
 
-  const wa = `https://wa.me/${siteConfig.business.whatsapp}?text=${encodeURIComponent(WHATSAPP_MSG)}`;
+  const wa = `https://wa.me/${siteConfig.business.whatsapp}?text=${encodeURIComponent(t.common.whatsappHello)}`;
 
   return (
     <>
@@ -68,7 +79,7 @@ export function Navbar() {
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-ivory-50 focus:text-heritage-brown-950 focus:px-4 focus:py-2 focus:rounded"
       >
-        Skip to content
+        {t.common.skipToContent}
       </a>
 
       <header
@@ -82,12 +93,15 @@ export function Navbar() {
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between gap-4">
             <p className="truncate">
-              <span className="text-gold-300 font-semibold">Woven to order</span>
-              <span className="hidden sm:inline text-ivory-300"> · Silk sarees from our looms in Salem district</span>
+              <span className="text-gold-300 font-semibold">{t.nav.wovenToOrder}</span>
+              <span className="hidden sm:inline text-ivory-300">{t.nav.fromLooms}</span>
             </p>
             <div className="flex items-center gap-4 shrink-0">
               <Link href="/order-status" className="hidden sm:inline-flex items-center gap-1 hover:text-gold-300 transition-colors">
-                <Search className="w-3 h-3" aria-hidden="true" /> Track your order
+                <Search className="w-3 h-3" aria-hidden="true" /> {t.common.trackOrder}
+              </Link>
+              <Link href="/faq" className="hidden sm:inline-flex hover:text-gold-300 transition-colors">
+                {t.nav.faq}
               </Link>
               <a href={`tel:+${siteConfig.business.phoneNumeric}`} className="inline-flex items-center gap-1 hover:text-gold-300 transition-colors">
                 <Phone className="w-3 h-3 text-gold-400" aria-hidden="true" />
@@ -119,7 +133,7 @@ export function Navbar() {
             </Link>
 
             {/* Desktop links */}
-            <ul className="hidden lg:flex items-center gap-1">
+            <ul className={`hidden ${locale === "ta" ? "xl:flex" : "lg:flex"} items-center gap-1`}>
               {siteConfig.navLinks.map((l) => {
                 const active = isActive(pathname, l.href);
                 return (
@@ -127,13 +141,13 @@ export function Navbar() {
                     <Link
                       href={l.href}
                       aria-current={active ? "page" : undefined}
-                      className={`relative px-3 py-2 text-[13px] font-medium tracking-wide transition-colors after:absolute after:left-3 after:right-3 after:-bottom-0.5 after:h-px after:origin-left after:bg-silk-red-700 after:transition-transform after:duration-300 ${
+                      className={`relative ${locale === "ta" ? "px-2 font-tamil text-[12.5px]" : "px-3 text-[13px]"} py-2 font-medium tracking-wide transition-colors after:absolute after:left-3 after:right-3 after:-bottom-0.5 after:h-px after:origin-left after:bg-silk-red-700 after:transition-transform after:duration-300 ${
                         active
                           ? "text-silk-red-700 after:scale-x-100"
                           : "text-heritage-brown-800 hover:text-silk-red-700 after:scale-x-0 hover:after:scale-x-100"
                       }`}
                     >
-                      {l.label}
+                      {label(l)}
                     </Link>
                   </li>
                 );
@@ -142,20 +156,21 @@ export function Navbar() {
 
             {/* Actions */}
             <div className="flex items-center gap-2">
+              <LanguageSwitch />
               <a
                 href={wa}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Chat with PVS on WhatsApp"
+                aria-label={t.common.chatWhatsapp}
                 className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-full border border-gold-400/40 text-heritage-brown-900 hover:bg-heritage-brown-950 hover:text-gold-300 transition-colors"
               >
                 <MessageCircle className="w-4 h-4" aria-hidden="true" />
               </a>
               <Link
                 href="/custom-order"
-                className="group hidden sm:inline-flex items-center gap-2 rounded-full bg-silk-red-700 hover:bg-heritage-brown-950 text-ivory-50 pl-5 pr-4 py-2.5 text-[12px] font-semibold tracking-[0.12em] uppercase transition-colors"
+                className="group hidden sm:inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-silk-red-700 hover:bg-heritage-brown-950 text-ivory-50 pl-5 pr-4 py-2.5 text-[12px] font-semibold tracking-[0.12em] uppercase transition-colors"
               >
-                Start Custom Order
+                {t.common.startCustomOrder}
                 <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
               </Link>
               <button
@@ -164,8 +179,8 @@ export function Navbar() {
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
                 aria-controls="mobile-menu"
-                aria-label={open ? "Close menu" : "Open menu"}
-                className="lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-full border border-gold-400/40 text-heritage-brown-950"
+                aria-label={open ? t.common.closeMenu : t.common.openMenu}
+                className={`${locale === "ta" ? "xl:hidden" : "lg:hidden"} inline-flex h-10 w-10 items-center justify-center rounded-full border border-gold-400/40 text-heritage-brown-950`}
               >
                 {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -178,7 +193,7 @@ export function Navbar() {
       <div
         id="mobile-menu"
         ref={menuPanel}
-        className={`lg:hidden fixed inset-0 z-40 bg-heritage-brown-950 text-ivory-50 transition-[clip-path] duration-700 ease-[cubic-bezier(0.77,0,0.18,1)] ${
+        className={`${locale === "ta" ? "xl:hidden" : "lg:hidden"} fixed inset-0 z-40 bg-heritage-brown-950 text-ivory-50 transition-[clip-path] duration-700 ease-[cubic-bezier(0.77,0,0.18,1)] ${
           open ? "[clip-path:circle(150%_at_100%_0)]" : "[clip-path:circle(0%_at_100%_0)] pointer-events-none"
         }`}
         aria-hidden={!open}
@@ -194,31 +209,39 @@ export function Navbar() {
                 <Link
                   href={l.href}
                   aria-current={isActive(pathname, l.href) ? "page" : undefined}
-                  className={`block py-2 font-serif text-4xl ${isActive(pathname, l.href) ? "text-gold-300" : "text-ivory-50"}`}
+                  className={`block py-2 ${locale === "ta" ? "font-tamil text-3xl" : "font-serif text-4xl"} ${isActive(pathname, l.href) ? "text-gold-300" : "text-ivory-50"}`}
                 >
-                  {l.label}
+                  {label(l)}
                 </Link>
               </li>
             ))}
             <li className={`transition-all duration-500 delay-500 ${open ? "opacity-100" : "opacity-0"}`}>
               <Link href="/order-status" className="block py-2 text-sm tracking-widest uppercase text-gold-300">
-                Track your order →
+                {t.common.trackOrder} →
+              </Link>
+            </li>
+            <li className={`transition-all duration-500 delay-500 ${open ? "opacity-100" : "opacity-0"}`}>
+              <Link href="/faq" className="block py-2 text-sm tracking-widest uppercase text-gold-300">
+                {t.nav.faq} →
               </Link>
             </li>
           </ul>
+          <div className={`mt-6 transition-opacity duration-500 delay-500 ${open ? "opacity-100" : "opacity-0"}`}>
+            <LanguageSwitch variant="dark" />
+          </div>
           <div className={`mt-auto pt-10 space-y-3 transition-opacity duration-500 delay-500 ${open ? "opacity-100" : "opacity-0"}`}>
             <Link
               href="/custom-order"
               className="flex items-center justify-center gap-2 rounded-full bg-gold-500 text-heritage-brown-950 py-4 text-sm font-semibold tracking-widest uppercase"
             >
-              Start Custom Order <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+              {t.common.startCustomOrder} <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
             </Link>
             <div className="grid grid-cols-2 gap-3">
               <a href={`tel:+${siteConfig.business.phoneNumeric}`} className="flex items-center justify-center gap-2 rounded-full border border-ivory-200/30 py-3 text-sm">
-                <Phone className="w-4 h-4" aria-hidden="true" /> Call
+                <Phone className="w-4 h-4" aria-hidden="true" /> {t.common.call}
               </a>
               <a href={wa} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-full border border-ivory-200/30 py-3 text-sm">
-                <MessageCircle className="w-4 h-4" aria-hidden="true" /> WhatsApp
+                <MessageCircle className="w-4 h-4" aria-hidden="true" /> {t.common.whatsapp}
               </a>
             </div>
           </div>

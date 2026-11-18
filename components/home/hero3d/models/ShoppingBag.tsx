@@ -44,7 +44,22 @@ export function ShoppingBag({ progress, assets: a }: Props) {
         new THREE.Vector3(0.19, 0.17, 0),
         new THREE.Vector3(0.2, 0, 0),
       ]);
-      const handleGeo = new THREE.TubeGeometry(curve, 48, 0.011, 10, false);
+      // Twisted cord: two strands spiralling around the handle path (reads as real rope up close)
+      const strand = (phase: number) => {
+        const pts: THREE.Vector3[] = [];
+        const N = 160;
+        const frames = curve.computeFrenetFrames(N, false);
+        for (let i = 0; i <= N; i++) {
+          const u = i / N;
+          const c = curve.getPointAt(u);
+          const a = u * Math.PI * 2 * 14 + phase;
+          const r = 0.0055;
+          pts.push(c.clone().addScaledVector(frames.normals[i], Math.cos(a) * r).addScaledVector(frames.binormals[i], Math.sin(a) * r));
+        }
+        return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 320, 0.0062, 8, false);
+      };
+      const handleGeo = strand(0);
+      const handleGeo2 = strand(Math.PI);
       const tissueGeo = new THREE.PlaneGeometry(0.55, 0.32, 10, 6);
       const tp = tissueGeo.attributes.position as THREE.BufferAttribute;
       for (let i = 0; i < tp.count; i++) {
@@ -57,10 +72,10 @@ export function ShoppingBag({ progress, assets: a }: Props) {
       // Box faces: +x, -x, +y, -y, +z, -z
       const frontMats = [a.bagBody, a.bagBody, a.bagBody, a.bagBody, a.bagFront, a.bagInner];
       const backMats = [a.bagBody, a.bagBody, a.bagBody, a.bagBody, a.bagInner, a.bagBody];
-      return { handleGeo, tissueGeo, frontMats, backMats };
+      return { handleGeo, handleGeo2, tissueGeo, frontMats, backMats };
     },
     [a],
-    (r) => [r.handleGeo, r.tissueGeo],
+    (r) => [r.handleGeo, r.handleGeo2, r.tissueGeo],
   );
 
   useFrame((state) => {
@@ -109,6 +124,7 @@ export function ShoppingBag({ progress, assets: a }: Props) {
   const handle = (ref: React.RefObject<THREE.Group>) => (
     <group ref={ref} position={[0, HB, 0]}>
       <mesh geometry={res.handleGeo} material={a.handle} castShadow />
+      <mesh geometry={res.handleGeo2} material={a.handle} castShadow />
       {[-0.2, 0.2].map((x) => (
         <mesh key={x} position={[x, -0.025, 0]} rotation={[Math.PI / 2, 0, 0]} material={a.brass}>
           <torusGeometry args={[0.014, 0.005, 8, 16]} />
@@ -121,6 +137,10 @@ export function ShoppingBag({ progress, assets: a }: Props) {
     <group ref={root} visible={false}>
       <mesh ref={front} position={[0, HB / 2, D / 2]} material={res.frontMats} castShadow receiveShadow>
         <boxGeometry args={[W, HB, T]} />
+        {/* turned-in top hem (real paper bags fold the top edge inwards) */}
+        <mesh position={[0, HB / 2 - 0.022, -T]} material={a.bagInner}>
+          <boxGeometry args={[W - 0.012, 0.044, T]} />
+        </mesh>
       </mesh>
       <mesh ref={back} position={[0, HB / 2, -D / 2]} material={res.backMats} castShadow receiveShadow>
         <boxGeometry args={[W, HB, T]} />

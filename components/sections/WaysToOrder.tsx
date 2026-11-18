@@ -1,36 +1,41 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight, MapPin, MessageCircle, PenTool } from "lucide-react";
 import { siteConfig, getWhatsAppLink } from "@/config/site";
 import { Reveal } from "@/components/motion/Reveal";
+import { fmt, useI18n } from "@/i18n/I18nProvider";
 
 const b = siteConfig.business;
 
 /** The three ways a customer can place an order with PVS. */
 export function WaysToOrder({ dark = false, showDesignCard = true }: { dark?: boolean; showDesignCard?: boolean }) {
+  const { t } = useI18n();
+  const w = t.ways;
   const ways = [
     {
       icon: MapPin,
-      title: "Visit the workshop",
-      body: "See the looms, feel the silk and discuss your saree in person at Panjakalipatti.",
-      cta: "Get directions",
+      title: w.visitTitle,
+      body: w.visitBody,
+      cta: t.common.getDirections,
       href: b.address.googleMapsUrl,
       external: true,
     },
     {
       icon: MessageCircle,
-      title: "Call or WhatsApp",
-      body: `Talk to us directly on ${b.phoneDisplay}. Send photos of designs you like.`,
-      cta: "Chat on WhatsApp",
-      href: getWhatsAppLink("Hello PVS, I'd like to order a silk saree."),
+      title: w.callTitle,
+      body: fmt(w.callBody, { phone: b.phoneDisplay }),
+      cta: t.common.chatWhatsapp,
+      href: getWhatsAppLink(w.whatsappMsg),
       external: true,
     },
     ...(showDesignCard
       ? [
           {
             icon: PenTool,
-            title: "Design it online",
-            body: "Upload your design, pick colours, silk and zari, and get a quotation.",
-            cta: "Start custom order",
+            title: w.designTitle,
+            body: w.designBody,
+            cta: t.common.startCustomOrder,
             href: "/custom-order",
             external: false,
           },

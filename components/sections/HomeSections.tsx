@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { ArrowUpRight, Store, Users } from "lucide-react";
-import { FOUNDER, MILESTONES, PROBLEMS_WE_SOLVE, ORDER_TERMS, visible } from "@/data/business";
+import { FOUNDER, MILESTONES, ORDER_TERMS, visible } from "@/data/business";
 import { Reveal, SplitWords } from "@/components/motion/Reveal";
 import { DiamondRule, Kolam, KovilBorder } from "@/components/ui/Ornament";
 import { DraftBadge } from "@/components/ui/DraftBadge";
 import { WaysToOrder } from "./WaysToOrder";
 import { OrderingJourney } from "./OrderingJourney";
+import { TrendsStrip } from "./TrendsStrip";
+import { getI18n } from "@/i18n/server";
+import { fmt } from "@/i18n/fmt";
 
 function Eyebrow({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
   return <p className={`text-xs font-semibold tracking-[0.3em] uppercase ${dark ? "text-gold-400" : "text-silk-red-700"}`}>{children}</p>;
@@ -13,23 +16,22 @@ function Eyebrow({ children, dark = false }: { children: React.ReactNode; dark?:
 
 /* 1 ─ Who we are + how to order */
 export function IntroSection() {
+  const { t } = getI18n();
+  const h = t.home;
   return (
     <section className="relative bg-ivory-50 bg-weave overflow-hidden">
       <Kolam className="pointer-events-none absolute -right-16 -top-10 w-72 text-gold-400/25" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
-        <Eyebrow>Made to order · Salem district</Eyebrow>
+        <Eyebrow>{h.introEyebrow}</Eyebrow>
         <Reveal variant="words" as="h2" className="mt-6 max-w-5xl font-serif text-4xl sm:text-6xl lg:text-7xl font-medium leading-[1.02] text-heritage-brown-950 text-balance">
-          <SplitWords text="We don't sell from stock." />{" "}
+          <SplitWords text={h.introA} />{" "}
           <span className="italic text-silk-red-700">
-            <SplitWords text="We weave your saree," />
+            <SplitWords text={h.introB} />
           </span>{" "}
-          <SplitWords text="to your design." />
+          <SplitWords text={h.introC} />
         </Reveal>
         <Reveal className="mt-8 max-w-2xl text-lg text-heritage-brown-700 leading-relaxed">
-          <p>
-            PVS is a silk saree weaving unit in Panjakalipatti, Salem district. For years we&apos;ve woven for saree shops and wholesale buyers. Now
-            families can order directly from our looms — one saree or one hundred.
-          </p>
+          <p>{h.introBody}</p>
         </Reveal>
         <div className="mt-14">
           <WaysToOrder />
@@ -41,13 +43,14 @@ export function IntroSection() {
 
 /* 2 ─ Marquee ribbon */
 export function CraftMarquee() {
-  const words = ["Pure silk", "Pattu", "Woven to order", "Zari borders", "Your colours", "பட்டு", "Silk cotton", "Temple borders", "Direct from the loom"];
+  const { t, locale } = getI18n();
+  const words = locale === "ta" ? [...t.home.marquee] : [...t.home.marquee.slice(0, 5), "பட்டு", ...t.home.marquee.slice(5)];
   const row = [...words, ...words];
   return (
     <div className="bg-silk-red-800 text-ivory-50 py-5 overflow-hidden border-y border-gold-500/40" aria-hidden="true">
       <div className="flex w-max animate-marquee gap-10 whitespace-nowrap">
         {row.map((w, i) => (
-          <span key={i} className={`flex items-center gap-10 text-2xl sm:text-3xl ${w === "பட்டு" ? "font-tamil" : "font-serif italic"}`}>
+          <span key={i} className={`flex items-center gap-10 text-2xl sm:text-3xl ${w === "பட்டு" || locale === "ta" ? "font-tamil" : "font-serif italic"}`}>
             {w}
             <span className="h-2 w-2 rotate-45 bg-gold-400" />
           </span>
@@ -59,27 +62,29 @@ export function CraftMarquee() {
 
 /* 3 ─ How ordering works */
 export function JourneySection() {
+  const { t } = getI18n();
+  const h = t.home;
   return (
     <section className="bg-ivory-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 grid lg:grid-cols-12 gap-12">
         <div className="lg:col-span-5 lg:sticky lg:top-32 self-start">
-          <Eyebrow>How ordering works</Eyebrow>
+          <Eyebrow>{h.journeyEyebrow}</Eyebrow>
           <Reveal variant="words" as="h2" className="mt-5 font-serif text-4xl sm:text-5xl font-medium leading-[1.05] text-heritage-brown-950">
-            <SplitWords text="From your idea to your doorstep, in five steps." />
+            <SplitWords text={h.journeyTitle} />
           </Reveal>
           <p className="mt-6 text-heritage-brown-700 leading-relaxed">
-            You see and approve everything before a single thread is woven. No surprises in colour, material or price.
+            {h.journeyBody}
           </p>
           {visible(ORDER_TERMS.retailMinimum) && (
             <p className="mt-4 text-sm text-heritage-brown-800">
-              Minimum order for families: <strong>{ORDER_TERMS.retailMinimum.value}</strong> <DraftBadge fact={ORDER_TERMS.retailMinimum} />
+              {h.minimumFamilies} <strong>{ORDER_TERMS.retailMinimum.value}</strong> <DraftBadge fact={ORDER_TERMS.retailMinimum} />
             </p>
           )}
           <Link
             href="/custom-order"
             className="group mt-8 inline-flex items-center gap-2 rounded-full bg-heritage-brown-950 hover:bg-silk-red-700 text-ivory-50 px-6 py-3.5 text-sm font-semibold tracking-wide transition-colors"
           >
-            Start your order <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+            {h.startOrder} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
           </Link>
         </div>
         <div className="lg:col-span-7">
@@ -92,21 +97,23 @@ export function JourneySection() {
 
 /* 4 ─ Customer problems → our answers */
 export function ProblemsSection() {
+  const { t } = getI18n();
+  const h = t.home;
   return (
     <section className="relative bg-heritage-brown-950 bg-weave-dark text-ivory-50 overflow-hidden">
       <KovilBorder className="w-full h-3 text-gold-500/40" count={80} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
         <div className="max-w-3xl">
-          <Eyebrow dark>Buying silk shouldn&apos;t be a gamble</Eyebrow>
+          <Eyebrow dark>{h.problemsEyebrow}</Eyebrow>
           <Reveal variant="words" as="h2" className="mt-5 font-serif text-4xl sm:text-6xl font-medium leading-[1.02]">
-            <SplitWords text="The worries every saree buyer has —" />{" "}
+            <SplitWords text={h.problemsA} />{" "}
             <span className="italic text-gold-300">
-              <SplitWords text="and how we answer them." />
+              <SplitWords text={h.problemsB} />
             </span>
           </Reveal>
         </div>
         <Reveal variant="stagger" className="mt-16 grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-ivory-200/10 rounded-3xl overflow-hidden">
-          {PROBLEMS_WE_SOLVE.map(({ problem, solution }) => (
+          {t.problems.map(({ problem, solution }) => (
             <div key={problem} data-reveal-item className="bg-heritage-brown-950 p-8 hover:bg-white/[0.03] transition-colors">
               <p className="font-serif text-2xl text-gold-300 leading-snug">{problem}</p>
               <DiamondRule className="my-5 text-gold-500/60 w-16" />
@@ -121,30 +128,16 @@ export function ProblemsSection() {
 
 /* 5 ─ Families vs retailers */
 export function AudienceSection() {
+  const { t } = getI18n();
+  const h = t.home;
   const cards = [
-    {
-      icon: Users,
-      tag: "Families",
-      title: "Your wedding saree, woven for you",
-      points: ["Even a single saree", "Bring your own design or photo", "Choose silk, zari and colours to fit your budget", "Approve before weaving"],
-      href: "/custom-order",
-      cta: "Design your saree",
-      dark: false,
-    },
-    {
-      icon: Store,
-      tag: "Boutiques & retailers",
-      title: "Stock woven to your store's taste",
-      points: ["Your colour stories, exclusive to you", "Repeat production of designs that sell", "Direct manufacturer pricing", "Planned dispatch for festival seasons"],
-      href: "/wholesale",
-      cta: "Wholesale enquiry",
-      dark: true,
-    },
+    { icon: Users, ...h.families, href: "/custom-order", dark: false },
+    { icon: Store, ...h.retailers, href: "/wholesale", dark: true },
   ];
   return (
     <section className="bg-ivory-50 bg-weave">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
-        <Eyebrow>Who we weave for</Eyebrow>
+        <Eyebrow>{h.audienceEyebrow}</Eyebrow>
         <Reveal variant="stagger" className="mt-10 grid lg:grid-cols-2 gap-5">
           {cards.map(({ icon: Icon, tag, title, points, href, cta, dark }) => (
             <Link
@@ -180,41 +173,98 @@ export function AudienceSection() {
 
 /* 6 ─ Founder teaser */
 export function FounderTeaser() {
-  const shown = MILESTONES.filter((m) => visible(m.body));
+  const { t } = getI18n();
+  const h = t.home;
+  const shown = MILESTONES.map((m, i) => ({ ...m, text: t.about.milestones[i] })).filter((m) => visible(m.body));
   return (
     <section className="bg-ivory-100/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 grid lg:grid-cols-12 gap-12 items-start">
         <div className="lg:col-span-5">
-          <Eyebrow>Our story</Eyebrow>
+          <Eyebrow>{h.founderEyebrow}</Eyebrow>
           <Reveal variant="words" as="h2" className="mt-5 font-serif text-4xl sm:text-5xl font-medium leading-[1.05] text-heritage-brown-950">
-            <SplitWords text="One weaver. One loom." />{" "}
+            <SplitWords text={h.founderA} />{" "}
             <span className="italic text-silk-red-700">
-              <SplitWords text="Built thread by thread." />
+              <SplitWords text={h.founderB} />
             </span>
           </Reveal>
           <p className="mt-6 text-heritage-brown-700 leading-relaxed">
-            PVS is led by {FOUNDER.name.value}, who learned the craft at the loom and grew the workshop step by step — from weaving his own sarees to
-            supplying retailers, and now weaving for families directly.
+            {fmt(h.founderBody, { name: FOUNDER.name.value })}
           </p>
           <Link href="/about" className="group mt-8 inline-flex items-center gap-2 text-sm font-semibold tracking-widest uppercase text-silk-red-700">
-            Read the full story <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+            {h.founderMore} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
           </Link>
         </div>
         <Reveal variant="stagger" as="ol" className="lg:col-span-7 grid sm:grid-cols-2 gap-4">
           {shown.map((m) => (
-            <li key={m.title} data-reveal-item className="rounded-3xl bg-white border border-heritage-brown-100 p-6">
+            <li key={m.text.title} data-reveal-item className="rounded-3xl bg-white border border-heritage-brown-100 p-6">
               {visible(m.year) && (
                 <p className="font-serif text-3xl text-gold-700">
                   {m.year.value} <DraftBadge fact={m.year} />
                 </p>
               )}
-              <p className="mt-2 font-semibold text-heritage-brown-950">{m.title}</p>
+              <p className="mt-2 font-semibold text-heritage-brown-950">{m.text.title}</p>
               <p className="mt-2 text-sm text-heritage-brown-700 leading-relaxed">
-                {m.body.value} <DraftBadge fact={m.body} />
+                {m.text.body} <DraftBadge fact={m.body} />
               </p>
             </li>
           ))}
         </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* 7 ─ Trending designs (code-drawn illustrations, open the designer with a preset) */
+export function TrendsSection() {
+  const { t } = getI18n();
+  const h = t.home;
+  return (
+    <section className="bg-ivory-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+        <div className="grid lg:grid-cols-12 gap-6 items-end">
+          <div className="lg:col-span-7">
+            <Eyebrow>{h.trendsEyebrow}</Eyebrow>
+            <Reveal variant="words" as="h2" className="mt-5 font-serif text-4xl sm:text-5xl font-medium leading-[1.05] text-heritage-brown-950">
+              <SplitWords text={h.trendsTitle} />
+            </Reveal>
+          </div>
+          <p className="lg:col-span-5 text-heritage-brown-700 leading-relaxed">{h.trendsBody}</p>
+        </div>
+        <div className="mt-12">
+          <TrendsStrip />
+        </div>
+        <p className="mt-4 text-xs text-heritage-brown-600">{t.common.illustration}</p>
+      </div>
+    </section>
+  );
+}
+
+/* 8 ─ FAQ teaser */
+export function FaqTeaser() {
+  const { t } = getI18n();
+  const h = t.home;
+  const items = t.faq.groups.flatMap((g) => g.items).filter((_, i) => [0, 1, 3, 4, 7].includes(i));
+  return (
+    <section className="bg-ivory-100/60">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28">
+        <Eyebrow>{h.faqEyebrow}</Eyebrow>
+        <h2 className="mt-5 font-serif text-4xl sm:text-5xl font-medium leading-[1.05] text-heritage-brown-950">{h.faqTitle}</h2>
+        <div className="mt-10 divide-y divide-heritage-brown-100 rounded-3xl border border-heritage-brown-100 bg-white">
+          {items.map((q) => (
+            <details key={q.q} className="group px-6 py-5 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer items-center justify-between gap-4 font-semibold text-heritage-brown-950">
+                {q.q}
+                <span className="h-6 w-6 shrink-0 rounded-full border border-gold-400 text-gold-700 flex items-center justify-center transition-transform group-open:rotate-45" aria-hidden="true">
+                  +
+                </span>
+              </summary>
+              <p className="mt-3 text-heritage-brown-700 leading-relaxed">{q.a}</p>
+            </details>
+          ))}
+        </div>
+        <Link href="/faq" className="group mt-8 inline-flex items-center gap-2 text-sm font-semibold tracking-widest uppercase text-silk-red-700">
+          {h.faqMore} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+        </Link>
       </div>
     </section>
   );
