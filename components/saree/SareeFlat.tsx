@@ -77,40 +77,98 @@ function draw(canvas: HTMLCanvasElement, d: SareeDesign, variant: Variant) {
     return;
   }
 
-  // "fold": a folded saree as shops show it
-  const cardX = W * 0.08;
-  const cardW = W * 0.84;
-  const topH = H * 0.62;
-  const stripH = H * 0.2;
-  const y1 = H * 0.06;
+  // "fold": a folded saree photographed on a table, the way shops show it — pallu on top,
+  // the border running along the folded front edge, the stacked layers visible at the edge.
+  const pad = W * 0.07;
+  const fw = W - pad * 2; // folded width
+  const depth = H * 0.62; // top face height (foreshortened)
+  const edge = Math.max(10 * dpr, H * 0.09); // thickness of the stack at the front edge
+  const skew = fw * 0.07; // perspective: back edge slightly narrower/shifted
+  const x0 = pad;
+  const y0 = (H - depth - edge) * 0.42;
+
+  // soft contact shadow on the table
   ctx.save();
-  ctx.shadowColor = "rgba(40,20,10,0.4)";
-  ctx.shadowBlur = 22 * dpr;
-  ctx.shadowOffsetY = 12 * dpr;
-  ctx.fillStyle = "#000";
-  ctx.fillRect(cardX, y1, cardW, topH + stripH);
+  const sh = ctx.createRadialGradient(W / 2, y0 + depth + edge, fw * 0.1, W / 2, y0 + depth + edge, fw * 0.62);
+  sh.addColorStop(0, "rgba(40,22,12,0.45)");
+  sh.addColorStop(1, "rgba(40,22,12,0)");
+  ctx.fillStyle = sh;
+  ctx.fillRect(0, y0 + depth * 0.6, W, H - (y0 + depth * 0.6));
   ctx.restore();
 
-  // pallu panel (rotated so the border runs along the bottom like a real fold)
-  const palluSrcX = TW * 0.72;
-  ctx.drawImage(tex, palluSrcX, 0, TW * 0.28, TH, cardX, y1, cardW, topH);
-  // the folded body strip with its border showing beneath
-  ctx.drawImage(tex, TW * 0.2, TH * 0.55, TW * 0.4, TH * 0.45, cardX, y1 + topH, cardW, stripH);
-  // fold crease shading
-  const g = ctx.createLinearGradient(0, y1 + topH - 10 * dpr, 0, y1 + topH + 14 * dpr);
-  g.addColorStop(0, "rgba(0,0,0,0)");
-  g.addColorStop(0.5, "rgba(0,0,0,0.35)");
-  g.addColorStop(0.7, "rgba(255,240,220,0.18)");
-  g.addColorStop(1, "rgba(0,0,0,0)");
+  // front edge: the stacked layers of the fold (body colour, with the border on alternate layers)
+  const layers = 7;
+  for (let i = 0; i < layers; i++) {
+    const ly = y0 + depth + (edge / layers) * i;
+    const lh = edge / layers + 0.6;
+    ctx.fillStyle = i % 2 === 0 ? shade(d.border, -0.25 - i * 0.02) : shade(d.body, -0.3 - i * 0.02);
+    ctx.beginPath();
+    ctx.roundRect(x0 + i * 0.4, ly, fw - i * 0.8, lh, lh / 2);
+    ctx.fill();
+    // zari glint on the border layers
+    if (i % 2 === 0 && d.zari !== "none") {
+      ctx.fillStyle = "rgba(240,205,120,0.35)";
+      ctx.fillRect(x0 + fw * 0.02, ly + lh * 0.35, fw * 0.96, Math.max(1, lh * 0.18));
+    }
+  }
+
+  // top face: pallu end, half the width (one border along the folded front edge)
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(x0 + skew, y0);
+  ctx.lineTo(x0 + fw - skew * 0.4, y0);
+  ctx.lineTo(x0 + fw, y0 + depth);
+  ctx.lineTo(x0, y0 + depth);
+  ctx.closePath();
+  ctx.clip();
+  // slices so the face follows the trapezoid (cheap perspective)
+  const srcX = TW * 0.66;
+  const srcW = TW * 0.34;
+  const srcY = TH * 0.42;
+  const srcH = TH * 0.58;
+  const rows = 40;
+  for (let r = 0; r < rows; r++) {
+    const t0 = r / rows;
+    const l = x0 + skew * (1 - t0);
+    const rgt = x0 + fw - skew * 0.4 * (1 - t0);
+    ctx.drawImage(tex, srcX, srcY + (srcH * r) / rows, srcW, srcH / rows + 1, l, y0 + depth * t0, rgt - l, depth / rows + 1);
+  }
+  // silk lighting: soft diagonal sheen + gentle cloth waviness
+  const g = ctx.createLinearGradient(x0, y0, x0 + fw, y0 + depth);
+  g.addColorStop(0, "rgba(255,255,255,0.16)");
+  g.addColorStop(0.45, "rgba(255,255,255,0.02)");
+  g.addColorStop(1, "rgba(0,0,0,0.18)");
   ctx.fillStyle = g;
-  ctx.fillRect(cardX, y1 + topH - 10 * dpr, cardW, 24 * dpr);
-  // gentle highlight on the top panel
-  const hl = ctx.createLinearGradient(cardX, y1, cardX + cardW, y1 + topH);
-  hl.addColorStop(0, "rgba(255,255,255,0.10)");
-  hl.addColorStop(0.5, "rgba(255,255,255,0)");
-  hl.addColorStop(1, "rgba(0,0,0,0.12)");
-  ctx.fillStyle = hl;
-  ctx.fillRect(cardX, y1, cardW, topH);
+  ctx.fillRect(x0, y0, fw, depth);
+  for (let k = 0; k < 4; k++) {
+    const cx = x0 + fw * (0.15 + k * 0.23);
+    const wg = ctx.createLinearGradient(cx - fw * 0.06, 0, cx + fw * 0.06, 0);
+    wg.addColorStop(0, "rgba(0,0,0,0)");
+    wg.addColorStop(0.5, k % 2 ? "rgba(255,240,215,0.07)" : "rgba(0,0,0,0.08)");
+    wg.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = wg;
+    ctx.fillRect(cx - fw * 0.06, y0, fw * 0.12, depth);
+  }
+  // rounded fold at the back edge (cloth turns under)
+  const bk = ctx.createLinearGradient(0, y0, 0, y0 + depth * 0.08);
+  bk.addColorStop(0, "rgba(0,0,0,0.35)");
+  bk.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = bk;
+  ctx.fillRect(x0, y0, fw, depth * 0.08);
+  // front fold highlight
+  const fr = ctx.createLinearGradient(0, y0 + depth * 0.94, 0, y0 + depth);
+  fr.addColorStop(0, "rgba(255,245,225,0)");
+  fr.addColorStop(1, "rgba(255,245,225,0.22)");
+  ctx.fillStyle = fr;
+  ctx.fillRect(x0, y0 + depth * 0.94, fw, depth * 0.06);
+  ctx.restore();
+}
+
+/** Lighten (amt > 0) or darken (amt < 0) a hex colour. */
+function shade(hex: string, amt: number) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (c: number) => Math.round(Math.min(255, Math.max(0, amt < 0 ? c * (1 + amt) : c + (255 - c) * amt)));
+  return `rgb(${f((n >> 16) & 255)},${f((n >> 8) & 255)},${f(n & 255)})`;
 }
 
 export function SareeFlat({

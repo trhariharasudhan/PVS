@@ -11,6 +11,7 @@ import { useHeroAssets } from "./useHeroAssets";
 import { Loom } from "./models/Loom";
 import { Saree } from "./models/Saree";
 import { ShoppingBag } from "./models/ShoppingBag";
+import { SareeBox } from "./models/SareeBox";
 
 interface Props {
   progress: ProgressStore;
@@ -33,29 +34,31 @@ function Scene({ progress, quality, framing, onReady }: Omit<Props, "active" | "
   return (
     <>
       <color attach="background" args={[PALETTE.background]} />
-      <fog attach="fog" args={[PALETTE.background, 7.5, 17]} />
+      <fog attach="fog" args={[PALETTE.background, 9, 20]} />
 
-      {/* Warm, directional "workshop" lighting */}
-      <hemisphereLight args={["#ffe6c7", "#2a1610", 0.45]} />
-      <directionalLight
-        position={[3.5, 5.2, 4]}
-        intensity={2.3}
-        color="#ffd6a3"
+      {/* Studio lighting: one soft key spot from high front-right (the main, moving shadow),
+          a warm rim from behind, a cool-ish fill and a low ambient so blacks keep detail. */}
+      <hemisphereLight args={["#ffe9cf", "#24140e", 0.32]} />
+      <spotLight
+        position={[3.2, 6.2, 4.4]}
+        angle={0.62}
+        penumbra={0.75}
+        intensity={95}
+        decay={1.6}
+        distance={22}
+        color="#ffe0b8"
         castShadow={quality.shadows}
         shadow-mapSize={[quality.tier === "high" ? 2048 : 1024, quality.tier === "high" ? 2048 : 1024]}
-        shadow-camera-left={-3.5}
-        shadow-camera-right={3.5}
-        shadow-camera-top={3.5}
-        shadow-camera-bottom={-3.5}
-        shadow-camera-near={1}
-        shadow-camera-far={15}
-        shadow-bias={-0.0004}
+        shadow-bias={-0.0003}
         shadow-normalBias={0.02}
+        shadow-radius={6}
+        shadow-camera-near={1.5}
+        shadow-camera-far={18}
       />
-      <spotLight position={[-4, 3.6, -3]} angle={0.6} penumbra={0.85} intensity={28} color={PALETTE.antiqueGold} distance={14} />
-      <pointLight position={[0, 2.2, 4.2]} intensity={5} color="#ffb48a" distance={10} />
-      {/* Soft front key for the bag / brand reveal */}
-      <spotLight position={[-1.2, 2.6, 5]} angle={0.5} penumbra={1} intensity={14} color="#fff0d8" distance={12} />
+      {/* rim light from behind-left: outlines the loom posts and the saree edge */}
+      <spotLight position={[-4.2, 3.8, -3.6]} angle={0.6} penumbra={0.9} intensity={60} decay={1.6} distance={16} color={PALETTE.antiqueGold} />
+      {/* soft fill from the camera side */}
+      <spotLight position={[-2.5, 2.4, 6]} angle={0.7} penumbra={1} intensity={22} decay={1.6} distance={14} color="#fff3e2" />
 
       {/* Local studio reflections for silk & zari (no network HDR) */}
       <Environment resolution={256} frames={1}>
@@ -67,12 +70,13 @@ function Scene({ progress, quality, framing, onReady }: Omit<Props, "active" | "
 
       {assets && (
         <>
-          {/* Floor */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={assets.floor}>
-            <circleGeometry args={[12, 64]} />
+          {/* Seamless studio floor: warm pool of light, falls off into the dark */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0.6]} receiveShadow material={assets.floor}>
+            <circleGeometry args={[11, 72]} />
           </mesh>
           <Loom progress={progress} quality={quality} assets={assets} />
           <Saree progress={progress} quality={quality} assets={assets} />
+          <SareeBox progress={progress} assets={assets} />
           <ShoppingBag progress={progress} assets={assets} />
         </>
       )}

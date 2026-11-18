@@ -146,11 +146,13 @@ export function createWoodTexture(size = 512): THREE.CanvasTexture {
 /* ------------------------------------------------------------------ */
 
 /** PVS signature bridal design used in the 3D story. */
-export function createSareeTextures(size = 2048, design: SareeDesign = HERO_SAREE_DESIGN) {
+export function createSareeTextures(size = 2048, design: SareeDesign = HERO_SAREE_DESIGN, serif = "serif", sans = "sans-serif") {
   const W = size;
   const H = Math.round(size * 0.42); // matches the saree aspect (≈ 3.0 x 1.2)
-  const color = renderSareeCanvas(W, H, design, "color");
-  const orm = renderSareeCanvas(W, H, design, "orm");
+  // "PVS SILKS" is WOVEN into the body in zari, so it appears as the cloth comes off the loom.
+  const opts = { wovenText: { text: "PVS SILKS", sub: "PARAMPARIYAM  •  VANNAM  •  SILK", font: serif, subFont: sans } };
+  const color = renderSareeCanvas(W, H, design, "color", opts);
+  const orm = renderSareeCanvas(W, H, design, "orm", opts);
   return { map: toTexture(color, true), orm: toTexture(orm, false) };
 }
 
@@ -158,44 +160,24 @@ export function createSareeTextures(size = 2048, design: SareeDesign = HERO_SARE
 /* Brand mark (embroidered decal)                                      */
 /* ------------------------------------------------------------------ */
 
-export function createBrandMarkTexture(serif: string, sans: string, size = 2048) {
-  const W = size;
-  const H = Math.round(size * 0.3);
-  const { c, ctx } = makeCanvas(W, H);
-  ctx.clearRect(0, 0, W, H);
-  ctx.textAlign = "center";
-  ctx.textBaseline = "alphabetic";
-
-  // Ornamental lines
-  ctx.fillStyle = "#fff";
-  const lineY = H * 0.08;
-  ctx.fillRect(W * 0.18, lineY, W * 0.64, H * 0.01);
-  ctx.beginPath();
-  ctx.moveTo(W / 2, lineY - H * 0.03);
-  ctx.lineTo(W / 2 + H * 0.03, lineY + H * 0.005);
-  ctx.lineTo(W / 2, lineY + H * 0.04);
-  ctx.lineTo(W / 2 - H * 0.03, lineY + H * 0.005);
-  ctx.fill();
-
-  ctx.font = `700 ${Math.round(H * 0.46)}px ${serif}`;
-  spacedText(ctx, "PVS SILKS", W / 2, H * 0.62, H * 0.05);
-
-  ctx.font = `600 ${Math.round(H * 0.11)}px ${sans}`;
-  spacedText(ctx, "PARAMPARIYAM  •  VANNAM  •  SILK", W / 2, H * 0.86, H * 0.025);
-  ctx.fillRect(W * 0.3, H * 0.93, W * 0.4, H * 0.006);
-
-  // Stitch texture inside the glyphs (embroidery look), drawn only where text exists.
-  ctx.globalCompositeOperation = "source-atop";
-  ctx.strokeStyle = "rgba(0,0,0,0.28)";
-  ctx.lineWidth = 2;
-  for (let x = -H; x < W + H; x += 7) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x + H * 0.35, H);
-    ctx.stroke();
+export function createStudioFloorTexture(size = 1024): THREE.CanvasTexture {
+  // warm pool of light in the centre, falling off to the dark studio
+  const { c, ctx } = makeCanvas(size, size);
+  const g = ctx.createRadialGradient(size / 2, size / 2, size * 0.02, size / 2, size / 2, size * 0.5);
+  g.addColorStop(0, "#5a4234");
+  g.addColorStop(0.35, "#3a2a21");
+  g.addColorStop(0.7, "#1f1612");
+  g.addColorStop(1, "#140c0a");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  const img = ctx.getImageData(0, 0, size, size);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const n = (Math.random() - 0.5) * 6; // faint seamless-paper grain
+    img.data[i] += n;
+    img.data[i + 1] += n;
+    img.data[i + 2] += n;
   }
-  ctx.globalCompositeOperation = "source-over";
-
+  ctx.putImageData(img, 0, 0);
   return toTexture(c, true);
 }
 

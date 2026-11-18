@@ -107,7 +107,8 @@ export function HeroScrollStory({ quality, onFatal }: Props) {
   return (
     <section
       ref={section}
-      className="hero-3d relative bg-[#140c0a] h-[420vh] md:h-[550vh] xl:h-[650vh]"
+      data-hero-story
+      className="hero-3d relative bg-[#140c0a] h-[500vh] md:h-[640vh] xl:h-[760vh]"
       aria-label={t.hero.storyLabel}
     >
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden">

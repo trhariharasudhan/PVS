@@ -1,379 +1,254 @@
 /**
- * Traditional South Indian saree motifs drawn with canvas paths (no images, no AI art).
+ * Traditional South Indian saree motifs as vector shapes (no images, no AI art).
  *
- * Every motif draws into a unit box centred on (0,0), roughly −0.5…0.5, facing right.
- * `fill` is the main colour (usually zari gold); `cut` is the "negative space" colour used
- * for eyes, veins and inner lines, exactly like the ground silk showing through zari.
+ * Each motif is a list of layers in a 100×100 box, facing right:
+ *   fill    – solid zari (gold) area
+ *   cut     – "negative space" where the ground silk shows through (eyes, veins, inner lines)
+ *   fstroke – zari line of the given width
+ *   cstroke – cut line of the given width
+ * The same data drives the canvas renderer (saree textures) and the SVG icons, so what the
+ * customer picks is exactly what gets drawn on the saree preview.
  */
 
 export type MotifId = "peacock" | "elephant" | "lotus" | "annam" | "mango" | "chakram" | "rudraksha" | "flower";
 
 export const MOTIF_IDS: MotifId[] = ["peacock", "elephant", "lotus", "annam", "mango", "chakram", "rudraksha", "flower"];
 
+export type LayerKind = "fill" | "cut" | "fstroke" | "cstroke";
+export type MotifLayer = [LayerKind, string, number];
+
+export const MOTIF_SHAPES: Record<MotifId, MotifLayer[]> = {
+  peacock: [
+    ["fill", "M41,58C40,46 52,40 62,42C66,43 68,46 68,50C66,60 56,66 46,66C43,66 41,62 41,58Z", 0],
+    ["fill", "M60,45C62,37 64,29 66,22C67,16 72,13 75,16L83,19L75,21C73,24 72,30 70,36C69,42 68,46 66,49Z", 0],
+    ["fstroke", "M72,15L69,6", 1.2],
+    ["fstroke", "M73,15L74,5", 1.2],
+    ["fstroke", "M74,15L79,7", 1.2],
+    ["fill", "M67.20,6.00a1.80,1.80 0 1,0 3.60,0a1.80,1.80 0 1,0 -3.60,0Z", 0],
+    ["fill", "M72.20,5.00a1.80,1.80 0 1,0 3.60,0a1.80,1.80 0 1,0 -3.60,0Z", 0],
+    ["fill", "M77.20,7.00a1.80,1.80 0 1,0 3.60,0a1.80,1.80 0 1,0 -3.60,0Z", 0],
+    ["fill", "M44,56C32,58 19,66 11,79C9,85 13,90 19,88C31,84 45,74 53,64Z", 0],
+    ["fill", "M7.80,86.00a5.20,5.20 0 1,0 10.40,0a5.20,5.20 0 1,0 -10.40,0Z", 0],
+    ["fill", "M16.00,82.00a5.00,5.00 0 1,0 10.00,0a5.00,5.00 0 1,0 -10.00,0Z", 0],
+    ["fill", "M24.40,77.00a4.60,4.60 0 1,0 9.20,0a4.60,4.60 0 1,0 -9.20,0Z", 0],
+    ["fill", "M32.80,72.00a4.20,4.20 0 1,0 8.40,0a4.20,4.20 0 1,0 -8.40,0Z", 0],
+    ["cut", "M15.25,84.70 L15.42,85.17 L15.43,85.70 L15.26,86.24 L14.95,86.77 L14.50,87.25 L13.95,87.65 L13.33,87.93 L12.70,88.08 L12.08,88.08 L11.52,87.95 L11.07,87.68 L10.75,87.30 L10.58,86.83 L10.57,86.30 L10.74,85.76 L11.05,85.23 L11.50,84.75 L12.05,84.35 L12.67,84.07 L13.30,83.92 L13.92,83.92 L14.47,84.05 L14.93,84.32Z", 0],
+    ["cut", "M23.17,80.75 L23.32,81.20 L23.32,81.70 L23.17,82.22 L22.86,82.72 L22.43,83.18 L21.90,83.56 L21.31,83.83 L20.70,83.97 L20.11,83.99 L19.57,83.86 L19.14,83.61 L18.83,83.25 L18.68,82.80 L18.68,82.30 L18.83,81.78 L19.14,81.28 L19.57,80.82 L20.10,80.44 L20.69,80.17 L21.30,80.03 L21.89,80.01 L22.43,80.14 L22.86,80.39Z", 0],
+    ["cut", "M30.99,75.85 L31.14,76.27 L31.15,76.74 L31.01,77.23 L30.73,77.70 L30.34,78.12 L29.85,78.47 L29.31,78.72 L28.74,78.85 L28.19,78.85 L27.70,78.73 L27.30,78.49 L27.01,78.15 L26.86,77.73 L26.85,77.26 L26.99,76.77 L27.27,76.30 L27.66,75.88 L28.15,75.53 L28.69,75.28 L29.26,75.15 L29.81,75.15 L30.30,75.27 L30.70,75.51Z", 0],
+    ["cut", "M38.82,70.95 L38.95,71.32 L38.95,71.74 L38.82,72.18 L38.56,72.60 L38.20,72.98 L37.75,73.30 L37.25,73.53 L36.74,73.65 L36.24,73.66 L35.80,73.56 L35.44,73.35 L35.18,73.05 L35.05,72.68 L35.05,72.26 L35.18,71.82 L35.44,71.40 L35.80,71.02 L36.25,70.70 L36.75,70.47 L37.26,70.35 L37.76,70.34 L38.20,70.44 L38.56,70.65Z", 0],
+    ["fill", "M12.00,86.00a1.00,1.00 0 1,0 2.00,0a1.00,1.00 0 1,0 -2.00,0Z", 0],
+    ["fill", "M20.00,82.00a1.00,1.00 0 1,0 2.00,0a1.00,1.00 0 1,0 -2.00,0Z", 0],
+    ["fill", "M28.10,77.00a0.90,0.90 0 1,0 1.80,0a0.90,0.90 0 1,0 -1.80,0Z", 0],
+    ["fill", "M36.20,72.00a0.80,0.80 0 1,0 1.60,0a0.80,0.80 0 1,0 -1.60,0Z", 0],
+    ["cstroke", "M47,51C53,46 61,48 63,54", 1.3],
+    ["cstroke", "M46,57C52,53 58,54 61,59", 1.1],
+    ["cstroke", "M24,74C30,72 36,68 42,63", 0.9],
+    ["cut", "M71.90,18.00a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["fstroke", "M52,64L50,80", 1.8],
+    ["fstroke", "M58,62L58,80", 1.8],
+    ["fstroke", "M46,81L53,80", 1.4],
+    ["fstroke", "M55,81L62,80", 1.4],
+  ],
+  elephant: [
+    ["fill", "M22,44C22,30 40,24 56,26C66,22 78,24 84,32C90,40 92,52 91,62C90,70 88,76 84,78C80,79 78,76 80,73C83,70 84,64 83,58C82,52 79,49 76,50L74,56L73,86L63,86L62,70C55,72 45,72 38,70L37,86L27,86L26,67C22,63 21,58 21,52C18,54 15,58 14,64L12,63C13,56 17,50 22,44Z", 0],
+    ["fill", "M66,70L67,84L64,84Z", 0],
+    ["cstroke", "M32,33C40,29 52,29 58,31L56,52C48,56 40,56 32,52Z", 1.6],
+    ["cut", "M42.80,42.00a2.20,2.20 0 1,0 4.40,0a2.20,2.20 0 1,0 -4.40,0Z", 0],
+    ["cut", "M36.70,46.00a1.30,1.30 0 1,0 2.60,0a1.30,1.30 0 1,0 -2.60,0Z", 0],
+    ["cut", "M50.70,46.00a1.30,1.30 0 1,0 2.60,0a1.30,1.30 0 1,0 -2.60,0Z", 0],
+    ["cut", "M43.70,35.00a1.30,1.30 0 1,0 2.60,0a1.30,1.30 0 1,0 -2.60,0Z", 0],
+    ["cstroke", "M33,52L36,56L39,52L42,56L45,52L48,56L51,52L54,56L56,52", 1.2],
+    ["cstroke", "M64,30C57,33 57,48 64,52C69,49 70,38 66,31", 1.5],
+    ["cut", "M75.40,35.00a1.60,1.60 0 1,0 3.20,0a1.60,1.60 0 1,0 -3.20,0Z", 0],
+    ["cstroke", "M72,27C76,25 80,26 83,30", 1.2],
+    ["cut", "M78.90,30.00a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M75,51C78,58 85,59 89,56C85,56 80,54 77,49Z", 0],
+    ["cstroke", "M63,80L73,80", 1.4],
+    ["cstroke", "M27,80L37,80", 1.4],
+    ["cstroke", "M63,83L73,83", 0.9],
+    ["cstroke", "M27,83L37,83", 0.9],
+  ],
+  lotus: [
+    ["fill", "M50,18C59,31 59,50 50,63C41,50 41,31 50,18Z", 0],
+    ["fill", "M50,63C38,59 27,45 27,30C38,34 48,46 50,63Z", 0],
+    ["fill", "M50 63C62 59 73 45 73 30C62 34 52 46 50 63Z", 0],
+    ["fill", "M50,65C35,67 19,59 13,46C26,46 42,52 50,65Z", 0],
+    ["fill", "M50 65C65 67 81 59 87 46C74 46 58 52 50 65Z", 0],
+    ["fill", "M34,64C39,72 61,72 66,64Z", 0],
+    ["fill", "M48.8,70L48.8,93L51.2,93L51.2,70Z", 0],
+    ["fill", "M50,85C41,76 29,77 23,83C31,89 42,89 50,85Z", 0],
+    ["fill", "M50 85C59 76 71 77 77 83C69 89 58 89 50 85Z", 0],
+    ["cstroke", "M50,25L50,56", 1.1],
+    ["cstroke", "M46,57C41,49 35,41 32,35", 1],
+    ["cstroke", "M54 57C59 49 65 41 68 35 ", 1],
+    ["cstroke", "M45,62C36,61 27,56 20,50", 1],
+    ["cstroke", "M55 62C64 61 73 56 80 50 ", 1],
+    ["cstroke", "M38,67C45,69 55,69 62,67", 1],
+    ["cstroke", "M48,84C40,81 33,81 28,83", 0.9],
+    ["cstroke", "M52 84C60 81 67 81 72 83 ", 0.9],
+  ],
+  annam: [
+    ["fill", "M20,62C28,74 56,76 71,65C75,61 73,56 69,56C60,60 46,60 36,54C29,50 22,54 20,62Z", 0],
+    ["fill", "M62,58C57,46 57,34 63,26C67,20 75,19 78,25L87,28L78,31C72,32 68,38 68,46C68,52 70,56 68,58Z", 0],
+    ["fstroke", "M33,55C24,47 23,31 34,26C41,23 45,31 40,35C36,38 32,34 35,31", 3.2],
+    ["fstroke", "M27,58C17,52 13,40 20,34", 2.4],
+    ["fstroke", "M69,22C67,14 73,9 78,13", 1.8],
+    ["cstroke", "M34,63C42,55 55,56 58,65", 1.6],
+    ["cstroke", "M38,67C44,62 52,62 55,68", 1.1],
+    ["cut", "M73.80,25.00a1.20,1.20 0 1,0 2.40,0a1.20,1.20 0 1,0 -2.40,0Z", 0],
+    ["fstroke", "M14,80C22,76 30,84 38,80C46,76 54,84 62,80C70,76 78,82 86,80", 2.4],
+  ],
+  mango: [
+    ["fill", "M40,90C17,84 13,57 25,38C35,22 58,11 74,13C67,20 65,28 71,34C83,46 84,71 69,83C61,89 50,91 40,90Z", 0],
+    ["cstroke", "M42,81C27,77 25,59 32,45C40,33 53,25 62,24C60,30 62,36 66,40C74,50 75,66 65,76C59,80 50,82 42,81Z", 1.8],
+    ["cut", "M52.00,60.00a3.00,3.00 0 1,0 6.00,0a3.00,3.00 0 1,0 -6.00,0Z", 0],
+    ["cut", "M48.50,66.06a3.00,3.00 0 1,0 6.00,0a3.00,3.00 0 1,0 -6.00,0Z", 0],
+    ["cut", "M41.50,66.06a3.00,3.00 0 1,0 6.00,0a3.00,3.00 0 1,0 -6.00,0Z", 0],
+    ["cut", "M38.00,60.00a3.00,3.00 0 1,0 6.00,0a3.00,3.00 0 1,0 -6.00,0Z", 0],
+    ["cut", "M41.50,53.94a3.00,3.00 0 1,0 6.00,0a3.00,3.00 0 1,0 -6.00,0Z", 0],
+    ["cut", "M48.50,53.94a3.00,3.00 0 1,0 6.00,0a3.00,3.00 0 1,0 -6.00,0Z", 0],
+    ["cut", "M45.80,60.00a2.20,2.20 0 1,0 4.40,0a2.20,2.20 0 1,0 -4.40,0Z", 0],
+    ["cut", "M34.70,48.00a1.30,1.30 0 1,0 2.60,0a1.30,1.30 0 1,0 -2.60,0Z", 0],
+    ["cut", "M42.70,38.00a1.30,1.30 0 1,0 2.60,0a1.30,1.30 0 1,0 -2.60,0Z", 0],
+    ["cut", "M52.70,32.00a1.30,1.30 0 1,0 2.60,0a1.30,1.30 0 1,0 -2.60,0Z", 0],
+    ["cut", "M64.70,52.00a1.30,1.30 0 1,0 2.60,0a1.30,1.30 0 1,0 -2.60,0Z", 0],
+    ["cut", "M62.70,66.00a1.30,1.30 0 1,0 2.60,0a1.30,1.30 0 1,0 -2.60,0Z", 0],
+    ["cut", "M30.70,64.00a1.30,1.30 0 1,0 2.60,0a1.30,1.30 0 1,0 -2.60,0Z", 0],
+  ],
+  chakram: [
+    ["fill", "M6.00,50.00a44.00,44.00 0 1,0 88.00,0a44.00,44.00 0 1,0 -88.00,0Z", 0],
+    ["cstroke", "M11.00,50.00a39.00,39.00 0 1,0 78.00,0a39.00,39.00 0 1,0 -78.00,0Z", 1.6],
+    ["cut", "M90.40,50.00a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M88.99,60.74a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M84.84,70.75a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M78.24,79.34a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M69.65,85.94a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M59.64,90.09a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M48.90,91.50a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M38.16,90.09a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M28.15,85.94a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M19.56,79.34a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M12.96,70.75a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M8.81,60.74a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M7.40,50.00a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M8.81,39.26a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M12.96,29.25a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M19.56,20.66a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M28.15,14.06a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M38.16,9.91a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M48.90,8.50a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M59.64,9.91a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M69.65,14.06a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M78.24,20.66a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M84.84,29.25a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M88.99,39.26a1.10,1.10 0 1,0 2.20,0a1.10,1.10 0 1,0 -2.20,0Z", 0],
+    ["cut", "M50.00,50.00Q64.85,57.00 83.00,50.00Q64.85,43.00 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q57.62,57.48 70.33,58.42Q60.68,50.09 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q55.55,65.45 73.33,73.33Q65.45,55.55 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q50.09,60.68 58.42,70.33Q57.48,57.62 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q43.00,64.85 50.00,83.00Q57.00,64.85 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q42.52,57.62 41.58,70.33Q49.91,60.68 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q34.55,55.55 26.67,73.33Q44.45,65.45 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q39.32,50.09 29.67,58.42Q42.38,57.48 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q35.15,43.00 17.00,50.00Q35.15,57.00 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q42.38,42.52 29.67,41.58Q39.32,49.91 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q44.45,34.55 26.67,26.67Q34.55,44.45 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q49.91,39.32 41.58,29.67Q42.52,42.38 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q57.00,35.15 50.00,17.00Q43.00,35.15 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q57.48,42.38 58.42,29.67Q50.09,39.32 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q65.45,44.45 73.33,26.67Q55.55,34.55 50.00,50.00Z", 0],
+    ["cut", "M50.00,50.00Q60.68,49.91 70.33,41.58Q57.62,42.52 50.00,50.00Z", 0],
+    ["fill", "M41.00,50.00a9.00,9.00 0 1,0 18.00,0a9.00,9.00 0 1,0 -18.00,0Z", 0],
+    ["cut", "M45.00,50.00a5.00,5.00 0 1,0 10.00,0a5.00,5.00 0 1,0 -10.00,0Z", 0],
+    ["fill", "M47.60,50.00a2.40,2.40 0 1,0 4.80,0a2.40,2.40 0 1,0 -4.80,0Z", 0],
+  ],
+  rudraksha: [
+    ["fill", "M33.00,30.00a17.00,17.00 0 1,0 34.00,0a17.00,17.00 0 1,0 -34.00,0Z", 0],
+    ["cstroke", "M41.6,14.4Q36.0,30.0 41.6,45.6", 1.1],
+    ["cstroke", "M50.0,14.4Q50.0,30.0 50.0,45.6", 1.1],
+    ["cstroke", "M58.4,14.4Q64.0,30.0 58.4,45.6", 1.1],
+    ["cut", "M47.80,30.00a2.20,2.20 0 1,0 4.40,0a2.20,2.20 0 1,0 -4.40,0Z", 0],
+    ["fill", "M15.00,62.00a17.00,17.00 0 1,0 34.00,0a17.00,17.00 0 1,0 -34.00,0Z", 0],
+    ["cstroke", "M23.6,46.4Q18.0,62.0 23.6,77.6", 1.1],
+    ["cstroke", "M32.0,46.4Q32.0,62.0 32.0,77.6", 1.1],
+    ["cstroke", "M40.4,46.4Q46.0,62.0 40.4,77.6", 1.1],
+    ["cut", "M29.80,62.00a2.20,2.20 0 1,0 4.40,0a2.20,2.20 0 1,0 -4.40,0Z", 0],
+    ["fill", "M51.00,62.00a17.00,17.00 0 1,0 34.00,0a17.00,17.00 0 1,0 -34.00,0Z", 0],
+    ["cstroke", "M59.6,46.4Q54.0,62.0 59.6,77.6", 1.1],
+    ["cstroke", "M68.0,46.4Q68.0,62.0 68.0,77.6", 1.1],
+    ["cstroke", "M76.4,46.4Q82.0,62.0 76.4,77.6", 1.1],
+    ["cut", "M65.80,62.00a2.20,2.20 0 1,0 4.40,0a2.20,2.20 0 1,0 -4.40,0Z", 0],
+    ["fstroke", "M50,47L50,52M42,55L46,52M58,55L54,52", 1.4],
+  ],
+  flower: [
+    ["fill", "M50.00,50.00Q63.00,30.20 50.00,6.00Q37.00,30.20 50.00,50.00Z", 0],
+    ["fill", "M50.00,50.00Q73.19,45.19 81.11,18.89Q54.81,26.81 50.00,50.00Z", 0],
+    ["fill", "M50.00,50.00Q69.80,63.00 94.00,50.00Q69.80,37.00 50.00,50.00Z", 0],
+    ["fill", "M50.00,50.00Q54.81,73.19 81.11,81.11Q73.19,54.81 50.00,50.00Z", 0],
+    ["fill", "M50.00,50.00Q37.00,69.80 50.00,94.00Q63.00,69.80 50.00,50.00Z", 0],
+    ["fill", "M50.00,50.00Q26.81,54.81 18.89,81.11Q45.19,73.19 50.00,50.00Z", 0],
+    ["fill", "M50.00,50.00Q30.20,37.00 6.00,50.00Q30.20,63.00 50.00,50.00Z", 0],
+    ["fill", "M50.00,50.00Q45.19,26.81 18.89,18.89Q26.81,45.19 50.00,50.00Z", 0],
+    ["cstroke", "M50.0,38.0L50.0,16.0", 1.1],
+    ["cstroke", "M58.5,41.5L74.0,26.0", 1.1],
+    ["cstroke", "M62.0,50.0L84.0,50.0", 1.1],
+    ["cstroke", "M58.5,58.5L74.0,74.0", 1.1],
+    ["cstroke", "M50.0,62.0L50.0,84.0", 1.1],
+    ["cstroke", "M41.5,58.5L26.0,74.0", 1.1],
+    ["cstroke", "M38.0,50.0L16.0,50.0", 1.1],
+    ["cstroke", "M41.5,41.5L26.0,26.0", 1.1],
+    ["fill", "M39.00,50.00a11.00,11.00 0 1,0 22.00,0a11.00,11.00 0 1,0 -22.00,0Z", 0],
+    ["cstroke", "M42.00,50.00a8.00,8.00 0 1,0 16.00,0a8.00,8.00 0 1,0 -16.00,0Z", 1.1],
+    ["cut", "M53.50,50.00a1.00,1.00 0 1,0 2.00,0a1.00,1.00 0 1,0 -2.00,0Z", 0],
+    ["cut", "M52.18,53.18a1.00,1.00 0 1,0 2.00,0a1.00,1.00 0 1,0 -2.00,0Z", 0],
+    ["cut", "M49.00,54.50a1.00,1.00 0 1,0 2.00,0a1.00,1.00 0 1,0 -2.00,0Z", 0],
+    ["cut", "M45.82,53.18a1.00,1.00 0 1,0 2.00,0a1.00,1.00 0 1,0 -2.00,0Z", 0],
+    ["cut", "M44.50,50.00a1.00,1.00 0 1,0 2.00,0a1.00,1.00 0 1,0 -2.00,0Z", 0],
+    ["cut", "M45.82,46.82a1.00,1.00 0 1,0 2.00,0a1.00,1.00 0 1,0 -2.00,0Z", 0],
+    ["cut", "M49.00,45.50a1.00,1.00 0 1,0 2.00,0a1.00,1.00 0 1,0 -2.00,0Z", 0],
+    ["cut", "M52.18,46.82a1.00,1.00 0 1,0 2.00,0a1.00,1.00 0 1,0 -2.00,0Z", 0],
+  ],
+};
+
 type Ctx = CanvasRenderingContext2D;
 type Paint = string | CanvasGradient | CanvasPattern;
 
-function strokeLine(ctx: Ctx, w: number, paint: Paint) {
-  ctx.lineWidth = w;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.strokeStyle = paint;
-  ctx.stroke();
-}
-
-/* ---------------------------------------------------------------- peacock (mayil) */
-function peacock(ctx: Ctx, fill: Paint, cut: Paint) {
-  ctx.fillStyle = fill;
-  // tail feathers sweeping back and down, each ending in an "eye" (mayil kann)
-  const feathers = [150, 165, 180, 195, 210];
-  feathers.forEach((deg, i) => {
-    const a = (deg * Math.PI) / 180;
-    const len = 0.38 + (i === 2 ? 0.04 : 0);
-    const bx = -0.04;
-    const by = 0.1;
-    const ex = bx + Math.cos(a) * len;
-    const ey = by + Math.sin(a) * len * 0.75;
-    ctx.beginPath();
-    ctx.moveTo(bx, by - 0.025);
-    ctx.quadraticCurveTo((bx + ex) / 2, (by + ey) / 2 - 0.06, ex, ey);
-    ctx.quadraticCurveTo((bx + ex) / 2, (by + ey) / 2 + 0.06, bx, by + 0.025);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(ex, ey, 0.06, 0.045, a, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = cut;
-    ctx.beginPath();
-    ctx.ellipse(ex, ey, 0.035, 0.024, a, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = fill;
-    ctx.beginPath();
-    ctx.arc(ex, ey, 0.013, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  // body
-  ctx.beginPath();
-  ctx.ellipse(0.06, 0.1, 0.17, 0.12, -0.35, 0, Math.PI * 2);
-  ctx.fill();
-  // neck
-  ctx.beginPath();
-  ctx.moveTo(0.1, 0.06);
-  ctx.bezierCurveTo(0.24, -0.02, 0.17, -0.22, 0.25, -0.31);
-  ctx.lineTo(0.31, -0.28);
-  ctx.bezierCurveTo(0.25, -0.18, 0.33, 0.0, 0.2, 0.12);
-  ctx.closePath();
-  ctx.fill();
-  // head + beak
-  ctx.beginPath();
-  ctx.arc(0.285, -0.33, 0.052, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(0.33, -0.35);
-  ctx.lineTo(0.41, -0.33);
-  ctx.lineTo(0.33, -0.31);
-  ctx.fill();
-  // crest
-  for (const dx of [-0.03, 0, 0.03]) {
-    ctx.beginPath();
-    ctx.moveTo(0.28, -0.37);
-    ctx.lineTo(0.28 + dx, -0.47);
-    strokeLine(ctx, 0.012, fill);
-    ctx.beginPath();
-    ctx.arc(0.28 + dx, -0.48, 0.017, 0, Math.PI * 2);
-    ctx.fill();
+const pathCache = new Map<string, Path2D>();
+function path(d: string): Path2D {
+  let p = pathCache.get(d);
+  if (!p) {
+    p = new Path2D(d);
+    pathCache.set(d, p);
   }
-  // legs
-  ctx.beginPath();
-  ctx.moveTo(0.04, 0.2);
-  ctx.lineTo(0.02, 0.4);
-  ctx.moveTo(0.12, 0.19);
-  ctx.lineTo(0.13, 0.4);
-  strokeLine(ctx, 0.022, fill);
-  // details: eye and wing lines
-  ctx.fillStyle = cut;
-  ctx.beginPath();
-  ctx.arc(0.295, -0.335, 0.012, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(-0.04, 0.08);
-  ctx.quadraticCurveTo(0.05, 0.02, 0.15, 0.08);
-  ctx.moveTo(-0.02, 0.14);
-  ctx.quadraticCurveTo(0.06, 0.08, 0.15, 0.13);
-  strokeLine(ctx, 0.014, cut);
+  return p;
 }
 
-/* ---------------------------------------------------------------- elephant (yaanai) */
-function elephant(ctx: Ctx, fill: Paint, cut: Paint) {
-  ctx.fillStyle = fill;
-  // body
-  ctx.beginPath();
-  ctx.ellipse(-0.06, 0.02, 0.3, 0.19, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // legs
-  for (const x of [-0.3, -0.16, 0.03, 0.15]) {
-    ctx.beginPath();
-    ctx.roundRect(x, 0.08, 0.09, 0.3, 0.025);
-    ctx.fill();
-  }
-  // head
-  ctx.beginPath();
-  ctx.arc(0.23, -0.06, 0.15, 0, Math.PI * 2);
-  ctx.fill();
-  // trunk (curling outward at the tip)
-  ctx.beginPath();
-  ctx.moveTo(0.31, 0.0);
-  ctx.bezierCurveTo(0.42, 0.1, 0.35, 0.25, 0.42, 0.34);
-  ctx.quadraticCurveTo(0.47, 0.37, 0.47, 0.31);
-  strokeLine(ctx, 0.075, fill);
-  // tail
-  ctx.beginPath();
-  ctx.moveTo(-0.35, -0.03);
-  ctx.quadraticCurveTo(-0.42, 0.06, -0.39, 0.17);
-  strokeLine(ctx, 0.018, fill);
-  // details: ear, eye, tusk, saddle cloth with diamond
-  ctx.beginPath();
-  ctx.ellipse(0.17, -0.04, 0.075, 0.11, 0.15, 0, Math.PI * 2);
-  strokeLine(ctx, 0.018, cut);
-  ctx.fillStyle = cut;
-  ctx.beginPath();
-  ctx.arc(0.29, -0.1, 0.014, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(0.3, 0.05);
-  ctx.quadraticCurveTo(0.38, 0.08, 0.4, 0.04);
-  strokeLine(ctx, 0.018, cut);
-  ctx.beginPath();
-  ctx.moveTo(-0.22, -0.15);
-  ctx.lineTo(0.05, -0.15);
-  ctx.lineTo(0.03, 0.06);
-  ctx.lineTo(-0.2, 0.06);
-  ctx.closePath();
-  strokeLine(ctx, 0.016, cut);
-  ctx.beginPath();
-  ctx.moveTo(-0.085, -0.1);
-  ctx.lineTo(-0.035, -0.045);
-  ctx.lineTo(-0.085, 0.01);
-  ctx.lineTo(-0.135, -0.045);
-  ctx.closePath();
-  ctx.fill();
-}
-
-/* ---------------------------------------------------------------- lotus (thamarai) */
-function lotus(ctx: Ctx, fill: Paint, cut: Paint) {
-  ctx.fillStyle = fill;
-  const petal = (angle: number, h: number, w: number) => {
-    ctx.save();
-    ctx.translate(0, 0.14);
-    ctx.rotate(angle);
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.bezierCurveTo(-w, -h * 0.35, -w * 0.55, -h * 0.85, 0, -h);
-    ctx.bezierCurveTo(w * 0.55, -h * 0.85, w, -h * 0.35, 0, 0);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(0, -h * 0.12);
-    ctx.lineTo(0, -h * 0.78);
-    strokeLine(ctx, 0.012, cut);
-    ctx.restore();
-  };
-  for (const [a, h, w] of [
-    [-1.15, 0.34, 0.11],
-    [1.15, 0.34, 0.11],
-    [-0.75, 0.44, 0.13],
-    [0.75, 0.44, 0.13],
-    [-0.36, 0.52, 0.14],
-    [0.36, 0.52, 0.14],
-    [0, 0.58, 0.15],
-  ] as const)
-    petal(a, h, w);
-  // base bowl + stem + leaves
-  ctx.beginPath();
-  ctx.ellipse(0, 0.16, 0.22, 0.06, 0, 0, Math.PI);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(0, 0.2);
-  ctx.lineTo(0, 0.42);
-  strokeLine(ctx, 0.022, fill);
-  for (const s of [-1, 1]) {
-    ctx.beginPath();
-    ctx.moveTo(0, 0.36);
-    ctx.quadraticCurveTo(s * 0.18, 0.26, s * 0.28, 0.34);
-    ctx.quadraticCurveTo(s * 0.16, 0.42, 0, 0.36);
-    ctx.fill();
-  }
-}
-
-/* ---------------------------------------------------------------- annam (swan) */
-function annam(ctx: Ctx, fill: Paint, cut: Paint) {
-  ctx.fillStyle = fill;
-  // body (boat shape)
-  ctx.beginPath();
-  ctx.moveTo(-0.3, 0.02);
-  ctx.quadraticCurveTo(-0.22, 0.3, 0.06, 0.28);
-  ctx.quadraticCurveTo(0.26, 0.26, 0.26, 0.08);
-  ctx.quadraticCurveTo(0.0, 0.14, -0.3, 0.02);
-  ctx.fill();
-  // neck S-curve and head
-  ctx.beginPath();
-  ctx.moveTo(0.16, 0.1);
-  ctx.bezierCurveTo(0.34, 0.02, 0.06, -0.2, 0.2, -0.33);
-  strokeLine(ctx, 0.06, fill);
-  ctx.beginPath();
-  ctx.arc(0.23, -0.34, 0.05, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(0.27, -0.36);
-  ctx.lineTo(0.37, -0.32);
-  ctx.lineTo(0.27, -0.31);
-  ctx.fill();
-  // tail plumes curling up and back
-  for (const [r, off] of [
-    [0.1, 0],
-    [0.08, 0.07],
-    [0.06, 0.13],
-  ] as const) {
-    ctx.beginPath();
-    ctx.moveTo(-0.24, 0.06 - off);
-    ctx.bezierCurveTo(-0.36, -0.06 - off, -0.42, -0.2 - off, -0.3 + r * 0.2, -0.24 - off);
-    ctx.arc(-0.31, -0.2 - off, r * 0.4, -1.2, 2.2);
-    strokeLine(ctx, 0.03, fill);
-  }
-  // details: wing feathers and eye
-  for (const k of [0, 1, 2]) {
-    ctx.beginPath();
-    ctx.moveTo(-0.14 + k * 0.08, 0.1);
-    ctx.quadraticCurveTo(-0.06 + k * 0.08, 0.06, 0.02 + k * 0.08, 0.13);
-    strokeLine(ctx, 0.013, cut);
-  }
-  ctx.fillStyle = cut;
-  ctx.beginPath();
-  ctx.arc(0.24, -0.35, 0.011, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-/* ---------------------------------------------------------------- mango (maanga / paisley) */
-function mango(ctx: Ctx, fill: Paint, cut: Paint) {
-  const shape = (s: number) => {
-    ctx.beginPath();
-    ctx.moveTo(0.02 * s, 0.42 * s);
-    ctx.bezierCurveTo(-0.38 * s, 0.32 * s, -0.36 * s, -0.22 * s, 0.0, -0.3 * s);
-    ctx.bezierCurveTo(0.22 * s, -0.36 * s, 0.34 * s, -0.12 * s, 0.18 * s, 0.02 * s);
-    ctx.bezierCurveTo(0.08 * s, 0.12 * s, 0.22 * s, 0.32 * s, 0.02 * s, 0.42 * s);
-    ctx.closePath();
-  };
-  ctx.fillStyle = fill;
-  shape(1);
-  ctx.fill();
-  ctx.save();
-  ctx.translate(-0.02, 0.02);
-  shape(0.62);
-  strokeLine(ctx, 0.022, cut);
-  ctx.restore();
-  ctx.fillStyle = cut;
-  for (const [x, y] of [
-    [-0.05, -0.02],
-    [-0.08, 0.1],
-    [0.0, 0.17],
-    [0.04, -0.12],
-  ])
-    ctx.beginPath(), ctx.arc(x, y, 0.022, 0, Math.PI * 2), ctx.fill();
-  // curl at the tip
-  ctx.beginPath();
-  ctx.arc(0.16, -0.2, 0.06, Math.PI * 0.2, Math.PI * 1.6);
-  strokeLine(ctx, 0.02, cut);
-}
-
-/* ---------------------------------------------------------------- chakram (wheel) */
-function chakram(ctx: Ctx, fill: Paint, cut: Paint) {
-  ctx.fillStyle = fill;
-  ctx.beginPath();
-  ctx.arc(0, 0, 0.42, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(0, 0, 0.33, 0, Math.PI * 2);
-  strokeLine(ctx, 0.02, cut);
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2;
-    ctx.save();
-    ctx.rotate(a);
-    ctx.beginPath();
-    ctx.ellipse(0, -0.19, 0.045, 0.11, 0, 0, Math.PI * 2);
-    strokeLine(ctx, 0.016, cut);
-    ctx.restore();
-  }
-  ctx.fillStyle = cut;
-  ctx.beginPath();
-  ctx.arc(0, 0, 0.06, 0, Math.PI * 2);
-  ctx.fill();
-  for (let i = 0; i < 16; i++) {
-    const a = (i / 16) * Math.PI * 2;
-    ctx.beginPath();
-    ctx.arc(Math.cos(a) * 0.375, Math.sin(a) * 0.375, 0.014, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
-/* ---------------------------------------------------------------- rudraksha (beads) */
-function rudraksha(ctx: Ctx, fill: Paint, cut: Paint) {
-  ctx.fillStyle = fill;
-  const beads: [number, number, number][] = [
-    [0, -0.22, 0.15],
-    [-0.2, 0.1, 0.15],
-    [0.2, 0.1, 0.15],
-    [0, 0.0, 0.09],
-  ];
-  beads.forEach(([x, y, r]) => {
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  ctx.fillStyle = cut;
-  beads.slice(0, 3).forEach(([x, y, r]) => {
-    for (let k = 0; k < 5; k++) {
-      const a = (k / 5) * Math.PI * 2;
-      ctx.beginPath();
-      ctx.arc(x + Math.cos(a) * r * 0.5, y + Math.sin(a) * r * 0.5, r * 0.12, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  });
-}
-
-/* ---------------------------------------------------------------- flower (poo) */
-function flower(ctx: Ctx, fill: Paint, cut: Paint) {
-  ctx.fillStyle = fill;
-  for (let i = 0; i < 8; i++) {
-    ctx.save();
-    ctx.rotate((i / 8) * Math.PI * 2);
-    ctx.beginPath();
-    ctx.ellipse(0, -0.24, 0.09, 0.2, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-  ctx.fillStyle = cut;
-  ctx.beginPath();
-  ctx.arc(0, 0, 0.12, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = fill;
-  ctx.beginPath();
-  ctx.arc(0, 0, 0.065, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-const DRAW: Record<MotifId, (ctx: Ctx, fill: Paint, cut: Paint) => void> = {
-  peacock,
-  elephant,
-  lotus,
-  annam,
-  mango,
-  chakram,
-  rudraksha,
-  flower,
-};
-
-/** Draw a motif centred at (x, y) with the given size in pixels. */
+/**
+ * Draw a motif centred on (x, y) inside a `size` × `size` box.
+ * `fill` is the zari paint, `cut` the ground colour that shows through. `flip` mirrors it to face left.
+ */
 export function drawMotif(ctx: Ctx, id: MotifId, x: number, y: number, size: number, fill: Paint, cut: Paint, flip = false) {
+  const layers = MOTIF_SHAPES[id];
+  if (!layers) return;
   ctx.save();
   ctx.translate(x, y);
-  ctx.scale(flip ? -size : size, size);
-  DRAW[id](ctx, fill, cut);
+  ctx.scale(((flip ? -1 : 1) * size) / 100, size / 100);
+  ctx.translate(-50, -50);
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  for (const [kind, d, w] of layers) {
+    const p = path(d);
+    if (kind === "fill") {
+      ctx.fillStyle = fill;
+      ctx.fill(p);
+    } else if (kind === "cut") {
+      ctx.fillStyle = cut;
+      ctx.fill(p);
+    } else {
+      ctx.strokeStyle = kind === "fstroke" ? fill : cut;
+      ctx.lineWidth = w;
+      ctx.stroke(p);
+    }
+  }
   ctx.restore();
 }

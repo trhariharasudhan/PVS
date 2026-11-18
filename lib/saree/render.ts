@@ -10,7 +10,7 @@
 import { drawMotif, type MotifId } from "./motifs";
 
 export type BorderStyle = "temple" | "rettaiPettu" | "gangaJamuna" | "vairaoosi" | "kattam" | "minimal";
-export type BodyPattern = "plain" | "buttas" | "checks" | "stripes" | "vairaoosi" | "jaal";
+export type BodyPattern = "plain" | "buttas" | "checks" | "stripes" | "vairaoosi" | "jaal" | "sungudi";
 export type PalluStyle = "grand" | "motifRows" | "stripes" | "minimal";
 export type ZariKind = "gold" | "antique" | "silver" | "none";
 
@@ -404,6 +404,29 @@ function body(ctx: CanvasRenderingContext2D, ink: Inks, d: SareeDesign, x0: numb
       }
       return;
     }
+    case "sungudi": {
+      // tie-and-dye dots (Madurai sungudi style): small light rings in diamond clusters
+      if (ink.mode !== "color") return; // dye, not zari: no metal in the ORM pass
+      const s = unit * 1.6;
+      const dot = (x: number, y: number, r: number) => {
+        ctx.fillStyle = "rgba(255,246,222,0.92)";
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = d.body;
+        ctx.beginPath();
+        ctx.arc(x, y, r * 0.42, 0, Math.PI * 2);
+        ctx.fill();
+      };
+      for (let y = y0 + s / 2, row = 0; y < y1; y += s, row++) {
+        for (let x = x0 + (row % 2 ? s / 2 : 0) + s / 2; x < x1; x += s) {
+          const r = Math.max(1, unit * 0.09);
+          dot(x, y, r * 1.2);
+          for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) dot(x + dx * r * 3.2, y + dy * r * 3.2, r);
+        }
+      }
+      return;
+    }
     case "jaal": {
       const step = H / 3.2;
       lattice(ctx, ink, x0, y0, W, H, step, Math.max(1, unit * 0.035));
@@ -499,6 +522,53 @@ export interface RenderOptions {
   palluFraction?: number;
   /** Border band height as a fraction of saree width. */
   borderFraction?: number;
+  /** Name woven into the body in zari (e.g. "PVS SILKS"), centred on the saree. */
+  wovenText?: { text: string; sub?: string; font: string; subFont?: string };
+}
+
+/** A woven name panel: silk cartouche with zari letters and fine zari rules, like a weaver's mark. */
+function wovenName(ctx: CanvasRenderingContext2D, ink: Inks, d: SareeDesign, W: number, H: number, bh: number, wt: NonNullable<RenderOptions["wovenText"]>) {
+  const cx = W * 0.5;
+  const cy = H / 2;
+  const capH = (H - 2 * bh) * 0.3;
+  ctx.save();
+  ctx.font = `700 ${Math.round(capH)}px ${wt.font}`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const tw = ctx.measureText(wt.text).width;
+  const pw = tw + capH * 1.6;
+  const ph = capH * (wt.sub ? 2.3 : 1.7);
+  // plain silk panel so buttas don't run through the letters
+  if (ink.mode === "color") silkGround(ctx, cx - pw / 2, cy - ph / 2, pw, ph, d.body, ink, 77);
+  else {
+    ctx.fillStyle = ORM_SILK;
+    ctx.fillRect(cx - pw / 2, cy - ph / 2, pw, ph);
+  }
+  // zari rules above / below with a small diamond
+  ctx.fillStyle = ink.zari;
+  const rule = Math.max(1.5, capH * 0.05);
+  for (const y of [cy - ph / 2 + rule * 2, cy + ph / 2 - rule * 3]) ctx.fillRect(cx - pw / 2 + capH * 0.3, y, pw - capH * 0.6, rule);
+  for (const y of [cy - ph / 2 + rule * 2.5, cy + ph / 2 - rule * 2.5]) {
+    ctx.beginPath();
+    ctx.moveTo(cx, y - capH * 0.12);
+    ctx.lineTo(cx + capH * 0.12, y);
+    ctx.lineTo(cx, y + capH * 0.12);
+    ctx.lineTo(cx - capH * 0.12, y);
+    ctx.fill();
+  }
+  const textY = wt.sub ? cy - capH * 0.25 : cy;
+  if (ink.mode === "color") {
+    // raised zari: soft shadow under the letters
+    ctx.shadowColor = "rgba(0,0,0,0.45)";
+    ctx.shadowBlur = capH * 0.06;
+    ctx.shadowOffsetY = capH * 0.04;
+  }
+  ctx.fillText(wt.text, cx, textY);
+  if (wt.sub) {
+    ctx.font = `600 ${Math.round(capH * 0.26)}px ${wt.subFont ?? wt.font}`;
+    ctx.fillText(wt.sub, cx, cy + capH * 0.62);
+  }
+  ctx.restore();
 }
 
 export function renderSaree(ctx: CanvasRenderingContext2D, W: number, H: number, d: SareeDesign, mode: Mode = "color", opts: RenderOptions = {}) {
@@ -509,6 +579,7 @@ export function renderSaree(ctx: CanvasRenderingContext2D, W: number, H: number,
   const unit = H / 12;
 
   body(ctx, ink, d, 0, palluX, bh, H - bh, unit);
+  if (opts.wovenText) wovenName(ctx, ink, d, W, H, bh, opts.wovenText);
   pallu(ctx, ink, d, palluX, W, bh, H - bh, unit);
 
   const top = d.border;

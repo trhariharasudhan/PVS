@@ -4,7 +4,7 @@ import "./globals.css";
 import { siteConfig } from "@/config/site";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { FloatingWhatsApp } from "@/components/layout/FloatingWhatsApp";
+import { SareeHelper } from "@/components/chat/SareeHelper";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { I18nProvider } from "@/i18n/I18nProvider";
 import { getI18n } from "@/i18n/server";
@@ -78,11 +78,13 @@ export function generateMetadata(): Metadata {
     title: t.meta.siteTitle,
     description: t.meta.siteDescription,
     siteName: siteConfig.name,
+    images: [{ url: siteConfig.ogImage, width: 1200, height: 630, alt: t.meta.siteTitle }],
   },
   twitter: {
     card: "summary_large_image",
     title: `${siteConfig.name} | Pattu Saree Manufacturer`,
-    description: siteConfig.description,
+    description: t.meta.siteDescription,
+    images: [siteConfig.ogImage],
   },
   robots: {
     index: true,
@@ -136,7 +138,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
-          <FloatingWhatsApp />
+          <SareeHelper />
         </I18nProvider>
       </body>
     </html>

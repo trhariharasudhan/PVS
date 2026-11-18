@@ -12,9 +12,9 @@ export const SCENES: Record<SceneId, readonly [number, number]> = {
   threads: [0.15, 0.25],
   weaving: [0.25, 0.4],
   saree: [0.4, 0.6],
-  brand: [0.6, 0.75],
-  packaging: [0.75, 0.9],
-  final: [0.9, 1.0],
+  brand: [0.6, 0.72],
+  packaging: [0.72, 0.93],
+  final: [0.93, 1.0],
 };
 
 /** Brand palette used inside the 3D scene (from the hero brief). */
@@ -53,7 +53,7 @@ export const QUALITY: Record<QualityTier, QualitySettings> = {
     clothSegments: [96, 36],
     shadows: true,
     dpr: [1, 1.75],
-    scrollVh: 650,
+    scrollVh: 760,
     textureSize: 2048,
   },
   medium: {
@@ -62,7 +62,7 @@ export const QUALITY: Record<QualityTier, QualitySettings> = {
     clothSegments: [64, 24],
     shadows: true,
     dpr: [1, 1.5],
-    scrollVh: 550,
+    scrollVh: 640,
     textureSize: 1536,
   },
   low: {
@@ -71,7 +71,7 @@ export const QUALITY: Record<QualityTier, QualitySettings> = {
     clothSegments: [40, 16],
     shadows: false,
     dpr: [1, 1.25],
-    scrollVh: 420,
+    scrollVh: 500,
     textureSize: 1024,
   },
 };
@@ -116,10 +116,21 @@ export const SAREE = {
   folds: 6,
 } as const;
 
-/** Shopping bag dimensions & resting position. */
+/** Shopping bag dimensions & resting position (right of the packing table). */
 export const BAG = {
   width: 1.05,
   height: 1.25,
   depth: 0.38,
-  position: [0, 0, 1.5] as const,
+  position: [1.3, 0, 1.55] as const,
+} as const;
+
+/** Packing table + saree box (the folded saree goes into the box, the box into the bag). */
+export const PACK = {
+  tablePos: [-0.35, 0, 1.6] as const,
+  tableTop: 0.62,
+  tableSize: [1.9, 0.8] as const,
+  /** Saree scale while lying on the table (stack = panel × half width). */
+  sareeScale: 0.62,
+  /** Box outer size: x (width), y (height), z (depth). */
+  box: [0.42, 0.1, 0.46] as const,
 } as const;

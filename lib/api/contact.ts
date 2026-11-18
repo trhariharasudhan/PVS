@@ -18,6 +18,7 @@ export interface WholesalePayload {
   email?: string;
   city: string;
   business_type: string;
+  number_of_stores?: string;
   interested_collection?: string;
   expected_quantity?: string;
   message?: string;

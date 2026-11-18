@@ -1,35 +1,34 @@
-"use client";
+import { useId } from "react";
+import { MOTIF_SHAPES, type MotifId } from "@/lib/saree/motifs";
 
-import { useEffect, useRef } from "react";
-import { drawMotif, type MotifId } from "@/lib/saree/motifs";
-
-/** Small gold-on-silk tile showing one motif (used in the designer pickers). */
+/** Gold-on-silk motif tile (SVG, same shapes the saree renderer uses). */
 export function MotifIcon({ id, size = 44, ground = "#7A1022" }: { id: MotifId | "none"; size?: number; ground?: string }) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const c = ref.current;
-    if (!c) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    c.width = c.height = Math.round(size * dpr);
-    const ctx = c.getContext("2d");
-    if (!ctx) return;
-    const S = c.width;
-    ctx.fillStyle = ground;
-    ctx.fillRect(0, 0, S, S);
-    if (id === "none") {
-      ctx.strokeStyle = "rgba(233,200,120,0.7)";
-      ctx.lineWidth = S * 0.05;
-      ctx.beginPath();
-      ctx.moveTo(S * 0.28, S * 0.72);
-      ctx.lineTo(S * 0.72, S * 0.28);
-      ctx.stroke();
-      return;
-    }
-    const g = ctx.createLinearGradient(0, 0, 0, S);
-    g.addColorStop(0, "#F3D98B");
-    g.addColorStop(0.5, "#C9A24E");
-    g.addColorStop(1, "#8C6A25");
-    drawMotif(ctx, id, S / 2, S / 2, S * 0.78, g, ground);
-  }, [id, size, ground]);
-  return <canvas ref={ref} style={{ width: size, height: size }} className="rounded-lg" aria-hidden="true" />;
+  const gid = useId().replace(/:/g, "");
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" className="rounded-lg" aria-hidden="true">
+      <defs>
+        <linearGradient id={`z${gid}`} x1="0" y1="0" x2="0.3" y2="1">
+          <stop offset="0" stopColor="#F6DE95" />
+          <stop offset="0.45" stopColor="#D2AA55" />
+          <stop offset="1" stopColor="#8C6A25" />
+        </linearGradient>
+      </defs>
+      <rect width="100" height="100" fill={ground} />
+      {id === "none" ? (
+        <path d="M28,72L72,28" stroke="rgba(233,200,120,0.7)" strokeWidth="5" strokeLinecap="round" />
+      ) : (
+        <g transform="translate(11 11) scale(0.78)">
+          {MOTIF_SHAPES[id].map(([kind, d, w], i) =>
+            kind === "fill" ? (
+              <path key={i} d={d} fill={`url(#z${gid})`} />
+            ) : kind === "cut" ? (
+              <path key={i} d={d} fill={ground} />
+            ) : (
+              <path key={i} d={d} fill="none" stroke={kind === "fstroke" ? `url(#z${gid})` : ground} strokeWidth={w} strokeLinecap="round" strokeLinejoin="round" />
+            ),
+          )}
+        </g>
+      )}
+    </svg>
+  );
 }

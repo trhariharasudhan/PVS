@@ -7,6 +7,7 @@ import { Reveal, SplitWords } from "@/components/motion/Reveal";
 import { DiamondRule } from "@/components/ui/Ornament";
 import { MOTIF_IDS } from "@/lib/saree/motifs";
 import { PRESETS } from "@/lib/saree/presets";
+import { REGION_DESIGNS, type RegionId } from "@/lib/saree/regions";
 import type { SareeDesign } from "@/lib/saree/render";
 import { getI18n } from "@/i18n/server";
 
@@ -40,6 +41,7 @@ const KIND_DESIGNS: Record<string, SareeDesign> = {
 export default function WhatWeWeavePage() {
   const { t } = getI18n();
   const w = t.weave;
+  const r = t.regions;
   return (
     <div className="bg-ivory-50 bg-weave">
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-16">
@@ -56,7 +58,7 @@ export default function WhatWeWeavePage() {
           {w.kinds.map((k) => (
             <article key={k.id} data-reveal-item className="group rounded-[2rem] bg-white border border-heritage-brown-100 overflow-hidden">
               <div className="bg-[#f4ecdd] p-4 sm:p-6">
-                <SareeFlat design={KIND_DESIGNS[k.id] ?? PRESETS.templeBride} variant="full" className="h-40 sm:h-48" label={`${k.title} — ${t.common.illustration}`} />
+                <SareeFlat design={KIND_DESIGNS[k.id] ?? PRESETS.templeBride} variant="fold" className="h-52 sm:h-60" label={`${k.title} — ${t.common.illustration}`} />
               </div>
               <div className="p-7 sm:p-9">
                 <h2 className="font-serif text-3xl text-heritage-brown-950">{k.title}</h2>
@@ -77,7 +79,47 @@ export default function WhatWeWeavePage() {
         </Reveal>
       </section>
 
-      <section className="bg-heritage-brown-950 text-ivory-50">
+      {/* Regional styles of Tamil Nadu */}
+      <section id="regions" className="scroll-mt-28 bg-ivory-100/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="grid lg:grid-cols-12 gap-6 items-end">
+            <div className="lg:col-span-7">
+              <p className="text-xs font-semibold tracking-[0.3em] uppercase text-silk-red-700">{r.eyebrow}</p>
+              <Reveal variant="words" as="h2" className="mt-5 font-serif text-4xl sm:text-5xl leading-[1.05] text-heritage-brown-950">
+                <SplitWords text={r.title} />
+              </Reveal>
+            </div>
+            <p className="lg:col-span-5 text-heritage-brown-700 leading-relaxed">{r.body}</p>
+          </div>
+          <Reveal variant="stagger" className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {r.items.map((it) => (
+              <article key={it.id} data-reveal-item className="group rounded-[2rem] bg-white border border-heritage-brown-100 overflow-hidden flex flex-col">
+                <div className="bg-[#efe5d3] px-3 pt-4">
+                  <SareeFlat design={REGION_DESIGNS[it.id as RegionId]} variant="fold" className="h-56" label={`${it.name} — ${t.common.illustration}`} />
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-gold-700">{it.place}</p>
+                  <h3 className="mt-1 font-serif text-2xl text-heritage-brown-950">{it.name}</h3>
+                  <p className="mt-2 text-sm text-heritage-brown-700 leading-relaxed flex-1">{it.body}</p>
+                  <ul className="mt-4 flex flex-wrap gap-1.5">
+                    {it.tags.map((tag) => (
+                      <li key={tag} className="rounded-full bg-ivory-100 border border-heritage-brown-100 px-2.5 py-0.5 text-[11px] text-heritage-brown-800">
+                        {tag}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href={`/custom-order?region=${it.id}`} className="mt-5 inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-silk-red-700">
+                    {r.inspired} <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </Reveal>
+          <p className="mt-8 max-w-4xl text-xs text-heritage-brown-600 leading-relaxed">{r.note}</p>
+        </div>
+      </section>
+
+      <section id="motifs" className="scroll-mt-28 bg-heritage-brown-950 text-ivory-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 grid lg:grid-cols-12 gap-10">
           <div className="lg:col-span-5">
             <p className="text-xs font-semibold tracking-[0.3em] uppercase text-gold-400">{w.motifsEyebrow}</p>

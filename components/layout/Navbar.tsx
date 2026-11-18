@@ -33,10 +33,27 @@ export function Navbar() {
   const menuPanel = useRef<HTMLDivElement>(null);
 
   // Shrink after scrolling; hide while scrolling down, reveal on scroll up.
+  // On the home page the navbar stays out of the way for the whole 3D story: visible at the
+  // very top, hidden once the story starts scrolling, back as soon as the story ends.
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
       setScrolled(y > 12);
+      const story = document.querySelector<HTMLElement>("[data-hero-story]");
+      if (story && story.offsetHeight > 0) {
+        const end = story.offsetTop + story.offsetHeight - window.innerHeight;
+        if (y > 12 && y < end - 4) {
+          setHidden(true);
+          lastY.current = y;
+          return;
+        }
+        if (y <= 12 || y < end + window.innerHeight) {
+          // top of the page, or just after the story ended: show it again
+          setHidden(false);
+          lastY.current = y;
+          return;
+        }
+      }
       setHidden(y > 160 && y > lastY.current + 4);
       if (y < lastY.current - 4) setHidden(false);
       lastY.current = y;

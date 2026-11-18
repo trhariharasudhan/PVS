@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { PALETTE, type QualitySettings } from "./sceneConfig";
 import {
   createBagTextures,
-  createBrandMarkTexture,
+  createStudioFloorTexture,
   createSareeTextures,
   createWoodTexture,
   ensureFonts,
@@ -22,7 +22,10 @@ export interface HeroAssets {
   silk: THREE.MeshPhysicalMaterial;
   /** Same silk, texture rotated so zari borders run along the loom (warp direction). */
   loomSilk: THREE.MeshPhysicalMaterial;
-  brandMark: THREE.MeshStandardMaterial;
+  /** Saree box: lid top carries the PVS mark, body is maroon board, inside is ivory. */
+  boxLid: THREE.MeshStandardMaterial;
+  boxBody: THREE.MeshStandardMaterial;
+  boxInner: THREE.MeshStandardMaterial;
   bagFront: THREE.MeshStandardMaterial;
   bagBody: THREE.MeshStandardMaterial;
   bagInner: THREE.MeshStandardMaterial;
@@ -35,7 +38,7 @@ export interface HeroAssets {
 
 function build(quality: QualitySettings, serif: string, sans: string): HeroAssets {
   const woodTex = createWoodTexture(512);
-  const saree = createSareeTextures(quality.textureSize);
+  const saree = createSareeTextures(quality.textureSize, undefined, serif, sans);
   const loomMap = saree.map.clone();
   const loomOrm = saree.orm.clone();
   for (const t of [loomMap, loomOrm]) {
@@ -44,7 +47,7 @@ function build(quality: QualitySettings, serif: string, sans: string): HeroAsset
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     t.needsUpdate = true;
   }
-  const brandTex = createBrandMarkTexture(serif, sans, quality.textureSize);
+  const floorTex = createStudioFloorTexture(1024);
   const bag = createBagTextures(serif, sans, Math.min(1024, quality.textureSize));
 
   const silkParams: THREE.MeshPhysicalMaterialParameters = {
@@ -64,27 +67,18 @@ function build(quality: QualitySettings, serif: string, sans: string): HeroAsset
     yarn: new THREE.MeshStandardMaterial({ color: "#9b1629", roughness: 0.42, emissive: "#22030a" }),
     silk: new THREE.MeshPhysicalMaterial({ ...silkParams, map: saree.map, roughnessMap: saree.orm, metalnessMap: saree.orm }),
     loomSilk: new THREE.MeshPhysicalMaterial({ ...silkParams, map: loomMap, roughnessMap: loomOrm, metalnessMap: loomOrm }),
-    brandMark: new THREE.MeshStandardMaterial({
-      map: brandTex,
-      color: "#f2d48e",
-      emissive: "#3a2508",
-      metalness: 0.75,
-      roughness: 0.32,
-      transparent: true,
-      alphaTest: 0.2,
-      side: THREE.DoubleSide,
-      polygonOffset: true,
-      polygonOffsetFactor: -2,
-    }),
+    boxLid: new THREE.MeshStandardMaterial({ map: bag.map, roughnessMap: bag.orm, metalnessMap: bag.orm, roughness: 1, metalness: 1 }),
+    boxBody: new THREE.MeshStandardMaterial({ color: "#5a1424", roughness: 0.7, metalness: 0.05 }),
+    boxInner: new THREE.MeshStandardMaterial({ color: "#efe4cc", roughness: 0.85 }),
     bagFront: new THREE.MeshStandardMaterial({ map: bag.map, roughnessMap: bag.orm, metalnessMap: bag.orm, roughness: 1, metalness: 1 }),
     bagBody: new THREE.MeshStandardMaterial({ color: PALETTE.deepMaroon, roughness: 0.86, metalness: 0 }),
     bagInner: new THREE.MeshStandardMaterial({ color: "#2b0a12", roughness: 0.95 }),
     handle: new THREE.MeshStandardMaterial({ color: PALETTE.antiqueGold, metalness: 0.75, roughness: 0.35 }),
     tissue: new THREE.MeshStandardMaterial({ color: "#efe2c4", roughness: 0.75, metalness: 0.15, side: THREE.DoubleSide }),
-    floor: new THREE.MeshStandardMaterial({ color: "#1b110d", roughness: 0.92, metalness: 0 }),
+    floor: new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.82, metalness: 0 }),
   };
 
-  const textures = [woodTex, saree.map, saree.orm, loomMap, loomOrm, brandTex, bag.map, bag.orm];
+  const textures = [woodTex, saree.map, saree.orm, loomMap, loomOrm, floorTex, bag.map, bag.orm];
   return { ...a, disposables: [...Object.values(a), ...textures] };
 }
 

@@ -84,26 +84,26 @@ export function ShoppingBag({ progress, assets: a }: Props) {
     const p = progress.value;
     const tP = sceneT(p, "packaging");
     const tF = sceneT(p, "final");
-    g.visible = p > 0.77;
+    g.visible = p > 0.74;
     if (!g.visible) return;
 
     // Slide in from the right, settle facing camera
-    const enter = smoother(step(tP, 0.1, 0.45));
+    const enter = smoother(step(tP, 0.12, 0.45));
     const [bx, by, bz] = BAG.position;
     g.position.set(lerp(bx + 3.2, bx, enter), by, bz);
     // Final: slow presentation turn + a very subtle idle sway
     const sway = Math.sin(state.clock.elapsedTime * 0.5) * 0.03 * tF;
-    g.rotation.y = lerp(-0.7, 0, enter) + lerp(0, 0.38, smoother(tF)) + sway;
+    g.rotation.y = lerp(-0.7, -0.18, enter) + lerp(0, 0.5, smoother(tF)) + sway;
 
     // Packaging opens: gusset expands from flat-folded to full depth
-    const open = smoother(step(tP, 0.3, 0.52));
+    const open = smoother(step(tP, 0.35, 0.6));
     const dz = lerp(0.06, 1, open) * (D / 2);
     if (front.current) front.current.position.z = dz;
     if (back.current) back.current.position.z = -dz;
     sides.current.forEach((s) => s && (s.scale.z = (dz * 2) / D));
 
     // Handles rise once the saree is inside
-    const lift = smoother(step(tP, 0.75, 1));
+    const lift = smoother(step(tP, 0.92, 1));
     if (handleF.current) {
       handleF.current.position.z = dz + 0.004;
       handleF.current.rotation.x = lerp(Math.PI * 0.92, 0, lift);
@@ -115,7 +115,7 @@ export function ShoppingBag({ progress, assets: a }: Props) {
 
     // Tissue paper puffs up at the top
     if (tissue.current) {
-      const t = smoother(step(tP, 0.72, 1));
+      const t = smoother(step(tP, 0.88, 1));
       tissue.current.visible = t > 0.01;
       tissue.current.scale.set(1, Math.max(t, 0.001), 1);
     }

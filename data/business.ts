@@ -25,12 +25,6 @@ export const visible = <T,>(f: Fact<T>) => f.confirmed || SHOW_DRAFT_CONTENT;
 /* Founder journey (About page)                                        */
 /* ------------------------------------------------------------------ */
 
-export interface Milestone {
-  year: Fact<string>;
-  title: string;
-  body: Fact<string>;
-}
-
 export const FOUNDER = {
   name: { value: "Sathish Kumar", confirmed: true } as Fact,
   learnedFrom: {
@@ -41,46 +35,15 @@ export const FOUNDER = {
   startYear: { value: "20XX", confirmed: false, ask: "Which year did PVS start?" } as Fact,
 };
 
-export const MILESTONES: Milestone[] = [
-  {
-    year: { value: "20XX", confirmed: false, ask: "Year he started" },
-    title: "One weaver, one loom",
-    body: {
-      value: "Sathish Kumar begins weaving on a single loom in Panjakalipatti, learning every step from warp to finished saree.",
-      confirmed: false,
-      ask: "Confirm the starting story",
-    },
-  },
-  {
-    year: { value: "20XX", confirmed: false, ask: "Year of first expansion" },
-    title: "More looms, more hands",
-    body: {
-      value: "Growing demand from local saree shops brings additional looms and skilled weavers into the workshop.",
-      confirmed: false,
-      ask: "When and how many looms / weavers?",
-    },
-  },
-  {
-    year: { value: "20XX", confirmed: false, ask: "Year wholesale supply began" },
-    title: "Supplying retailers",
-    body: {
-      value: "PVS becomes a regular manufacturing partner for boutiques and saree retailers.",
-      confirmed: false,
-      ask: "Confirm wholesale history",
-    },
-  },
-  {
-    year: { value: "Today", confirmed: true },
-    title: "Weaving for families directly",
-    body: {
-      value: "Alongside wholesale, PVS now weaves made-to-order sarees for families and individual customers — your colours, your design, from our looms.",
-      confirmed: true,
-    },
-  },
-];
+/**
+ * The 20+ year journey is told as stages (text in the dictionaries: about.milestones).
+ * PVS confirmed "20+ years" and the growth story; exact years aren't published, so the
+ * timeline shows stages, not dates.
+ */
+export const JOURNEY_YEARS: Fact = { value: "20+", confirmed: true };
 
 export const WORKSHOP_FACTS: { label: string; fact: Fact }[] = [
-  { label: "Years of weaving", fact: { value: "XX+", confirmed: false, ask: "How many years?" } },
+  { label: "Years of weaving", fact: { value: "20+", confirmed: true } },
   { label: "Looms in our workshop", fact: { value: "XX", confirmed: false, ask: "How many looms (handloom / power loom)?" } },
   { label: "Skilled weavers", fact: { value: "XX", confirmed: false, ask: "How many weavers work with PVS?" } },
 ];
@@ -93,7 +56,9 @@ export const ORDER_TERMS = {
   retailMinimum: { value: "1 saree", confirmed: false, ask: "Minimum order for families (is 1 saree OK?)" } as Fact,
   wholesaleMinimum: { value: "To be discussed", confirmed: false, ask: "Minimum order quantity for retailers" } as Fact,
   leadTime: { value: "Usually 2–6 weeks, depending on design", confirmed: false, ask: "Typical making time" } as Fact,
-  advance: { value: "Advance confirmed with quotation", confirmed: false, ask: "Advance payment terms" } as Fact,
+  /** Confirmed by PVS (Nov 2026). */
+  advance: { value: "50% advance after the design is confirmed twice; balance when the saree is ready", confirmed: true } as Fact,
+  pricing: { value: "Price fixed by PVS on the quotation; bulk orders negotiable, full balance at final delivery", confirmed: true } as Fact,
 };
 
 /**
@@ -103,7 +68,6 @@ export const ORDER_TERMS = {
  */
 export const SAREE_TYPE_IDS = ["wedding", "traditional", "soft", "silkCotton", "festive", "group", "other"] as const;
 export const OCCASION_IDS = ["wedding", "engagement", "festival", "temple", "gift", "stock", "other"] as const;
-export const BUDGET_IDS = ["u5", "r5_10", "r10_20", "r20_40", "o40", "discuss"] as const;
 
 /**
  * Material options a customer can REQUEST. PVS confirms feasibility and price on the quotation;

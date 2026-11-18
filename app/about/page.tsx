@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Eye, HandHeart, Scale } from "lucide-react";
 import { siteConfig } from "@/config/site";
-import { FOUNDER, MILESTONES, SHOW_DRAFT_CONTENT, WORKSHOP_FACTS, visible } from "@/data/business";
+import { FOUNDER, SHOW_DRAFT_CONTENT, WORKSHOP_FACTS, visible } from "@/data/business";
 import { Reveal, SplitWords } from "@/components/motion/Reveal";
 import { DraftBadge } from "@/components/ui/DraftBadge";
 import { Kolam, KovilBorder } from "@/components/ui/Ornament";
@@ -21,7 +21,6 @@ export default function AboutPage() {
   const { t } = getI18n();
   const a = t.about;
   const facts = WORKSHOP_FACTS.map((f, i) => ({ ...f, label: a.workshopFacts[i] ?? f.label })).filter((f) => visible(f.fact));
-  const milestones = MILESTONES.map((m, i) => ({ ...m, text: a.milestones[i] })).filter((m) => visible(m.body));
   const name = FOUNDER.name.value;
 
   return (
@@ -92,19 +91,16 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
           <p className="text-xs font-semibold tracking-[0.3em] uppercase text-gold-400">{a.journeyEyebrow}</p>
           <h2 className="mt-5 font-serif text-4xl sm:text-6xl leading-[1.02]">{a.journeyTitle}</h2>
+          <p className="mt-5 inline-flex items-center gap-3 rounded-full border border-gold-400/40 px-5 py-2 text-sm text-gold-200">
+            <span className="font-serif text-2xl text-gold-300">20+</span> {a.yearsBadge}
+          </p>
           <Reveal variant="stagger" as="ol" className="mt-16 relative border-l border-gold-500/30 ml-3 space-y-14">
-            {milestones.map((m) => (
-              <li key={m.text.title} data-reveal-item className="relative pl-10">
+            {a.milestones.map((m, i) => (
+              <li key={m.title} data-reveal-item className="relative pl-10">
                 <span className="absolute -left-[7px] top-2 h-3.5 w-3.5 rotate-45 bg-gold-400" aria-hidden="true" />
-                {visible(m.year) && (
-                  <p className="font-serif text-4xl text-gold-300">
-                    {m.year.value === "Today" ? a.today : m.year.value} <DraftBadge fact={m.year} />
-                  </p>
-                )}
-                <h3 className="mt-2 font-serif text-2xl">{m.text.title}</h3>
-                <p className="mt-2 max-w-2xl text-ivory-300 leading-relaxed">
-                  {m.text.body} <DraftBadge fact={m.body} />
-                </p>
+                <p className="font-serif text-4xl text-gold-300">{i === a.milestones.length - 1 ? a.today : String(i + 1).padStart(2, "0")}</p>
+                <h3 className="mt-2 font-serif text-2xl">{m.title}</h3>
+                <p className="mt-2 max-w-2xl text-ivory-300 leading-relaxed">{m.body}</p>
               </li>
             ))}
           </Reveal>

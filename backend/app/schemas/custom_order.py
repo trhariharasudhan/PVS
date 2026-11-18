@@ -25,7 +25,7 @@ STATUS_LABELS = {
 DESIGN_VALUES = {
     "border_style": {"temple", "rettaiPettu", "gangaJamuna", "vairaoosi", "kattam", "minimal"},
     "border_motif": {"peacock", "elephant", "lotus", "annam", "mango", "chakram", "rudraksha", "flower", "none"},
-    "body_pattern": {"plain", "buttas", "checks", "stripes", "vairaoosi", "jaal"},
+    "body_pattern": {"plain", "buttas", "checks", "stripes", "vairaoosi", "jaal", "sungudi"},
     "body_motif": {"peacock", "elephant", "lotus", "annam", "mango", "chakram", "rudraksha", "flower", "none"},
     "pallu_style": {"grand", "motifRows", "stripes", "minimal"},
     "pallu_motif": {"peacock", "elephant", "lotus", "annam", "mango", "chakram", "rudraksha", "flower", "none"},

@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, Copy, FileText, ImagePlus, Loader2, MessageCircle, Phone, Store, Truck, Users, X } from "lucide-react";
 import { siteConfig, getWhatsAppLink } from "@/config/site";
-import { BUDGET_IDS, OCCASION_IDS, SAREE_TYPE_IDS, SILK_OPTIONS, SWATCHES, ZARI_OPTIONS } from "@/data/business";
+import { OCCASION_IDS, SAREE_TYPE_IDS, SILK_OPTIONS, SWATCHES, ZARI_OPTIONS } from "@/data/business";
 import { submitCustomOrder, type CustomerSegment, type CustomOrderSpec } from "@/lib/api/customOrders";
 import { MOTIF_IDS, type MotifId } from "@/lib/saree/motifs";
 import type { BodyPattern, BorderStyle, PalluStyle, SareeDesign, ZariKind } from "@/lib/saree/render";
 import { PRESETS, PRESET_IDS, type PresetId } from "@/lib/saree/presets";
+import { REGION_DESIGNS, REGION_IDS, type RegionId } from "@/lib/saree/regions";
 import { en } from "@/i18n/dictionaries/en";
 import { fmt, useI18n } from "@/i18n/I18nProvider";
 import type { Dict } from "@/i18n/types";
@@ -28,13 +29,12 @@ const DRAFT_KEY = "pvs-custom-order-draft-v2";
 
 type SareeTypeId = (typeof SAREE_TYPE_IDS)[number];
 type OccasionId = (typeof OCCASION_IDS)[number];
-type BudgetId = (typeof BUDGET_IDS)[number];
 type SilkId = (typeof SILK_OPTIONS)[number]["id"];
 type ZariId = (typeof ZARI_OPTIONS)[number]["id"];
 type Motif = MotifId | "none";
 
 const BORDER_STYLES: BorderStyle[] = ["temple", "rettaiPettu", "gangaJamuna", "vairaoosi", "kattam", "minimal"];
-const BODY_PATTERNS: BodyPattern[] = ["buttas", "checks", "jaal", "vairaoosi", "stripes", "plain"];
+const BODY_PATTERNS: BodyPattern[] = ["buttas", "checks", "jaal", "vairaoosi", "stripes", "sungudi", "plain"];
 const PALLU_STYLES: PalluStyle[] = ["grand", "motifRows", "stripes", "minimal"];
 const MOTIFS: Motif[] = [...MOTIF_IDS, "none"];
 
@@ -59,7 +59,6 @@ interface FormState {
   silk: SilkId;
   silkPct: number;
   zari: ZariId;
-  budget: BudgetId | "";
   design: SareeDesign;
   notes: string;
   quantity: number;
@@ -81,7 +80,6 @@ const EMPTY: FormState = {
   silk: "pureMulberry",
   silkPct: 50,
   zari: "tested",
-  budget: "",
   design: { ...PRESETS.templeBride },
   notes: "",
   quantity: 1,
@@ -141,7 +139,6 @@ function summaryText(s: FormState, t: Dict, ref?: string) {
     `• ${w.silk}: ${o.silkTypes[s.silk].label}${s.silk !== "notSure" ? ` (${pct}%)` : ""}`,
     `• ${w.zari}: ${o.zariTypes[s.zari].label}`,
     s.needed_by ? `• ${w.neededBy}: ${s.needed_by}` : "",
-    s.budget ? `• ${w.budget}: ${o.budgets[s.budget]}` : "",
     s.notes ? `• ${w.notes}: ${s.notes}` : "",
     `• ${w.name}: ${s.contact_name}${s.city ? `, ${s.city}` : ""}`,
   ];
@@ -182,7 +179,6 @@ function toPayload(s: FormState): CustomOrderSpec {
     },
     quantity: s.quantity,
     needed_by: s.needed_by || null,
-    budget_range: s.budget ? o.budgets[s.budget] : undefined,
     consent_to_contact: s.consent,
     website: s.website,
   };
@@ -333,6 +329,8 @@ export function OrderBuilder() {
     }
     const type = params.get("type");
     if (type && (SAREE_TYPE_IDS as readonly string[]).includes(type)) next = { ...next, sareeType: type as SareeTypeId };
+    const region = params.get("region");
+    if (region && (REGION_IDS as readonly string[]).includes(region)) next = { ...next, design: { ...REGION_DESIGNS[region as RegionId] } };
     const preset = params.get("preset");
     if (preset && (PRESET_IDS as readonly string[]).includes(preset)) next = { ...next, design: { ...PRESETS[preset as PresetId] } };
     setS(next);
@@ -738,24 +736,15 @@ export function OrderBuilder() {
             {step === 5 && (
               <>
                 <SectionTitle>{t.order.detailsTitle}</SectionTitle>
-                <div className="grid sm:grid-cols-3 gap-4">
+                <div className="grid sm:grid-cols-2 gap-4">
                   <Field id="quantity" label={t.order.quantity} error={errors.quantity}>
                     <input id="quantity" type="number" min={1} max={10000} inputMode="numeric" className={inputCls} value={s.quantity} onChange={(e) => set("quantity", Math.max(0, Number(e.target.value)))} />
                   </Field>
                   <Field id="needed_by" label={`${t.order.neededBy} (${t.common.optional})`} error={errors.needed_by}>
                     <input id="needed_by" type="date" min={new Date().toISOString().slice(0, 10)} className={inputCls} value={s.needed_by} onChange={(e) => set("needed_by", e.target.value)} />
                   </Field>
-                  <Field id="budget_range" label={t.order.budget}>
-                    <select id="budget_range" className={inputCls} value={s.budget} onChange={(e) => set("budget", e.target.value as BudgetId | "")}>
-                      <option value="">{t.order.select}</option>
-                      {BUDGET_IDS.map((id) => (
-                        <option key={id} value={id}>
-                          {o.budgets[id]}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
                 </div>
+                <p className="rounded-2xl border border-gold-300/70 bg-gold-50 px-4 py-3 text-sm text-heritage-brown-800 leading-relaxed">{t.order.priceNote}</p>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <Field id="contact_name" label={t.order.name} error={errors.contact_name}>
                     <input id="contact_name" autoComplete="name" className={inputCls} value={s.contact_name} onChange={(e) => set("contact_name", e.target.value)} />

@@ -8,16 +8,20 @@
  */
 import { LOOM } from "./sceneConfig";
 
-/** Fraction of the warp width on EACH side controlled by the jacquard (the borders). */
-export const BORDER_FRACTION = 0.16;
+/**
+ * The hero loom follows the classic floor-loom layout (head roller, heddle shafts, beater,
+ * treadles, ratchet rollers), so every warp thread is on the shafts: no jacquard threads.
+ * Set BORDER_FRACTION > 0 to bring back jacquard-controlled border threads.
+ */
+export const BORDER_FRACTION = 0;
 
 export function borderCount(total: number) {
-  return Math.max(4, Math.round(total * BORDER_FRACTION));
+  return BORDER_FRACTION > 0 ? Math.max(4, Math.round(total * BORDER_FRACTION)) : 0;
 }
 
 export function isBorderThread(i: number, total: number) {
   const b = borderCount(total);
-  return i < b || i >= total - b;
+  return b > 0 && (i < b || i >= total - b);
 }
 
 /**

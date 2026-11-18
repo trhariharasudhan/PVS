@@ -12,7 +12,6 @@ export function generateMetadata(): Metadata {
 }
 
 const b = siteConfig.business;
-const MAP_EMBED = "https://www.google.com/maps?q=Panjakalipatti,+Kalipatti,+Tamil+Nadu+636455&z=14&output=embed";
 
 export default function ContactPage() {
   const { t } = getI18n();
@@ -98,9 +97,40 @@ export default function ContactPage() {
               </a>
             </div>
           </div>
-          <div className="overflow-hidden rounded-[2rem] border border-heritage-brown-100 bg-ivory-100 aspect-[4/3]">
-            <iframe title={t.common.mapLabel} src={MAP_EMBED} className="h-full w-full" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
-          </div>
+          {b.address.mapEmbedUrl ? (
+            <div className="overflow-hidden rounded-[2rem] border border-heritage-brown-100 bg-ivory-100 aspect-[4/3]">
+              <iframe title={t.common.mapLabel} src={b.address.mapEmbedUrl} className="h-full w-full" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+            </div>
+          ) : (
+            <a
+              href={b.address.googleMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative block overflow-hidden rounded-[2rem] border border-heritage-brown-100 bg-[#efe5d3] aspect-[4/3]"
+            >
+              {/* stylised map tile (no external map request): roads, river and the PVS pin */}
+              <svg viewBox="0 0 400 300" className="absolute inset-0 h-full w-full" aria-hidden="true">
+                <rect width="400" height="300" fill="#efe5d3" />
+                <path d="M-10 210 C 80 180, 160 240, 260 200 S 380 150, 420 170" stroke="#b9d3d8" strokeWidth="14" fill="none" />
+                <path d="M40 -10 L 120 310 M -10 90 L 410 140 M 230 -10 L 300 310 M 0 260 L 400 230" stroke="#fff" strokeWidth="9" fill="none" />
+                <path d="M40 -10 L 120 310 M -10 90 L 410 140 M 230 -10 L 300 310 M 0 260 L 400 230" stroke="#dccfb6" strokeWidth="1" fill="none" />
+                {Array.from({ length: 18 }, (_, i) => (
+                  <rect key={i} x={(i * 53) % 380} y={((i * 97) % 260) + 10} width="26" height="18" rx="3" fill="#e2d6bf" />
+                ))}
+                <g transform="translate(200 128)">
+                  <circle r="34" fill="#7A1022" opacity="0.12" />
+                  <path d="M0 22 C -16 2, -18 -6, -18 -12 A 18 18 0 1 1 18 -12 C 18 -6, 16 2, 0 22 Z" fill="#7A1022" />
+                  <circle cy="-12" r="7" fill="#F3D98B" />
+                </g>
+              </svg>
+              <span className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-3 rounded-2xl bg-heritage-brown-950/90 px-4 py-3 text-sm font-semibold text-ivory-50">
+                <span className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-gold-300" aria-hidden="true" /> {c.mapOpen}
+                </span>
+                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+              </span>
+            </a>
+          )}
         </div>
       </section>
     </div>

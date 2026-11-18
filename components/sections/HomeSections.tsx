@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { ArrowUpRight, Store, Users } from "lucide-react";
-import { FOUNDER, MILESTONES, ORDER_TERMS, visible } from "@/data/business";
+import { FOUNDER, ORDER_TERMS, visible } from "@/data/business";
 import { Reveal, SplitWords } from "@/components/motion/Reveal";
 import { DiamondRule, Kolam, KovilBorder } from "@/components/ui/Ornament";
 import { DraftBadge } from "@/components/ui/DraftBadge";
 import { WaysToOrder } from "./WaysToOrder";
 import { OrderingJourney } from "./OrderingJourney";
 import { TrendsStrip } from "./TrendsStrip";
+import { PaymentTerms } from "./PaymentTerms";
 import { getI18n } from "@/i18n/server";
 import { fmt } from "@/i18n/fmt";
 
@@ -90,6 +91,9 @@ export function JourneySection() {
         <div className="lg:col-span-7">
           <OrderingJourney />
         </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        <PaymentTerms />
       </div>
     </section>
   );
@@ -175,7 +179,8 @@ export function AudienceSection() {
 export function FounderTeaser() {
   const { t } = getI18n();
   const h = t.home;
-  const shown = MILESTONES.map((m, i) => ({ ...m, text: t.about.milestones[i] })).filter((m) => visible(m.body));
+  const ms = t.about.milestones;
+  const shown = [0, 2, 3, ms.length - 1].map((i) => ({ i, text: ms[i] }));
   return (
     <section className="bg-ivory-100/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 grid lg:grid-cols-12 gap-12 items-start">
@@ -197,15 +202,9 @@ export function FounderTeaser() {
         <Reveal variant="stagger" as="ol" className="lg:col-span-7 grid sm:grid-cols-2 gap-4">
           {shown.map((m) => (
             <li key={m.text.title} data-reveal-item className="rounded-3xl bg-white border border-heritage-brown-100 p-6">
-              {visible(m.year) && (
-                <p className="font-serif text-3xl text-gold-700">
-                  {m.year.value} <DraftBadge fact={m.year} />
-                </p>
-              )}
+              <p className="font-serif text-3xl text-gold-700">{m.i === ms.length - 1 ? t.about.today : String(m.i + 1).padStart(2, "0")}</p>
               <p className="mt-2 font-semibold text-heritage-brown-950">{m.text.title}</p>
-              <p className="mt-2 text-sm text-heritage-brown-700 leading-relaxed">
-                {m.text.body} <DraftBadge fact={m.body} />
-              </p>
+              <p className="mt-2 text-sm text-heritage-brown-700 leading-relaxed">{m.text.body}</p>
             </li>
           ))}
         </Reveal>
@@ -233,7 +232,12 @@ export function TrendsSection() {
         <div className="mt-12">
           <TrendsStrip />
         </div>
-        <p className="mt-4 text-xs text-heritage-brown-600">{t.common.illustration}</p>
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+          <p className="text-xs text-heritage-brown-600">{t.common.illustration}</p>
+          <Link href="/what-we-weave#regions" className="group inline-flex items-center gap-2 text-sm font-semibold tracking-widest uppercase text-silk-red-700">
+            {t.regions.eyebrow} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+          </Link>
+        </div>
       </div>
     </section>
   );

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { OrderBuilder } from "@/components/custom-order/OrderBuilder";
 import { WaysToOrder } from "@/components/sections/WaysToOrder";
+import { PaymentTerms } from "@/components/sections/PaymentTerms";
 import { KovilBorder } from "@/components/ui/Ornament";
 import { getI18n } from "@/i18n/server";
 
@@ -28,6 +29,7 @@ export default function CustomOrderPage() {
         <Suspense>
           <OrderBuilder />
         </Suspense>
+        <PaymentTerms className="mt-16" />
       </section>
 
       <section className="bg-heritage-brown-950 py-20">

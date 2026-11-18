@@ -9,11 +9,14 @@ import { lerp, range, sceneT, smooth, step, type ProgressStore } from "../math";
 import type { HeroAssets } from "../useHeroAssets";
 import { useDisposable } from "../useDisposable";
 import { WarpThreads, type WarpState } from "./WarpThreads";
-import { Jacquard, type MechState } from "./Jacquard";
 import { borderCount, isBorderThread, threadX } from "../jacquard";
+import { turntableAngle } from "../CameraRig";
 
 /**
- * Procedural traditional handloom (fly-shuttle frame loom).
+ * Procedural traditional floor handloom, laid out like the classic loom diagram:
+ * uprights + head roller (heddle cords), two heddle shafts, hanging beater with handtree,
+ * hand-thrown shuttle, back beam + warp roller (ratchet, pawl, crank handle), breast beam +
+ * cloth roller (ratchet + take-up handle), treadles hinged on the front crosspiece.
  *
  * MODULAR / REPLACEABLE: this is a code-built model. When a Blender GLB is ready,
  * replace <LoomFrame/> with the GLB and keep the animated parts (shafts, batten,
@@ -36,6 +39,29 @@ interface BeamProps {
 function Beam({ size, position, material, rotation }: BeamProps) {
   return (
     <RoundedBox args={size} radius={Math.min(...size) * 0.18} smoothness={3} position={position} rotation={rotation} castShadow receiveShadow material={material} />
+  );
+}
+
+/** Iron ratchet wheel (teeth) on a roller end. Rotates about X. */
+function Ratchet({ a, r }: { a: HeroAssets; r: number }) {
+  const teeth = 16;
+  return (
+    <group>
+      <mesh rotation={[0, 0, Math.PI / 2]} castShadow material={a.metal}>
+        <cylinderGeometry args={[r, r, 0.03, 32]} />
+      </mesh>
+      {Array.from({ length: teeth }, (_, i) => {
+        const t = (i / teeth) * Math.PI * 2;
+        return (
+          <mesh key={i} position={[0, Math.cos(t) * r, Math.sin(t) * r]} rotation={[t + 0.5, 0, 0]} material={a.metal}>
+            <boxGeometry args={[0.03, 0.022, 0.012]} />
+          </mesh>
+        );
+      })}
+      <mesh rotation={[0, 0, Math.PI / 2]} material={a.brass}>
+        <cylinderGeometry args={[0.02, 0.02, 0.05, 12]} />
+      </mesh>
+    </group>
   );
 }
 
@@ -85,10 +111,16 @@ function LoomFrame({ a }: { a: HeroAssets }) {
           </mesh>
         </group>
       ))}
-      {/* Shuttle boxes at each side of the race board */}
+      {/* Head roller: carries the heddle cords over the top */}
+      <mesh position={[0, 1.95, -0.15]} rotation={[0, 0, Math.PI / 2]} castShadow material={a.wood}>
+        <cylinderGeometry args={[0.04, 0.04, LOOM.width + 0.2, 20]} />
+      </mesh>
       {[-1, 1].map((s) => (
-        <Beam key={`box${s}`} size={[0.2, 0.07, 0.11]} position={[s * 1.0, 0.86, 0.33]} material={a.woodDark} />
+        <Beam key={`hrs${s}`} size={[0.06, 0.12, 0.06]} position={[s * (X_POST + 0.0), 1.93, -0.15]} material={a.woodDark} />
       ))}
+      {/* Front crosspiece (treadle hinge) and back cross beam at floor level */}
+      <Beam size={[LOOM.width, 0.06, 0.08]} position={[0, 0.05, Z_FRONT + 0.05]} material={a.woodDark} />
+      <Beam size={[LOOM.width, 0.06, 0.06]} position={[0, 0.5, Z_BACK]} material={a.woodDark} />
       {/* Iron bolts */}
       {bolts.map((p, i) => (
         <mesh key={i} position={p} rotation={[0, 0, Math.PI / 2]} material={a.metal}>
@@ -144,10 +176,10 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
   const weft = useRef<THREE.Mesh>(null);
   const cords = useRef<(THREE.Mesh | null)[]>([]);
   const warpState = useRef<WarpState>({ reveal: 0, shed: 0, fellZ: LOOM.fellStartZ, pick: 0 });
-  const mech = useRef<MechState>({ pick: 0, advance: 0, shed: 0, weaving: false });
-  const handle = useRef<THREE.Group>(null);
-  const pickers = useRef<(THREE.Mesh | null)[]>([]);
-  const pickCords = useRef<(THREE.Mesh | null)[]>([]);
+  const warpRoller = useRef<THREE.Group>(null);
+  const warpRatchet = useRef<THREE.Group>(null);
+  const clothRatchet = useRef<THREE.Group>(null);
+  const takeUpHandle = useRef<THREE.Group>(null);
 
   // Ground shafts carry only the body threads; the borders belong to the jacquard.
   const nBorder = borderCount(quality.warpThreads);
@@ -213,6 +245,8 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
     // Leave the stage once the saree has been presented.
     const exit = step(sceneT(p, "saree"), 0.2, 0.85);
     g.position.set(0, -0.15 * exit, -4.2 * exit);
+    // turntable during the opening (camera holds still → the key light's shadows sweep the floor)
+    g.rotation.y = -turntableAngle(p);
     g.visible = p < 0.66;
     if (!g.visible) return;
 
@@ -235,15 +269,15 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
     if (shaftA.current) shaftA.current.position.y = shed;
     if (shaftB.current) shaftB.current.position.y = -shed;
     const shedAmt = LOOM.shedOpen * shedOpen + Math.abs(idle);
-    mech.current.pick = weaving ? pickIdx : 0;
-    mech.current.advance = weaving || tWeave >= 1 ? tWeave * PICKS : 0;
-    mech.current.shed = weaving ? LOOM.shedOpen * shedOpen : 0;
-    mech.current.weaving = weaving;
 
     // Treadles: one pressed per pick
     const press = 0.16 * shedOpen;
-    if (treadleA.current) treadleA.current.rotation.x = sign > 0 ? press : 0.02;
-    if (treadleB.current) treadleB.current.rotation.x = sign < 0 ? press : 0.02;
+    // back ends rest slightly raised; pressing a treadle pulls its back end (and shaft cords) down
+    const REST = 0.12;
+    const rotA = REST - (sign > 0 ? press : 0);
+    const rotB = REST - (sign < 0 ? press : 0);
+    if (treadleA.current) treadleA.current.rotation.x = rotA;
+    if (treadleB.current) treadleB.current.rotation.x = rotB;
 
     // Fell line and beater (reed) beat-up
     const fellZ = lerp(LOOM.fellStartZ, LOOM.fellEndZ, tWeave);
@@ -274,22 +308,13 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
     warpState.current.pick = weaving ? pickIdx : 0;
     warpState.current.fellZ = fellZ;
 
-    // Fly-shuttle: the weaver jerks the picking handle toward the throw direction;
-    // the picker on the starting side strikes the shuttle out of its box.
-    const strike = weaving ? Math.sin(Math.PI * range(frac, 0.04, 0.26)) : 0;
-    if (handle.current) {
-      handle.current.position.x = dir * 0.3 * strike;
-      handle.current.rotation.z = -dir * 0.35 * strike;
-    }
-    const startSide = -dir; // shuttle starts on this side
-    for (let k = 0; k < 2; k++) {
-      const side = k === 0 ? -1 : 1;
-      const pk = pickers.current[k];
-      if (pk) pk.position.x = side * (1.08 - (side === startSide ? 0.1 * strike : 0));
-      v.a.set(side * (1.08 - (side === startSide ? 0.1 * strike : 0)), 0.92, 0.33);
-      v.b.set(handle.current ? handle.current.position.x : 0, 1.3, 0.42);
-      setCord(pickCords.current[k], v.a, v.b, 0.0025);
-    }
+    // Let-off & take-up: every few picks the weaver releases the warp roller one ratchet tooth
+    // and winds the cloth roller with the take-up handle. Both rotate in discrete clicks.
+    const clicks = Math.floor(tWeave * PICKS / 2);
+    if (warpRoller.current) warpRoller.current.rotation.x = clicks * 0.06;
+    if (warpRatchet.current) warpRatchet.current.rotation.x = clicks * 0.06;
+    if (clothRatchet.current) clothRatchet.current.rotation.x = -tWeave * 9;
+    if (takeUpHandle.current) takeUpHandle.current.rotation.x = -tWeave * 9;
 
     // Warp beam fills with red yarn during thread preparation
     if (warpWrap.current) {
@@ -345,11 +370,12 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
       for (let j = 0; j < 2; j++) {
         const x = j === 0 ? -PULLEY_X : PULLEY_X;
         v.a.set(x, shaftTopY + off, z);
-        v.b.set(x, 1.76, -0.15);
+        v.b.set(x, 1.91, -0.15);
         setCord(cs[k * 4 + j], v.a, v.b);
         v.a.set(x * 0.5, shaftBotY + off, z);
-        const tr = k === 0 ? (sign > 0 ? press : 0.02) : sign < 0 ? press : 0.02;
-        v.b.set(k === 0 ? -0.15 : 0.15, 0.1 - Math.sin(tr) * 0.45, -0.15);
+        const tr = k === 0 ? rotA : rotB;
+        // cord meets the treadle 1.25 m behind its hinge (z = -0.15)
+        v.b.set(k === 0 ? -0.15 : 0.15, 0.08 + Math.sin(tr) * 1.25, -0.15);
         setCord(cs[k * 4 + 2 + j], v.a, v.b);
       }
     }
@@ -383,15 +409,38 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
     <group ref={root}>
       <LoomFrame a={a} />
 
-      {/* Warp beam (back) with yarn wrap */}
-      <group position={[0, LOOM.warpY - 0.1, LOOM.backBeamZ]}>
-        <mesh rotation={[0, 0, Math.PI / 2]} castShadow material={a.wood}>
-          <cylinderGeometry args={[0.07, 0.07, LOOM.width + 0.1, 24]} />
-        </mesh>
+      {/* Warp roller (low at the back) with yarn wrap; warp rises over the back beam */}
+      <group position={[0, 0.42, LOOM.backBeamZ + 0.02]}>
+        <group ref={warpRoller}>
+          <mesh rotation={[0, 0, Math.PI / 2]} castShadow material={a.wood}>
+            <cylinderGeometry args={[0.07, 0.07, LOOM.width + 0.1, 24]} />
+          </mesh>
+        </group>
         <mesh ref={warpWrap} rotation={[0, 0, Math.PI / 2]} material={a.yarn}>
           <cylinderGeometry args={[0.095, 0.095, LOOM.warpWidth, 32]} />
         </mesh>
+        {/* ratchet wheel + pawl + crank handle on the right */}
+        <group position={[X_POST + 0.09, 0, 0]}>
+          <group ref={warpRatchet}>
+            <Ratchet a={a} r={0.1} />
+            <group position={[0.04, 0, 0]}>
+              <mesh position={[0.02, 0.09, 0]} material={a.metal} castShadow>
+                <boxGeometry args={[0.02, 0.18, 0.025]} />
+              </mesh>
+              <mesh position={[0.06, 0.18, 0]} rotation={[0, 0, Math.PI / 2]} material={a.woodDark} castShadow>
+                <cylinderGeometry args={[0.014, 0.014, 0.09, 10]} />
+              </mesh>
+            </group>
+          </group>
+          <mesh position={[0, 0.13, -0.09]} rotation={[0.6, 0, 0]} material={a.metal}>
+            <boxGeometry args={[0.012, 0.012, 0.11]} />
+          </mesh>
+        </group>
       </group>
+      {/* Warp sheet from the roller up to the back beam */}
+      <mesh position={[0, (0.42 + LOOM.warpY) / 2, LOOM.backBeamZ - 0.03]} rotation={[-0.06, 0, 0]} material={a.yarn}>
+        <boxGeometry args={[LOOM.warpWidth, LOOM.warpY - 0.42, 0.004]} />
+      </mesh>
 
       {/* Heddle shafts (two, moving in opposition) */}
       {shaft(shaftA, -0.2, 0)}
@@ -400,23 +449,6 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
       {/* Warp threads */}
       <WarpThreads count={quality.warpThreads} state={warpState} />
 
-      {/* Border jacquards: punch cards, harness cords, lingoes */}
-      <Jacquard assets={a} warpThreads={quality.warpThreads} mech={mech} />
-
-      {/* Fly-shuttle picking handle, pickers and cords */}
-      <group ref={handle} position={[0, 1.3, 0.42]}>
-        <mesh position={[0, -0.06, 0]} material={a.wood} castShadow>
-          <cylinderGeometry args={[0.014, 0.018, 0.13, 10]} />
-        </mesh>
-      </group>
-      {[0, 1].map((k) => (
-        <mesh key={`picker${k}`} ref={(m) => { pickers.current[k] = m; }} position={[k === 0 ? -1.08 : 1.08, 0.9, 0.33]} material={a.woodDark}>
-          <boxGeometry args={[0.05, 0.04, 0.06]} />
-        </mesh>
-      ))}
-      {[0, 1].map((k) => (
-        <mesh key={`pcord${k}`} ref={(m) => { pickCords.current[k] = m; }} geometry={inst.unitCyl} material={a.handle} />
-      ))}
 
       {/* Batten / beater hanging from the overhead pivot */}
       <group ref={batten} position={[PIVOT_X, PIVOT_Y, PIVOT_Z]}>
@@ -433,6 +465,10 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
           <boxGeometry args={[1.95, 0.035, 0.12]} />
         </mesh>
         <instancedMesh ref={setupDents} args={[inst.dentGeo, a.metal, DENTS]} position={[0, -0.86, 0]} frustumCulled={false} />
+        {/* handtree: the bar the weaver pulls to beat each pick */}
+        <mesh position={[0, -0.72, 0.07]} rotation={[0, 0, Math.PI / 2]} castShadow material={a.wood}>
+          <cylinderGeometry args={[0.025, 0.025, 1.9, 16]} />
+        </mesh>
         {/* Shuttle rides on the race board */}
         <group ref={shuttle} position={[-1.0, -0.93, 0.045]}>
           <mesh rotation={[0, 0, Math.PI / 2]} scale={[1, 1, 0.75]} castShadow material={a.woodDark}>
@@ -462,25 +498,37 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
           <mesh rotation={[0, 0, Math.PI / 2]} castShadow material={a.wood}>
             <cylinderGeometry args={[0.065, 0.065, LOOM.width + 0.1, 24]} />
           </mesh>
-          {[-1, 1].map((s) => (
-            <mesh key={s} position={[s * (LOOM.width / 2 + 0.08), 0, 0]} rotation={[0, 0, Math.PI / 2]} material={a.metal}>
-              <torusGeometry args={[0.07, 0.012, 8, 20]} />
+        </group>
+        {/* ratchet + take-up motion handle on the right */}
+        <group position={[X_POST + 0.09, 0, 0]}>
+          <group ref={clothRatchet}>
+            <Ratchet a={a} r={0.09} />
+          </group>
+          <group ref={takeUpHandle} position={[0.05, 0, 0]}>
+            <mesh position={[0, 0.1, 0]} material={a.metal} castShadow>
+              <boxGeometry args={[0.018, 0.2, 0.022]} />
             </mesh>
-          ))}
+            <mesh position={[0.04, 0.2, 0]} rotation={[0, 0, Math.PI / 2]} material={a.woodDark} castShadow>
+              <cylinderGeometry args={[0.013, 0.013, 0.08, 10]} />
+            </mesh>
+          </group>
+          <mesh position={[0, 0.12, 0.08]} rotation={[-0.6, 0, 0]} material={a.metal}>
+            <boxGeometry args={[0.012, 0.012, 0.1]} />
+          </mesh>
         </group>
         <mesh ref={clothWrap} rotation={[0, 0, Math.PI / 2]} material={a.loomSilk} visible={false}>
           <cylinderGeometry args={[0.075, 0.075, LOOM.warpWidth, 32]} />
         </mesh>
       </group>
 
-      {/* Treadles (hinged at the back) */}
+      {/* Treadles (hinged on the front crosspiece, cords to the shafts at the back end) */}
       {[
         { ref: treadleA, x: -0.15 },
         { ref: treadleB, x: 0.15 },
       ].map(({ ref, x }) => (
-        <group key={x} ref={ref} position={[x, 0.1, -0.6]}>
-          <mesh position={[0, 0, 0.7]} castShadow material={a.woodDark}>
-            <boxGeometry args={[0.1, 0.035, 1.4]} />
+        <group key={x} ref={ref} position={[x, 0.08, Z_FRONT + 0.05]}>
+          <mesh position={[0, 0, -0.75]} castShadow material={a.woodDark}>
+            <boxGeometry args={[0.1, 0.035, 1.5]} />
           </mesh>
         </group>
       ))}
