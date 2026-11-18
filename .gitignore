@@ -54,3 +54,6 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 postgres_data/
+
+# Local dev uploads (customer design files)
+backend/uploads/

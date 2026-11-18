@@ -8,10 +8,10 @@
 
 export const siteConfig = {
   name: "PVS",
-  brandTitle: "PVS | Pattu Saree Manufacturer | Wholesale & Retail",
+  brandTitle: "PVS Silks | Silk Saree Manufacturer, Salem | Custom & Wholesale Orders",
   tagline: "Tradition Woven Into Every Saree",
   description:
-    "PVS is a premier pattu saree manufacturer based in Panjakalipatti, Kalipatti, Salem district, Tamil Nadu. Crafted with traditional elegance, distinctive colours and timeless craftsmanship. Wholesale and retail available.",
+    "PVS is a silk saree manufacturer in Panjakalipatti, Kalipatti, Salem district, Tamil Nadu. We weave pattu sarees to order — your colours, your design, your choice of silk and zari — for families, boutiques and wholesale buyers.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://pvssilks.com",
   ogImage: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop",
 
@@ -34,7 +34,7 @@ export const siteConfig = {
     name: "PVS",
     owner: "Sathish Kumar",
     category: "Pattu Saree Manufacturer",
-    positioning: "Wholesale & Retail Available",
+    positioning: "Made-to-order • Families & Wholesale",
     location: "Salem, Tamil Nadu, India",
     address: {
       street: "Raaja Veedhi",
@@ -95,12 +95,10 @@ export const siteConfig = {
   // Main Desktop & Mobile Navigation Links
   navLinks: [
     { label: "Home", href: "/" },
-    { label: "Collections", href: "/collections" },
+    { label: "How We Weave", href: "/our-craft" },
+    { label: "What We Weave", href: "/what-we-weave" },
     { label: "Wholesale", href: "/wholesale" },
-    { label: "Our Craft", href: "/our-craft" },
     { label: "About", href: "/about" },
-    { label: "Gallery", href: "/gallery" },
-    { label: "Shop", href: "/shop" },
     { label: "Contact", href: "/contact" },
   ],
 };

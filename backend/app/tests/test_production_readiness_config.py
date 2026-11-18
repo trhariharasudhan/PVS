@@ -50,6 +50,9 @@ async def test_production_readiness_validation_passes_on_valid_config():
         CORS_ORIGINS=["https://pvssilks.com", "https://admin.pvssilks.com"],
         BANK_ACCOUNT_NUMBER="40991122334",
         BANK_IFSC="SBIN0001234",
+        STORAGE_BACKEND="supabase",
+        SUPABASE_URL="https://example-ref.supabase.co",
+        SUPABASE_SERVICE_ROLE_KEY="test-service-role-key",
     )
     errors = prod_cfg.validate_production_readiness()
     assert len(errors) == 0
@@ -178,3 +181,20 @@ def test_asyncpg_ssl_compatibility_direct_connect_args():
 
     assert opts["ssl"] == "require"
     assert "sslmode" not in opts
+
+
+@pytest.mark.asyncio
+async def test_production_readiness_requires_supabase_upload_storage():
+    """Customer design uploads must use durable private storage in production."""
+    cfg = Settings(
+        ENVIRONMENT="production",
+        SECRET_KEY="a" * 64,
+        DATABASE_URL="postgresql+asyncpg://user:pass@prod-db.internal:5432/pvs_db",
+        GST_ENABLED=False,
+        CORS_ORIGINS=["https://pvssilks.com"],
+        BANK_ACCOUNT_NUMBER="40991122334",
+        BANK_IFSC="SBIN0001234",
+        STORAGE_BACKEND="local",
+    )
+    assert any("STORAGE_BACKEND" in e for e in cfg.validate_production_readiness())
+

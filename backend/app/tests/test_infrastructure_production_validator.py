@@ -113,7 +113,8 @@ def test_alembic_single_head_linear_chain():
     res = val.validate_alembic_single_head_migration()
     assert res["status"] == InfraCheckStatus.PASS.value
     assert (
-        "0006_phase_6_04_communication_events" in res["details"]
+        "0007_custom_order_requests" in res["details"]
+        or "0006_phase_6_04_communication_events" in res["details"]
         or "0005_phase_6_03_payment_webhook_events" in res["details"]
         or "0004_phase_6_01_dealer_pricing_tiers" in res["details"]
         or "0003_phase_4c_d_finance_invoicing" in res["details"]

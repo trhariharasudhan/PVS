@@ -1,57 +1,32 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { siteConfig, getWhatsAppLink } from "@/config/site";
-import { MessageCircle, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { MessageCircle } from "lucide-react";
+import { getWhatsAppLink, siteConfig } from "@/config/site";
 
+/** Quiet floating WhatsApp button; appears after the first screen of scrolling. */
 export function FloatingWhatsApp() {
-  const [isVisible, setIsVisible] = useState(false);
-  const [hasDismissedTooltip, setHasDismissedTooltip] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Show after scrolling 150px
-    const handleScroll = () => {
-      if (window.scrollY > 150) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setVisible(window.scrollY > window.innerHeight * 0.6);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  if (!isVisible) return null;
-
-  const url = getWhatsAppLink(siteConfig.whatsappTemplates.general());
-
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 animate-fade-in-subtle">
-      {/* Floating Tooltip Pill */}
-      {!hasDismissedTooltip && (
-        <div className="hidden sm:flex items-center gap-2 bg-heritage-brown-900 text-ivory-50 text-xs px-3.5 py-2 rounded-[4px] shadow-luxury border border-gold-500/40 font-sans">
-          <span className="font-serif">Enquire on WhatsApp</span>
-          <button
-            type="button"
-            onClick={() => setHasDismissedTooltip(true)}
-            className="text-gold-300 hover:text-white ml-1"
-            aria-label="Dismiss message"
-          >
-            <X className="w-3 h-3" />
-          </button>
-        </div>
-      )}
-
-      {/* Floating Button in Deep Maroon & Antique Gold Accent */}
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-13 h-13 p-3.5 bg-deep-maroon-800 hover:bg-silk-red-700 text-ivory-50 rounded-full shadow-luxury flex items-center justify-center transition-all duration-300 hover:scale-105 border-2 border-gold-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500"
-        aria-label="Direct WhatsApp Consultation with PVS Silk S"
-      >
-        <MessageCircle className="w-6 h-6 text-gold-300" />
-      </a>
-    </div>
+    <a
+      href={getWhatsAppLink(siteConfig.whatsappTemplates.general())}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Chat with PVS on WhatsApp"
+      tabIndex={visible ? 0 : -1}
+      className={`fixed bottom-5 right-5 z-40 h-14 w-14 rounded-full bg-heritage-brown-950 text-gold-300 border border-gold-400/60 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-500 hover:bg-silk-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+      }`}
+    >
+      <MessageCircle className="w-6 h-6" aria-hidden="true" />
+    </a>
   );
 }

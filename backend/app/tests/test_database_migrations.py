@@ -29,6 +29,7 @@ def test_alembic_migration_chain_is_linear_and_single_headed():
     assert len(heads) == 1, f"Expected exactly 1 migration head, found {len(heads)}: {heads}"
     head_rev = heads[0]
     assert head_rev in [
+        "0007_custom_order_requests",
         "0006_phase_6_04_communication_events",
         "0005_phase_6_03_payment_webhook_events",
         "0004_phase_6_01_dealer_pricing_tiers",
@@ -45,7 +46,17 @@ def test_alembic_migration_chain_is_linear_and_single_headed():
         else:
             break
 
-    if head_rev == "0006_phase_6_04_communication_events":
+    if head_rev == "0007_custom_order_requests":
+        expected_chain = [
+            "0007_custom_order_requests",
+            "0006_phase_6_04_communication_events",
+            "0005_phase_6_03_payment_webhook_events",
+            "0004_phase_6_01_dealer_pricing_tiers",
+            "0003_phase_4c_d_finance_invoicing",
+            "0002_phase_4c_c_procurement_payments",
+            "0001_initial_schema",
+        ]
+    elif head_rev == "0006_phase_6_04_communication_events":
         expected_chain = [
             "0006_phase_6_04_communication_events",
             "0005_phase_6_03_payment_webhook_events",
@@ -91,6 +102,7 @@ def test_sqlalchemy_metadata_tables_and_foreign_keys():
         "inventory",
         "payment_webhook_events",
         "communication_events",
+        "custom_order_requests",
 
 
 

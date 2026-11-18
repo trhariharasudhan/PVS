@@ -1,186 +1,151 @@
-import React from "react";
-import Image from "next/image";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowUpRight, Eye, HandHeart, Scale } from "lucide-react";
 import { siteConfig } from "@/config/site";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { GoldDivider } from "@/components/ui/GoldDivider";
-import {
-  ShieldCheck,
-  Building2,
-  MapPin,
-  Phone,
-  MessageCircle,
-  ShoppingBag,
-  Sparkles,
-  Layers,
-  ArrowRight,
-} from "lucide-react";
+import { FOUNDER, MILESTONES, SHOW_DRAFT_CONTENT, WORKSHOP_FACTS, visible } from "@/data/business";
+import { Reveal, SplitWords } from "@/components/motion/Reveal";
+import { DraftBadge } from "@/components/ui/DraftBadge";
+import { Kolam, KovilBorder } from "@/components/ui/Ornament";
+import { WaysToOrder } from "@/components/sections/WaysToOrder";
 
-export const metadata = {
-  title: "About PVS & Sathish Kumar | Pattu Saree Manufacturer",
+export const metadata: Metadata = {
+  title: `Our Story — ${FOUNDER.name.value} & PVS`,
   description:
-    "The story behind PVS, a Tamil Nadu pattu saree manufacturing business led by Sathish Kumar in Panjakalipatti, Kalipatti, Salem. Wholesale and retail available.",
+    "How PVS grew from one weaver at one loom in Panjakalipatti, Salem district, into a silk saree manufacturer weaving for retailers and families.",
+  alternates: { canonical: "/about" },
 };
 
+const VALUES = [
+  { icon: Scale, title: "Honest materials", body: "Silk type, silk % and zari grade are written down before weaving. No vague “silk-like” promises." },
+  { icon: Eye, title: "You see it first", body: "Design and colours are approved by you before the warp goes on the loom." },
+  { icon: HandHeart, title: "Weaver to wearer", body: "You deal directly with the people who weave your saree — no showroom in between." },
+];
+
 export default function AboutPage() {
+  const facts = WORKSHOP_FACTS.filter((f) => visible(f.fact));
+  const milestones = MILESTONES.filter((m) => visible(m.body));
+
   return (
-    <div className="min-h-screen bg-ivory-50 pb-24">
-      {/* Header Banner */}
-      <section className="bg-silk-cream-100/70 text-heritage-brown-950 py-16 sm:py-24 border-b border-gold-300/40 relative overflow-hidden">
-        <div className="absolute inset-0 bg-textile-weave opacity-40 pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-3">
-          <span className="text-xs font-semibold tracking-widest uppercase text-silk-red-700 font-mono">
-            PVS BRAND & LEADERSHIP
-          </span>
-          <GoldDivider variant="motif" theme="light" className="!my-2" />
-          <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-heritage-brown-950">
-            The Story Behind PVS
-          </h1>
-          <p className="mt-3 text-base sm:text-lg text-heritage-brown-700 max-w-2xl mx-auto font-sans leading-relaxed">
-            Pattu saree manufacturing founded on direct loom craftsmanship, authentic silk, and
-            unbroken South Indian tradition in Salem, Tamil Nadu.
-          </p>
+    <div className="bg-ivory-50">
+      {/* Hero */}
+      <section className="relative bg-weave overflow-hidden">
+        <Kolam className="pointer-events-none absolute -left-24 bottom-0 w-96 text-gold-400/20" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-24 grid lg:grid-cols-12 gap-10 items-end">
+          <div className="lg:col-span-8">
+            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-silk-red-700">Our story</p>
+            <h1 className="mt-4 font-serif text-5xl sm:text-7xl font-medium leading-[0.98] text-heritage-brown-950 text-balance">
+              It began with <span className="italic text-silk-red-700">one weaver</span> and one loom.
+            </h1>
+          </div>
+          <div className="lg:col-span-4">
+            <p className="font-tamil text-xl text-gold-700" lang="ta">
+              பாரம்பரியம் • வண்ணம் • பட்டு
+            </p>
+            <p className="mt-2 text-sm text-heritage-brown-600">Parampariyam · Vannam · Silk — heritage, colour, silk.</p>
+          </div>
         </div>
       </section>
 
-      {/* Main Narrative Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Left Column: Visual */}
-          <div className="lg:col-span-5 space-y-4">
-            <div className="relative aspect-[4/5] rounded-[4px] overflow-hidden bg-heritage-brown-950 border-2 border-gold-400/60 shadow-luxury">
-              <Image
-                src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop"
-                alt="PVS Pattu Saree Manufacturing - Sathish Kumar"
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 40vw"
-                className="object-cover object-center"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-heritage-brown-950/90 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 bg-heritage-brown-950/90 text-ivory-100 p-4 rounded-[4px] border border-gold-400/40 text-xs space-y-1">
-                <p className="font-serif font-bold text-gold-300 text-sm">
-                  PVS — Sathish Kumar
-                </p>
-                <p className="text-[11px] text-ivory-300 font-sans">
-                  Pattu Saree Manufacturer • Raaja Veedhi, Panjakalipatti, Kalipatti, Salem, Tamil Nadu 636455
-                </p>
-              </div>
-            </div>
-            <p className="text-[11px] text-heritage-brown-600 text-center font-sans">
-              Wholesale Supply & Retail Availability directly from our weaving unit.
+      {/* Founder */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 grid lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-5">
+          {/* No stock photo of a stranger: an ornament until real workshop photos are provided */}
+          <div className="relative aspect-[4/5] rounded-[2rem] bg-heritage-brown-950 overflow-hidden flex items-center justify-center">
+            <Kolam className="w-2/3 text-gold-400/70" />
+            <KovilBorder className="absolute bottom-0 left-0 w-full h-4 text-gold-500/40" count={20} />
+            <p className="absolute top-6 left-6 font-serif text-ivory-50 text-2xl">{FOUNDER.name.value}</p>
+            <p className="absolute top-14 left-6 text-xs tracking-widest uppercase text-gold-300">Founder, PVS</p>
+            {SHOW_DRAFT_CONTENT && (
+              <p className="absolute bottom-8 inset-x-6 text-center text-[11px] text-amber-200">DRAFT: replace with a real photo of Sathish Kumar at the loom</p>
+            )}
+          </div>
+        </div>
+        <div className="lg:col-span-7 lg:pt-6">
+          <Reveal variant="words" as="h2" className="font-serif text-4xl sm:text-5xl leading-[1.05] text-heritage-brown-950">
+            <SplitWords text={`${FOUNDER.name.value} learned the craft the long way — at the loom.`} />
+          </Reveal>
+          <div className="mt-8 space-y-5 text-lg text-heritage-brown-700 leading-relaxed">
+            {visible(FOUNDER.learnedFrom) && (
+              <p>
+                {FOUNDER.learnedFrom.value} <DraftBadge fact={FOUNDER.learnedFrom} />
+              </p>
+            )}
+            <p>
+              There were no shortcuts: understanding silk, setting a warp, keeping colours true and weaving a border cleanly all came from years of
+              practice. Little by little, the workshop grew — more looms, more skilled hands, and saree shops that came back season after season.
+            </p>
+            <p>
+              Today PVS weaves for boutiques and wholesale buyers, and now opens its looms directly to families who want a saree made exactly the way
+              they imagine it.
             </p>
           </div>
 
-          {/* Right Column: Factual Introduction */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-silk-red-700 bg-silk-red-50 border border-silk-red-200 px-3 py-1 rounded-[3px]">
-              <MapPin className="w-3.5 h-3.5" />
-              <span>Salem District, Tamil Nadu</span>
-            </div>
-
-            <h2 className="font-serif text-2xl sm:text-4xl font-bold text-heritage-brown-950 leading-snug">
-              Authentic Pattu Saree Manufacturing by Sathish Kumar
-            </h2>
-
-            <div className="space-y-4 text-sm sm:text-base text-heritage-brown-700 font-sans leading-relaxed">
-              <p>
-                PVS is a dedicated pattu saree manufacturing business owned and managed by{" "}
-                <strong className="text-heritage-brown-950">Sathish Kumar</strong>, located in{" "}
-                <strong className="text-heritage-brown-950">Raaja Veedhi, Panjakalipatti, Kalipatti, Salem, Tamil Nadu 636455</strong>.
-              </p>
-              <p>
-                As a manufacturer at the source, PVS focuses on weaving genuine pattu sarees
-                distinguished by traditional elegance, distinctive colors, and structural durability.
-                By managing production directly on our looms, we serve both commercial wholesale
-                distributors and individual retail buyers without unnecessary intermediaries.
-              </p>
-            </div>
-
-            {/* Approved Brand Meanings */}
-            <div className="space-y-4 pt-2">
-              <div className="p-5 bg-white border border-gold-300 rounded-[4px] shadow-sm space-y-2">
-                <div className="flex items-center gap-2 text-silk-red-700 font-mono text-xs font-bold uppercase tracking-wider">
-                  <Sparkles className="w-4 h-4 text-gold-600" />
-                  <span>Brand Interpretation 01</span>
+          {facts.length > 0 && (
+            <dl className="mt-12 grid grid-cols-3 gap-4">
+              {facts.map(({ label, fact }) => (
+                <div key={label} className="rounded-2xl border border-heritage-brown-100 bg-white p-5">
+                  <dd className="font-serif text-4xl text-silk-red-700">{fact.value}</dd>
+                  <dt className="mt-1 text-xs text-heritage-brown-600">{label}</dt>
+                  <DraftBadge fact={fact} />
                 </div>
-                <h3 className="font-serif text-lg font-bold text-heritage-brown-950">
-                  PVS — Pattu • Vasthiram • Saree
-                </h3>
-                <p className="text-xs sm:text-sm text-heritage-brown-700 font-sans leading-relaxed">
-                  Honoring the sacred purity of authentic silk (<span className="italic font-medium">Pattu</span>),
-                  the timeless elegance of ceremonial attire (<span className="italic font-medium">Vasthiram</span>),
-                  and the quintessential Indian drape (<span className="italic font-medium">Saree</span>).
-                </p>
-              </div>
+              ))}
+            </dl>
+          )}
+        </div>
+      </section>
 
-              <div className="p-5 bg-white border border-gold-300 rounded-[4px] shadow-sm space-y-2">
-                <div className="flex items-center gap-2 text-silk-red-700 font-mono text-xs font-bold uppercase tracking-wider">
-                  <Layers className="w-4 h-4 text-gold-600" />
-                  <span>Brand Interpretation 02</span>
-                </div>
-                <h3 className="font-serif text-lg font-bold text-heritage-brown-950">
-                  PVS — Parampariyam • Vannam • Silk
-                </h3>
-                <p className="text-xs sm:text-sm text-heritage-brown-700 font-sans leading-relaxed">
-                  Celebrating our ancestral heritage (<span className="italic font-medium">Parampariyam</span>),
-                  the vibrant artistry of distinctive colors (<span className="italic font-medium">Vannam</span>),
-                  and the uncompromised luster of natural mulberry silk (<span className="italic font-medium">Silk</span>).
+      {/* Timeline */}
+      <section className="bg-heritage-brown-950 text-ivory-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+          <p className="text-xs font-semibold tracking-[0.3em] uppercase text-gold-400">The journey</p>
+          <h2 className="mt-5 font-serif text-4xl sm:text-6xl leading-[1.02]">Thread by thread</h2>
+          <Reveal variant="stagger" as="ol" className="mt-16 relative border-l border-gold-500/30 ml-3 space-y-14">
+            {milestones.map((m) => (
+              <li key={m.title} data-reveal-item className="relative pl-10">
+                <span className="absolute -left-[7px] top-2 h-3.5 w-3.5 rotate-45 bg-gold-400" aria-hidden="true" />
+                {visible(m.year) && (
+                  <p className="font-serif text-4xl text-gold-300">
+                    {m.year.value} <DraftBadge fact={m.year} />
+                  </p>
+                )}
+                <h3 className="mt-2 font-serif text-2xl">{m.title}</h3>
+                <p className="mt-2 max-w-2xl text-ivory-300 leading-relaxed">
+                  {m.body.value} <DraftBadge fact={m.body} />
                 </p>
-              </div>
+              </li>
+            ))}
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Values */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+        <p className="text-xs font-semibold tracking-[0.3em] uppercase text-silk-red-700">What we stand for</p>
+        <Reveal variant="stagger" className="mt-10 grid md:grid-cols-3 gap-5">
+          {VALUES.map(({ icon: Icon, title, body }) => (
+            <div key={title} data-reveal-item className="rounded-[2rem] bg-white border border-heritage-brown-100 p-8">
+              <Icon className="w-7 h-7 text-silk-red-700" aria-hidden="true" />
+              <h3 className="mt-6 font-serif text-2xl text-heritage-brown-950">{title}</h3>
+              <p className="mt-3 text-heritage-brown-700 leading-relaxed">{body}</p>
             </div>
+          ))}
+        </Reveal>
+      </section>
 
-            {/* Business Pillars */}
-            <div className="grid grid-cols-2 gap-4 pt-2 font-sans text-xs">
-              <div className="p-4 bg-gold-50/70 border border-gold-300 rounded-[4px]">
-                <p className="font-bold text-heritage-brown-950 uppercase tracking-wider">
-                  Wholesale Supply
-                </p>
-                <p className="text-heritage-brown-700 mt-1">
-                  Retailer, boutique, and reseller bulk orders with direct factory pricing.
-                </p>
-              </div>
-
-              <div className="p-4 bg-gold-50/70 border border-gold-300 rounded-[4px]">
-                <p className="font-bold text-heritage-brown-950 uppercase tracking-wider">
-                  Retail Availability
-                </p>
-                <p className="text-heritage-brown-700 mt-1">
-                  Individual retail customers can purchase authentic pattu sarees online and in-store.
-                </p>
-              </div>
+      {/* Visit */}
+      <section className="bg-ivory-100/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.3em] uppercase text-silk-red-700">Come and see the looms</p>
+              <h2 className="mt-4 font-serif text-4xl sm:text-5xl text-heritage-brown-950">{siteConfig.business.address.village}, Salem district</h2>
             </div>
-
-            {/* Direct Contact CTAs */}
-            <div className="pt-4 flex flex-wrap items-center gap-4">
-              <a
-                href={`https://wa.me/${siteConfig.business.whatsapp}?text=${encodeURIComponent(
-                  siteConfig.whatsappTemplates.general()
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-6 py-3.5 rounded-[4px] text-xs uppercase tracking-wider shadow-sm transition-all"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Chat with Sathish Kumar</span>
-              </a>
-
-              <a
-                href={`tel:${siteConfig.business.phoneNumeric}`}
-                className="inline-flex items-center gap-2 bg-heritage-brown-900 hover:bg-heritage-brown-950 text-ivory-50 font-semibold px-6 py-3.5 rounded-[4px] text-xs uppercase tracking-wider shadow-sm transition-all"
-              >
-                <Phone className="w-4 h-4 text-gold-400" />
-                <span>Call +91 99651 76136</span>
-              </a>
-
-              <Link
-                href="/contact"
-                className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider font-semibold text-silk-red-700 hover:underline"
-              >
-                <span>Showroom Directions</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
+            <Link href="/custom-order" className="inline-flex items-center gap-2 text-sm font-semibold tracking-widest uppercase text-silk-red-700">
+              Or start online <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="mt-10">
+            <WaysToOrder showDesignCard={false} />
           </div>
         </div>
       </section>

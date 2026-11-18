@@ -7,6 +7,11 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   "http://localhost:8000/api/v1";
 
+/** Base URL of the FastAPI backend (no trailing slash). */
+export function getApiBase(): string {
+  return API_BASE_URL.replace(/\/+$/, "");
+}
+
 export class ApiError extends Error {
   public status: number;
   public details?: unknown;

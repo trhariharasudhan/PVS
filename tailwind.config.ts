@@ -134,7 +134,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["var(--font-serif)", "Playfair Display", "Cormorant Garamond", "Cinzel", "Georgia", "serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
+        tamil: ["var(--font-tamil)", "Noto Serif Tamil", "Latha", "serif"],
         sans: ["var(--font-sans)", "Plus Jakarta Sans", "Inter", "DM Sans", "sans-serif"],
       },
       letterSpacing: {

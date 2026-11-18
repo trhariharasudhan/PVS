@@ -10,12 +10,12 @@ export const HERO_COPY: Record<SceneId, { eyebrow?: string; title: string; body?
   threads: {
     eyebrow: "Step 01 — Warp",
     title: "Silk, Thread by Thread",
-    body: "Fine red silk warp is drawn in, aligned and tensioned across the loom.",
+    body: "Fine silk warp is wound on the beam and drawn through the heddles and the jacquard harness, thread by thread.",
   },
   weaving: {
     eyebrow: "Step 02 — Weaving",
     title: "Woven on the Loom",
-    body: "Shuttle, reed and warp move as one. Pick by pick, the saree takes shape.",
+    body: "Punch cards set the border design, the shuttle flies through the open warp, and the reed beats each thread home — pick by pick.",
   },
   saree: {
     eyebrow: "Step 03 — Finish",
@@ -33,7 +33,7 @@ export const HERO_COPY: Record<SceneId, { eyebrow?: string; title: string; body?
     body: "Folded, wrapped and packed for safe delivery to your store.",
   },
   final: {
-    eyebrow: "Direct Manufacturer",
+    eyebrow: "Woven to order",
     title: "Crafted With Tradition.",
     body: "From the loom to your legacy. Discover the art of traditional silk weaving with PVS.",
   },
@@ -41,13 +41,13 @@ export const HERO_COPY: Record<SceneId, { eyebrow?: string; title: string; body?
 
 /** Concrete reasons for a retailer/wholesaler to enquire (only claims the business already makes). */
 export const VALUE_POINTS = [
-  "Direct from our looms in Salem, Tamil Nadu",
-  "Wholesale & bulk supply for boutiques and retailers",
-  "Custom weave enquiries welcome",
+  "Woven to your colours and design",
+  "Direct from our looms in Salem district — no middlemen",
+  "For families, boutiques and wholesale buyers",
 ];
 
 export const HERO_CTAS = {
-  primary: { label: "Request a Manufacturing Quote", href: "/wholesale" },
-  secondary: { label: "Explore Our Craft", href: "/our-craft" },
-  tertiary: { label: "Contact PVS", href: "/contact" },
+  primary: { label: "Start Custom Order", href: "/custom-order" },
+  secondary: { label: "How We Weave", href: "/our-craft" },
+  tertiary: { label: "Wholesale enquiry", href: "/wholesale" },
 };

@@ -31,11 +31,11 @@ export default function NotFound() {
           <span>Return Home</span>
         </Link>
         <Link
-          href="/collections"
+          href="/custom-order"
           className="inline-flex items-center gap-2 bg-white hover:bg-gold-50 text-charcoal-800 border border-gold-300 px-6 py-3 text-xs uppercase tracking-widest font-semibold rounded-sm transition-all"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>View Saree Collections</span>
+          <span>Start a Custom Order</span>
         </Link>
       </div>
     </div>

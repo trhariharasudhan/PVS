@@ -188,6 +188,7 @@ class ProductionContractValidator:
         script = ScriptDirectory.from_config(alembic_cfg)
         heads = script.get_heads()
         is_single_head = len(heads) == 1 and heads[0] in [
+            "0007_custom_order_requests",
             "0006_phase_6_04_communication_events",
             "0005_phase_6_03_payment_webhook_events",
             "0004_phase_6_01_dealer_pricing_tiers",

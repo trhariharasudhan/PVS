@@ -9,6 +9,8 @@ import { lerp, range, sceneT, smooth, step, type ProgressStore } from "../math";
 import type { HeroAssets } from "../useHeroAssets";
 import { useDisposable } from "../useDisposable";
 import { WarpThreads, type WarpState } from "./WarpThreads";
+import { Jacquard, type MechState } from "./Jacquard";
+import { borderCount, isBorderThread, threadX } from "../jacquard";
 
 /**
  * Procedural traditional handloom (fly-shuttle frame loom).
@@ -23,6 +25,7 @@ const X_POST = LOOM.width / 2;
 const Z_BACK = -1.1;
 const Z_FRONT = 1.05;
 const [PIVOT_X, PIVOT_Y, PIVOT_Z] = LOOM.battenPivot;
+const PULLEY_X = 0.32;
 
 interface BeamProps {
   size: [number, number, number];
@@ -72,7 +75,7 @@ function LoomFrame({ a }: { a: HeroAssets }) {
       {/* Back rest / warp beam supports */}
       <Beam size={[LOOM.width, 0.06, 0.08]} position={[0, LOOM.warpY - 0.035, LOOM.backBeamZ - 0.02]} material={a.wood} />
       {/* Heddle pulleys on the top beam */}
-      {[-0.55, 0.55].map((x) => (
+      {[-PULLEY_X, PULLEY_X].map((x) => (
         <group key={`pul${x}`} position={[x, 1.8, -0.15]}>
           <mesh rotation={[0, Math.PI / 2, 0]} castShadow material={a.brass}>
             <torusGeometry args={[0.045, 0.012, 10, 24]} />
@@ -140,9 +143,16 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
   const fabricFront = useRef<THREE.Mesh>(null);
   const weft = useRef<THREE.Mesh>(null);
   const cords = useRef<(THREE.Mesh | null)[]>([]);
-  const warpState = useRef<WarpState>({ reveal: 0, shed: 0, fellZ: LOOM.fellStartZ });
+  const warpState = useRef<WarpState>({ reveal: 0, shed: 0, fellZ: LOOM.fellStartZ, pick: 0 });
+  const mech = useRef<MechState>({ pick: 0, advance: 0, shed: 0, weaving: false });
+  const handle = useRef<THREE.Group>(null);
+  const pickers = useRef<(THREE.Mesh | null)[]>([]);
+  const pickCords = useRef<(THREE.Mesh | null)[]>([]);
 
-  const perShaft = Math.ceil(quality.warpThreads / 2);
+  // Ground shafts carry only the body threads; the borders belong to the jacquard.
+  const nBorder = borderCount(quality.warpThreads);
+  const perShaft = Math.ceil((quality.warpThreads - 2 * nBorder) / 2);
+  const shaftHalfW = Math.abs(threadX(nBorder, quality.warpThreads)) + 0.04;
 
   // Static instanced heddle wires (one per warp thread, split across two shafts) and reed dents.
   const inst = useDisposable(
@@ -162,8 +172,8 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
     const m = new THREE.Matrix4();
     let k = 0;
     for (let i = parity; i < quality.warpThreads; i += 2) {
-      const x = -LOOM.warpWidth / 2 + ((i + 0.5) / quality.warpThreads) * LOOM.warpWidth;
-      m.makeTranslation(x, 0, 0);
+      if (isBorderThread(i, quality.warpThreads)) continue;
+      m.makeTranslation(threadX(i, quality.warpThreads), 0, 0);
       mesh.setMatrixAt(k++, m);
     }
     mesh.count = k;
@@ -221,8 +231,14 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
     const idle = weaving ? 0 : Math.sin(time * 1.3) * 0.004 * smooth(tThreads);
     const shed = sign * LOOM.shedOpen * shedOpen + idle;
 
+    // Ground shafts: even body threads on shaft A, odd on shaft B (plain weave)
     if (shaftA.current) shaftA.current.position.y = shed;
     if (shaftB.current) shaftB.current.position.y = -shed;
+    const shedAmt = LOOM.shedOpen * shedOpen + Math.abs(idle);
+    mech.current.pick = weaving ? pickIdx : 0;
+    mech.current.advance = weaving || tWeave >= 1 ? tWeave * PICKS : 0;
+    mech.current.shed = weaving ? LOOM.shedOpen * shedOpen : 0;
+    mech.current.weaving = weaving;
 
     // Treadles: one pressed per pick
     const press = 0.16 * shedOpen;
@@ -254,8 +270,26 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
 
     // Warp threads
     warpState.current.reveal = tThreads;
-    warpState.current.shed = shed;
+    warpState.current.shed = shedAmt;
+    warpState.current.pick = weaving ? pickIdx : 0;
     warpState.current.fellZ = fellZ;
+
+    // Fly-shuttle: the weaver jerks the picking handle toward the throw direction;
+    // the picker on the starting side strikes the shuttle out of its box.
+    const strike = weaving ? Math.sin(Math.PI * range(frac, 0.04, 0.26)) : 0;
+    if (handle.current) {
+      handle.current.position.x = dir * 0.3 * strike;
+      handle.current.rotation.z = -dir * 0.35 * strike;
+    }
+    const startSide = -dir; // shuttle starts on this side
+    for (let k = 0; k < 2; k++) {
+      const side = k === 0 ? -1 : 1;
+      const pk = pickers.current[k];
+      if (pk) pk.position.x = side * (1.08 - (side === startSide ? 0.1 * strike : 0));
+      v.a.set(side * (1.08 - (side === startSide ? 0.1 * strike : 0)), 0.92, 0.33);
+      v.b.set(handle.current ? handle.current.position.x : 0, 1.3, 0.42);
+      setCord(pickCords.current[k], v.a, v.b, 0.0025);
+    }
 
     // Warp beam fills with red yarn during thread preparation
     if (warpWrap.current) {
@@ -309,7 +343,7 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
       const off = k === 0 ? shed : -shed;
       const z = k === 0 ? -0.2 : -0.1;
       for (let j = 0; j < 2; j++) {
-        const x = j === 0 ? -0.55 : 0.55;
+        const x = j === 0 ? -PULLEY_X : PULLEY_X;
         v.a.set(x, shaftTopY + off, z);
         v.b.set(x, 1.76, -0.15);
         setCord(cs[k * 4 + j], v.a, v.b);
@@ -327,10 +361,10 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
         <group position={[0, LOOM.warpY, 0]}>
           {[0.17, -0.17].map((y) => (
             <mesh key={y} position={[0, y, 0]} castShadow material={a.woodDark}>
-              <boxGeometry args={[1.75, 0.025, 0.02]} />
+              <boxGeometry args={[shaftHalfW * 2, 0.025, 0.02]} />
             </mesh>
           ))}
-          {[-0.87, 0.87].map((x) => (
+          {[-shaftHalfW, shaftHalfW].map((x) => (
             <mesh key={x} position={[x, 0, 0]} material={a.woodDark}>
               <boxGeometry args={[0.02, 0.36, 0.02]} />
             </mesh>
@@ -365,6 +399,24 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
 
       {/* Warp threads */}
       <WarpThreads count={quality.warpThreads} state={warpState} />
+
+      {/* Border jacquards: punch cards, harness cords, lingoes */}
+      <Jacquard assets={a} warpThreads={quality.warpThreads} mech={mech} />
+
+      {/* Fly-shuttle picking handle, pickers and cords */}
+      <group ref={handle} position={[0, 1.3, 0.42]}>
+        <mesh position={[0, -0.06, 0]} material={a.wood} castShadow>
+          <cylinderGeometry args={[0.014, 0.018, 0.13, 10]} />
+        </mesh>
+      </group>
+      {[0, 1].map((k) => (
+        <mesh key={`picker${k}`} ref={(m) => { pickers.current[k] = m; }} position={[k === 0 ? -1.08 : 1.08, 0.9, 0.33]} material={a.woodDark}>
+          <boxGeometry args={[0.05, 0.04, 0.06]} />
+        </mesh>
+      ))}
+      {[0, 1].map((k) => (
+        <mesh key={`pcord${k}`} ref={(m) => { pickCords.current[k] = m; }} geometry={inst.unitCyl} material={a.handle} />
+      ))}
 
       {/* Batten / beater hanging from the overhead pivot */}
       <group ref={batten} position={[PIVOT_X, PIVOT_Y, PIVOT_Z]}>

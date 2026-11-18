@@ -29,6 +29,14 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 12  # 12 hours for staff admin sessions
 
+    # Customer design uploads (Custom Order Builder)
+    # "supabase" in production (private bucket); "local" only for development/tests.
+    STORAGE_BACKEND: str = "local"
+    LOCAL_UPLOAD_DIR: str = "uploads"
+    SUPABASE_URL: Optional[str] = None
+    SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
+    SUPABASE_STORAGE_BUCKET: str = "custom-order-designs"
+
     # Cookie Configuration for Browser-based Admin Session
     AUTH_COOKIE_NAME: str = "pvs_access_token"
     COOKIE_SECURE: Optional[bool] = None  # None = auto-detect based on ENVIRONMENT
@@ -220,7 +228,13 @@ class Settings(BaseSettings):
             if not self.BANK_IFSC or len(self.BANK_IFSC) != 11:
                 errors.append("BANK_IFSC must be a valid 11-character Indian Financial System Code.")
 
-            # 5. CORS Validation
+            # 5. Upload storage: customer design files must not live on an ephemeral server disk
+            if self.STORAGE_BACKEND != "supabase":
+                errors.append("STORAGE_BACKEND must be 'supabase' in production (customer design uploads).")
+            elif not (self.SUPABASE_URL and self.SUPABASE_SERVICE_ROLE_KEY):
+                errors.append("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required for design upload storage.")
+
+            # 6. CORS Validation
             for origin in self.CORS_ORIGINS:
                 if "localhost" in origin or "127.0.0.1" in origin or origin == "*":
                     errors.append(f"CORS_ORIGINS contains unsecure/localhost origin '{origin}' in production.")

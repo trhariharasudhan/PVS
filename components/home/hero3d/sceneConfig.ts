@@ -89,6 +89,11 @@ export const LOOM = {
   warpY: 0.92,
   backBeamZ: -1.0,
   heddleZ: -0.15,
+  /** Jacquard harness plane (border threads are lifted here). */
+  harnessZ: -0.36,
+  /** Comber board height and jacquard machine height. */
+  comberY: 1.6,
+  jacquardY: 2.6,
   breastBeamZ: 0.95,
   clothBeamY: 0.46,
   /** Fell line (edge of woven cloth). Nearly fixed, as on a real loom: progress is

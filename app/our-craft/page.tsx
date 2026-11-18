@@ -1,412 +1,203 @@
-"use client";
-
-import React, { useState } from "react";
-import Image from "next/image";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { GoldDivider } from "@/components/ui/GoldDivider";
-import {
-  Sparkles,
-  Layers,
-  CheckCircle2,
-  Cpu,
-  ArrowRight,
-  Maximize2,
-  Sliders,
-  Play,
-  RotateCcw,
-} from "lucide-react";
+import { ArrowUpRight, ShieldCheck } from "lucide-react";
+import { HorizontalProcess, type ProcessStep } from "@/components/sections/HorizontalProcess";
+import { Reveal, SplitWords } from "@/components/motion/Reveal";
+import { DiamondRule, Kolam } from "@/components/ui/Ornament";
+
+export const metadata: Metadata = {
+  title: "How We Weave — Silk Saree Making & Silk/Zari Guide",
+  description:
+    "How a silk saree is made, step by step — design, dyeing, warping, setting the loom, weaving and finishing — plus a plain-language guide to silk types and zari grades.",
+  alternates: { canonical: "/our-craft" },
+};
+
+const STEPS: ProcessStep[] = [
+  {
+    no: "01",
+    title: "Design",
+    body: "Your idea becomes a design plan: motifs, border, pallu and where the zari goes. For woven patterns, every row of the design is worked out before weaving.",
+  },
+  {
+    no: "02",
+    title: "Silk yarn & dyeing",
+    tamil: "சாயம்",
+    body: "Raw silk is degummed so it becomes soft and lustrous, then dyed to the colours you approved. Colour is checked against your swatch.",
+  },
+  {
+    no: "03",
+    title: "Warping",
+    tamil: "பாவு",
+    body: "Thousands of lengthwise warp threads are measured, laid out in order and wound onto the warp beam under even tension.",
+  },
+  {
+    no: "04",
+    title: "Setting the loom",
+    body: "Each warp thread is drawn through the heddles and the reed. The design is set on the loom — a dobby for simpler borders, a jacquard for intricate motifs.",
+  },
+  {
+    no: "05",
+    title: "Weaving",
+    tamil: "நெசவு",
+    body: "Pick by pick: the warp opens, the shuttle carries the weft across, the reed beats it in. Zari is woven into the border and pallu as the saree grows.",
+  },
+  {
+    no: "06",
+    title: "Finishing & checking",
+    body: "The saree comes off the loom, loose threads are trimmed, and it is checked for weave faults, colour and measurements before folding.",
+  },
+  {
+    no: "07",
+    title: "Packing & dispatch",
+    body: "Folded, wrapped and packed for safe travel — collected from the workshop or sent to your home or store.",
+  },
+];
+
+const MOTIONS = [
+  {
+    title: "Shedding",
+    body: "Heddles (or a jacquard, for complex designs) lift some warp threads and lower others, opening a gap called the shed.",
+  },
+  {
+    title: "Picking",
+    body: "The shuttle flies through the shed, laying one weft thread — a ‘pick’ — across the full width of the saree.",
+  },
+  {
+    title: "Beating",
+    body: "The reed swings forward and packs the new pick tightly against the woven cloth. Then the shed changes and it repeats.",
+  },
+];
+
+const SILK_GUIDE = [
+  ["Pure mulberry silk", "100% silk in warp and weft", "Weddings, heirloom sarees", "Richest lustre, weight and drape"],
+  ["Soft silk", "Silk, lighter construction", "Long functions, daily silk", "Lighter and easier to carry"],
+  ["Silk cotton", "Silk blended with cotton", "Office, summer, festivals", "Breathable; price depends on silk %"],
+  ["Art silk / blends", "Silk-look fibres or blends", "Budget & bulk orders", "Affordable; not pure silk"],
+];
+
+const ZARI_GUIDE = [
+  ["Pure zari", "Silver thread coated with gold, on a silk core", "Highest value; precious-metal content gives resale value"],
+  ["Tested / half-fine zari", "Copper wire with silver & gold electroplating", "Durable and bright at a much lower price"],
+  ["Imitation / metallic zari", "Polyester or metallised film", "Lowest cost; can dull or peel over time"],
+];
 
 export default function OurCraftPage() {
-  // 7 Verified Manufacturing Stages
-  const craftStages = [
-    {
-      number: "01",
-      title: "The Foundation",
-      subtitle: "Mulberry Silk Yarns & Authentic Zari Selection",
-      description:
-        "The journey begins with high-grade mulberry silk filaments and certified electroplated zari threads. Yarns are tested for tensile strength, denier consistency, and uniform luster before entering the dye baths.",
-      details: [
-        "100% natural mulberry silk hanks",
-        "Tested metallic & pure zari thread reels",
-        "Degumming bath to reveal natural biological sheen",
-      ],
-      image: "https://images.unsplash.com/photo-1590736969955-71cc94801759?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      number: "02",
-      title: "Preparing the Loom",
-      subtitle: "Warp Beaming & Heddle Threading",
-      description:
-        "Thousands of individual warp ends (up to 7,200 continuous filaments) are painstakingly wound onto the warp beam under calibrated tension and drawn through heddle eyes and the reed comb.",
-      details: [
-        "Sectional warping for millimeter thread alignment",
-        "Heddle harness threading by master weavers",
-        "High-tension let-off beam calibration",
-      ],
-      image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      number: "03",
-      title: "The Weave Begins",
-      subtitle: "Rhythmic Shedding & Shuttle Synchronization",
-      description:
-        "The weaver initiates the shedding mechanism, opening the warp sheet while the wooden boat shuttle glides across the raceboard carrying pure zari and silk weft picks.",
-      details: [
-        "Traditional handloom & electronic Jacquard synchronization",
-        "Three-shuttle Korvai interlocking technique",
-        "Continuous edge width maintenance via brass temples",
-      ],
-      image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      number: "04",
-      title: "Creating the Design",
-      subtitle: "Intricate Jacquard Motifs & Temple Borders",
-      description:
-        "Electronic Jacquards lift individual warp ends with solenoid precision, weaving traditional Tamil Nadu motifs such as Mayil (Peacock), Rudraksham, and sacred temple spires directly into the body and pallu.",
-      details: [
-        "Digital CAD punch card coordination",
-        "Complex multi-colored weft brocading",
-        "Crisp body-to-border Korvai junction lines",
-      ],
-      image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      number: "05",
-      title: "Finishing",
-      subtitle: "Float Trimming & Non-Chemical Steam Press",
-      description:
-        "Once cut from the loom, the saree undergoes manual inspection where reverse float threads are carefully trimmed. Gentle steam calendering softens the drape without harsh chemicals.",
-      details: [
-        "Manual float thread micro-shearing",
-        "Steam pressing for supple pleating memory",
-        "Selvage edge straightening",
-      ],
-      image: "https://images.unsplash.com/photo-1610030469668-93530c17b58f?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      number: "06",
-      title: "Quality Check",
-      subtitle: "Backlit Table Scrutiny & Dimensional Audit",
-      description:
-        "Every saree is stretched across backlit inspection tables. Master examiners verify pick density, color uniformity, zari joint integrity, and ensure exact 5.5-meter length plus 0.8-meter blouse dimensions.",
-      details: [
-        "18-point visual lighting inspection",
-        "Zero-snag and unbroken zari pick verification",
-        "Dimensional & weight compliance audit",
-      ],
-      image: "https://images.unsplash.com/photo-1610030469854-41125208f237?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      number: "07",
-      title: "The Final Saree",
-      subtitle: "Protective Acid-Free Packaging & Dispatch",
-      description:
-        "The completed pattu saree is folded with acid-free barrier paper to prevent zari oxidation. Packed securely for wholesale merchant consignments or direct customer delivery.",
-      details: [
-        "Acid-free wrapping protecting pure zari threads",
-        "Product code tag & weave documentation",
-        "Ready for wholesale cartons or luxury boutique boxes",
-      ],
-      image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop",
-    },
-  ];
-
-  // Interactive Exploded Loom Simulation State (Mock / Extensible Container)
-  const [assemblyProgress, setAssemblyProgress] = useState(0.5);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  // Play animation loop
-  const handlePlayToggle = () => {
-    setIsPlaying(!isPlaying);
-    if (!isPlaying) {
-      let p = 0;
-      const interval = setInterval(() => {
-        p += 0.05;
-        if (p >= 1) {
-          p = 1;
-          clearInterval(interval);
-          setIsPlaying(false);
-        }
-        setAssemblyProgress(Number(p.toFixed(2)));
-      }, 100);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-ivory-50 pb-24">
-      {/* Hero Opening */}
-      <section className="bg-silk-cream-100/70 py-16 sm:py-24 border-b border-gold-300/40 relative overflow-hidden">
-        <div className="absolute inset-0 bg-textile-weave opacity-40 pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-4">
-          <span className="text-xs uppercase font-mono tracking-widest text-silk-red-700 font-bold">
-            PVS TEXTILE HERITAGE & MANUFACTURING
-          </span>
-
-          <GoldDivider variant="motif" theme="light" className="!my-2" />
-
-          <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-heritage-brown-950 uppercase">
-            From Thread to Tradition
+    <div className="bg-ivory-50">
+      <section className="relative bg-weave overflow-hidden">
+        <Kolam className="pointer-events-none absolute -right-20 top-10 w-96 text-gold-400/20" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-24">
+          <p className="text-xs font-semibold tracking-[0.3em] uppercase text-silk-red-700">How we weave</p>
+          <h1 className="mt-4 max-w-4xl font-serif text-5xl sm:text-7xl font-medium leading-[0.98] text-heritage-brown-950 text-balance">
+            Slow craft, <span className="italic text-silk-red-700">explained plainly.</span>
           </h1>
-
-          <p className="text-sm sm:text-base md:text-lg text-heritage-brown-700 max-w-2xl mx-auto font-sans leading-relaxed">
-            Discover the disciplined sequence of authentic pattu saree manufacturing at PVS in
-            Salem, Tamil Nadu. A synergy of generational handloom mastery and precision electronic Jacquards.
+          <p className="mt-6 max-w-2xl text-lg text-heritage-brown-700 leading-relaxed">
+            Knowing how a saree is made helps you choose well. Here&apos;s what happens between your order and your saree — and what silk and zari
+            terms really mean.
           </p>
         </div>
       </section>
 
-      {/* 3D / Exploded-Loom Architectural Container Section */}
-      <section className="py-16 sm:py-20 bg-heritage-brown-950 text-ivory-100 border-b border-gold-500/40 relative overflow-hidden">
-        <div className="absolute inset-0 bg-zari-pattern opacity-10 pointer-events-none" />
+      <HorizontalProcess steps={STEPS} />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-3xl mx-auto mb-10 space-y-2">
-            <span className="text-xs uppercase font-mono tracking-widest text-gold-400 font-bold">
-              THE CINEMATIC LOOM ARCHITECTURE
-            </span>
-            <h2 className="font-serif text-2xl sm:text-4xl font-bold text-white">
-              The Exploded-View Loom Experience
-            </h2>
-            <p className="text-xs sm:text-sm text-ivory-300 font-sans leading-relaxed">
-              This interactive stage models the mechanical anatomy of an authentic South Indian handloom.
-              As the visitor scrolls, separated components converge into an operational weaving machine.
-            </p>
-          </div>
-
-          {/* Loom Interactive Canvas / Future 3D Viewport Placeholder Container */}
-          <div
-            id="loom-3d-stage"
-            className="relative w-full max-w-5xl mx-auto aspect-[16/9] sm:aspect-[21/9] bg-heritage-brown-900 border-2 border-gold-500/50 rounded-[4px] shadow-2xl overflow-hidden flex flex-col justify-between p-6 sm:p-8"
-          >
-            {/* Visual Canvas Representation */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              {/* Central Frame Anchor */}
-              <div
-                className="relative w-64 sm:w-80 h-44 sm:h-56 border-2 border-gold-400/60 rounded flex items-center justify-center transition-all duration-300"
-                style={{
-                  transform: `scale(${0.9 + assemblyProgress * 0.1})`,
-                }}
-              >
-                <span className="text-[10px] font-mono uppercase text-gold-300 tracking-wider">
-                  [01: Teakwood Loom Frame]
-                </span>
-
-                {/* Exploded Parts simulated with CSS translation based on progress */}
-                {/* Top Jacquard */}
-                <div
-                  className="absolute -top-12 sm:-top-16 inset-x-8 h-10 border border-gold-300 bg-gold-900/60 flex items-center justify-center text-[9px] font-mono text-gold-200 transition-all duration-300"
-                  style={{
-                    transform: `translateY(${-40 * (1 - assemblyProgress)}px)`,
-                    opacity: 0.6 + assemblyProgress * 0.4,
-                  }}
-                >
-                  [02: Electronic Jacquard Head & Harness]
-                </div>
-
-                {/* Left Warp Beam */}
-                <div
-                  className="absolute -left-16 sm:-left-20 inset-y-6 w-12 border border-gold-300 bg-silk-red-950/60 flex items-center justify-center text-[8px] font-mono text-gold-200 transition-all duration-300 text-center"
-                  style={{
-                    transform: `translateX(${-30 * (1 - assemblyProgress)}px)`,
-                    opacity: 0.6 + assemblyProgress * 0.4,
-                  }}
-                >
-                  [03: Warp Beam]
-                </div>
-
-                {/* Right Cloth Roller */}
-                <div
-                  className="absolute -right-16 sm:-right-20 inset-y-6 w-12 border border-gold-300 bg-gold-950/60 flex items-center justify-center text-[8px] font-mono text-gold-200 transition-all duration-300 text-center"
-                  style={{
-                    transform: `translateX(${30 * (1 - assemblyProgress)}px)`,
-                    opacity: 0.6 + assemblyProgress * 0.4,
-                  }}
-                >
-                  [04: Cloth Roller]
-                </div>
-
-                {/* Center Shuttle */}
-                <div
-                  className="absolute inset-x-12 h-6 border border-emerald-400/80 bg-emerald-950/70 flex items-center justify-center text-[9px] font-mono text-emerald-300 transition-all duration-300"
-                  style={{
-                    transform: `translate(${Math.sin(assemblyProgress * 10) * 15}px, 0)`,
-                  }}
-                >
-                  [05: Korvai Shuttles & Zari Weft]
-                </div>
-
-                {/* Bottom Pedals */}
-                <div
-                  className="absolute -bottom-10 sm:-bottom-12 inset-x-16 h-8 border border-gold-300 bg-black/60 flex items-center justify-center text-[8px] font-mono text-gold-300 transition-all duration-300"
-                  style={{
-                    transform: `translateY(${25 * (1 - assemblyProgress)}px)`,
-                    opacity: 0.6 + assemblyProgress * 0.4,
-                  }}
-                >
-                  [06: Foot Treadles]
-                </div>
-              </div>
+      {/* The three motions */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+        <p className="text-xs font-semibold tracking-[0.3em] uppercase text-silk-red-700">Inside the loom</p>
+        <Reveal variant="words" as="h2" className="mt-5 max-w-3xl font-serif text-4xl sm:text-5xl leading-[1.05] text-heritage-brown-950">
+          <SplitWords text="Every row of your saree is three movements, repeated thousands of times." />
+        </Reveal>
+        <Reveal variant="stagger" className="mt-14 grid md:grid-cols-3 gap-5">
+          {MOTIONS.map((m, i) => (
+            <div key={m.title} data-reveal-item className="rounded-[2rem] bg-white border border-heritage-brown-100 p-8">
+              <p className="font-serif text-6xl text-gold-500/40">{i + 1}</p>
+              <h3 className="mt-4 font-serif text-3xl text-heritage-brown-950">{m.title}</h3>
+              <p className="mt-3 text-heritage-brown-700 leading-relaxed">{m.body}</p>
             </div>
-
-            {/* Top Stage Badges */}
-            <div className="relative z-10 flex justify-between items-start">
-              <div>
-                <span className="text-[10px] uppercase font-mono tracking-widest text-gold-400 bg-black/50 px-2.5 py-1 rounded border border-gold-500/30">
-                  Interactive Simulator
-                </span>
-                <p className="text-xs text-ivory-300 mt-1 font-mono">
-                  State: {assemblyProgress === 1 ? "100% Fully Assembled & Active Weaving" : `Assembly Progress: ${(assemblyProgress * 100).toFixed(0)}%`}
-                </p>
-              </div>
-
-              <div className="text-right text-[10px] font-mono text-gold-400">
-                PVS Loom Spec: 2,688 Electronic Hooks • Korvai Triple Shuttle
-              </div>
-            </div>
-
-            {/* Bottom Scrubber & Simulation Controls */}
-            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 bg-black/60 backdrop-blur-sm p-3.5 rounded-[4px] border border-gold-500/30">
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <button
-                  type="button"
-                  onClick={handlePlayToggle}
-                  className="inline-flex items-center gap-1.5 bg-silk-red-700 hover:bg-silk-red-800 text-white text-xs font-semibold px-4 py-2 rounded-[3px] uppercase tracking-wider"
-                >
-                  {isPlaying ? (
-                    <span>Pause</span>
-                  ) : (
-                    <>
-                      <Play className="w-3.5 h-3.5" />
-                      <span>Assemble Loom</span>
-                    </>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setAssemblyProgress(0)}
-                  className="p-2 text-ivory-300 hover:text-white border border-gold-500/30 rounded-[3px]"
-                  title="Reset to Exploded View"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              {/* Range Scrubber */}
-              <div className="flex items-center gap-3 w-full sm:w-72">
-                <span className="text-[10px] font-mono text-gold-300">Exploded</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={assemblyProgress}
-                  onChange={(e) => setAssemblyProgress(parseFloat(e.target.value))}
-                  className="w-full accent-gold-500 cursor-pointer"
-                />
-                <span className="text-[10px] font-mono text-gold-300">Assembled</span>
-              </div>
-            </div>
-          </div>
-
-          <p className="text-[11px] text-center text-ivory-400 font-mono mt-4">
-            * Future-ready architectural viewport: Connects directly with Three.js / R3F / GSAP ScrollTrigger without page redesign.
-          </p>
-        </div>
+          ))}
+        </Reveal>
+        <p className="mt-8 text-sm text-heritage-brown-600">
+          Watch all three in our{" "}
+          <Link href="/" className="underline text-silk-red-700">
+            3D loom on the home page
+          </Link>
+          .
+        </p>
       </section>
 
-      {/* 7 Verified Sequential Manufacturing Stages */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeading
-          subtitle="PRODUCTION LIFECYCLE"
-          title="The 7 Stages of Weaving"
-          description="Every PVS pattu saree follows this authentic, unbroken sequence from raw fiber to finished heirloom."
-          align="center"
-          className="mb-16"
-        />
+      {/* Silk & zari guide */}
+      <section id="guide" className="scroll-mt-28 bg-heritage-brown-950 text-ivory-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+          <p className="text-xs font-semibold tracking-[0.3em] uppercase text-gold-400">Buyer&apos;s guide</p>
+          <Reveal variant="words" as="h2" className="mt-5 max-w-3xl font-serif text-4xl sm:text-6xl leading-[1.02]">
+            <SplitWords text="Silk & zari," /> <span className="italic text-gold-300"><SplitWords text="without the confusion." /></span>
+          </Reveal>
 
-        <div className="space-y-12">
-          {craftStages.map((stage, idx) => {
-            const isEven = idx % 2 === 0;
-            return (
-              <div
-                key={stage.number}
-                className={`grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center bg-white border border-gold-300/80 rounded-[4px] p-6 sm:p-10 shadow-sm hover:shadow-luxury transition-all`}
-              >
-                {/* Visual */}
-                <div
-                  className={`lg:col-span-6 relative aspect-[4/3] rounded-[4px] overflow-hidden bg-gold-50 border border-gold-300 ${
-                    isEven ? "lg:order-1" : "lg:order-2"
-                  }`}
-                >
-                  <Image
-                    src={stage.image}
-                    alt={stage.title}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover object-center"
-                  />
-                  <div className="absolute top-4 left-4 bg-heritage-brown-950/90 text-gold-300 font-mono text-xs px-3 py-1 rounded-[3px] border border-gold-400/40">
-                    STAGE {stage.number}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className={`lg:col-span-6 space-y-4 ${isEven ? "lg:order-2" : "lg:order-1"}`}>
-                  <span className="text-xs uppercase font-mono tracking-widest text-silk-red-700 font-bold block">
-                    Phase {stage.number}
-                  </span>
-                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-heritage-brown-950">
-                    {stage.title}
-                  </h3>
-                  <p className="text-xs font-semibold text-gold-700 font-sans tracking-wide">
-                    {stage.subtitle}
-                  </p>
-                  <p className="text-xs sm:text-sm text-heritage-brown-700 font-sans leading-relaxed">
-                    {stage.description}
-                  </p>
-
-                  <div className="space-y-2 pt-2 border-t border-gold-200">
-                    {stage.details.map((d, dIdx) => (
-                      <div key={dIdx} className="flex items-center gap-2 text-xs text-heritage-brown-800 font-sans">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-gold-600 flex-shrink-0" />
-                        <span>{d}</span>
-                      </div>
+          <h3 className="mt-16 font-serif text-3xl">Silk types</h3>
+          <div className="mt-6 overflow-x-auto rounded-3xl border border-ivory-200/10">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead className="bg-white/[0.04] text-gold-300 text-xs tracking-widest uppercase">
+                <tr>
+                  {["Silk", "What it is", "Good for", "Feel & value"].map((h) => (
+                    <th key={h} scope="col" className="px-6 py-4 font-semibold">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-ivory-200/10">
+                {SILK_GUIDE.map((r) => (
+                  <tr key={r[0]}>
+                    <th scope="row" className="px-6 py-5 font-serif text-lg font-normal text-ivory-50">
+                      {r[0]}
+                    </th>
+                    {r.slice(1).map((c) => (
+                      <td key={c} className="px-6 py-5 text-ivory-300">
+                        {c}
+                      </td>
                     ))}
-                  </div>
-                </div>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <h3 className="mt-16 font-serif text-3xl">Zari grades</h3>
+          <Reveal variant="stagger" className="mt-6 grid md:grid-cols-3 gap-5">
+            {ZARI_GUIDE.map(([name, what, note], i) => (
+              <div key={name} data-reveal-item className="rounded-[2rem] border border-ivory-200/10 bg-white/[0.03] p-8">
+                <span
+                  className="block h-2 w-16 rounded-full"
+                  style={{ background: ["linear-gradient(90deg,#8E6923,#E3CD94,#B08A3C)", "linear-gradient(90deg,#B08A3C,#F1E5C4,#C29D4F)", "linear-gradient(90deg,#9a9a9a,#eee,#b5b5b5)"][i] }}
+                  aria-hidden="true"
+                />
+                <h4 className="mt-6 font-serif text-2xl">{name}</h4>
+                <p className="mt-3 text-ivory-300 text-sm leading-relaxed">{what}</p>
+                <DiamondRule className="my-5 w-12 text-gold-500/50" />
+                <p className="text-ivory-200 text-sm leading-relaxed">{note}</p>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </Reveal>
 
-        {/* Bottom CTA to Shop & Wholesale */}
-        <div className="mt-16 text-center space-y-4 bg-silk-cream-100/60 p-10 rounded-[4px] border border-gold-300">
-          <h3 className="font-serif text-2xl font-bold text-heritage-brown-950">
-            Witness the Craftsmanship in Person
-          </h3>
-          <p className="text-xs sm:text-sm text-heritage-brown-700 max-w-xl mx-auto font-sans leading-relaxed">
-            Wholesale merchants, boutique curators, and retail patrons are welcome to visit our looms in
-            Raaja Veedhi, Panjakalipatti, Kalipatti, Salem.
-          </p>
-
-          <div className="pt-2 flex flex-wrap gap-4 justify-center">
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-2 bg-silk-red-700 hover:bg-deep-maroon-800 text-ivory-50 text-xs uppercase font-semibold px-6 py-3.5 rounded-[4px] tracking-wider shadow-sm"
-            >
-              <span>Explore Finished Sarees</span>
-              <ArrowRight className="w-4 h-4 text-gold-300" />
-            </Link>
-
-            <Link
-              href="/wholesale"
-              className="inline-flex items-center gap-2 bg-heritage-brown-900 hover:bg-black text-ivory-50 text-xs uppercase font-semibold px-6 py-3.5 rounded-[4px] tracking-wider shadow-sm"
-            >
-              <span>Wholesale Loom Inquiries</span>
-            </Link>
+          <div className="mt-16 rounded-[2rem] bg-gold-500 text-heritage-brown-950 p-8 sm:p-12 grid lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-8">
+              <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.3em] uppercase">
+                <ShieldCheck className="w-4 h-4" aria-hidden="true" /> Our promise
+              </p>
+              <p className="mt-4 font-serif text-3xl sm:text-4xl leading-tight">
+                Before weaving, you get the silk type, silk % and zari grade in writing. What we write is what we weave.
+              </p>
+              <p className="mt-4 text-sm text-heritage-brown-800">
+                Buying pure silk anywhere? Look for the Silk Mark label, and for pure zari ask for a zari test report.
+              </p>
+            </div>
+            <div className="lg:col-span-4 lg:text-right">
+              <Link
+                href="/custom-order"
+                className="inline-flex items-center gap-2 rounded-full bg-heritage-brown-950 text-ivory-50 px-7 py-4 text-sm font-semibold tracking-widest uppercase"
+              >
+                Start your order <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>

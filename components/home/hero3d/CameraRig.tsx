@@ -10,8 +10,8 @@ type Key = { p: number; pos: [number, number, number]; tgt: [number, number, num
 
 /** Camera path after the opening orbit. Positions/targets are Catmull-Rom smoothed. */
 const KEYS: Key[] = [
-  { p: 0.15, pos: [0, 2.5, 5.2], tgt: [0, 0.85, 0] },
-  { p: 0.25, pos: [1.7, 2.05, 3.3], tgt: [0, 0.9, 0.05] },
+  { p: 0.15, pos: [0, 2.75, 5.9], tgt: [0, 1.25, 0] },
+  { p: 0.25, pos: [2.0, 2.35, 3.6], tgt: [0, 1.15, -0.1] },
   { p: 0.33, pos: [1.3, 1.78, 2.55], tgt: [0, 0.9, 0.45] },
   { p: 0.4, pos: [-1.0, 1.72, 2.95], tgt: [0, 0.82, 0.7] },
   { p: 0.5, pos: [0, 1.75, 4.7], tgt: [0, 1.15, 1.2] },
