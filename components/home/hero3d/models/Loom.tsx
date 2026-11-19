@@ -9,14 +9,20 @@ import { lerp, range, sceneT, smooth, step, type ProgressStore } from "../math";
 import type { HeroAssets } from "../useHeroAssets";
 import { useDisposable } from "../useDisposable";
 import { WarpThreads, type WarpState } from "./WarpThreads";
+import { Jacquard, type MechState } from "./Jacquard";
 import { borderCount, isBorderThread, threadX } from "../jacquard";
 import { turntableAngle } from "../CameraRig";
 
 /**
- * Procedural traditional floor handloom, laid out like the classic loom diagram:
- * uprights + head roller (heddle cords), two heddle shafts, hanging beater with handtree,
- * hand-thrown shuttle, back beam + warp roller (ratchet, pawl, crank handle), breast beam +
- * cloth roller (ratchet + take-up handle), treadles hinged on the front crosspiece.
+ * Procedural South Indian silk-saree handloom, laid out like the classic loom diagram:
+ * uprights + head roller (heddle cords), two heddle shafts for the body, a jacquard above
+ * each border (punch-card chain, harness cords, lingo weights), lease rods, hanging beater
+ * with handtree, hand-thrown shuttle, back beam + warp roller (ratchet, pawl, crank handle),
+ * breast beam + cloth roller (ratchet + take-up handle), treadles hinged at the front.
+ *
+ * While the weaving scene is on screen the loom keeps weaving on its own clock (shed →
+ * shuttle → beat-up), so it is alive even when the visitor stops scrolling; scroll drives
+ * how much cloth has been woven.
  *
  * MODULAR / REPLACEABLE: this is a code-built model. When a Blender GLB is ready,
  * replace <LoomFrame/> with the GLB and keep the animated parts (shafts, batten,
@@ -113,10 +119,10 @@ function LoomFrame({ a }: { a: HeroAssets }) {
       ))}
       {/* Head roller: carries the heddle cords over the top */}
       <mesh position={[0, 1.95, -0.15]} rotation={[0, 0, Math.PI / 2]} castShadow material={a.wood}>
-        <cylinderGeometry args={[0.04, 0.04, LOOM.width + 0.2, 20]} />
+        <cylinderGeometry args={[0.035, 0.035, 1.0, 20]} />
       </mesh>
       {[-1, 1].map((s) => (
-        <Beam key={`hrs${s}`} size={[0.06, 0.12, 0.06]} position={[s * (X_POST + 0.0), 1.93, -0.15]} material={a.woodDark} />
+        <Beam key={`hrs${s}`} size={[0.05, 0.11, 0.06]} position={[s * 0.52, 1.93, -0.15]} material={a.woodDark} />
       ))}
       {/* Front crosspiece (treadle hinge) and back cross beam at floor level */}
       <Beam size={[LOOM.width, 0.06, 0.08]} position={[0, 0.05, Z_FRONT + 0.05]} material={a.woodDark} />
@@ -176,6 +182,9 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
   const weft = useRef<THREE.Mesh>(null);
   const cords = useRef<(THREE.Mesh | null)[]>([]);
   const warpState = useRef<WarpState>({ reveal: 0, shed: 0, fellZ: LOOM.fellStartZ, pick: 0 });
+  const mech = useRef<MechState>({ pick: 0, advance: 0, shed: 0, weaving: false });
+  /** Picks woven on the loom's own clock (adds to the scroll-driven picks). */
+  const clockPicks = useRef(0);
   const warpRoller = useRef<THREE.Group>(null);
   const warpRatchet = useRef<THREE.Group>(null);
   const clothRatchet = useRef<THREE.Group>(null);
@@ -237,7 +246,7 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
     mesh.scale.set(r, len, r);
   };
 
-  useFrame((state) => {
+  useFrame((state, dt) => {
     const p = progress.value;
     const g = root.current;
     if (!g) return;
@@ -254,11 +263,12 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
     const tWeave = sceneT(p, "weaving");
     const time = state.clock.elapsedTime;
 
-    // ---- Weaving cycle (driven by scroll, so it reverses naturally) ----
-    const pick = tWeave * PICKS;
-    const pickIdx = Math.min(PICKS - 1, Math.floor(pick));
-    const frac = tWeave >= 1 ? 1 : pick - Math.floor(pick);
+    // ---- Weaving cycle: scroll position + the loom's own clock (≈0.8 pick / s) ----
     const weaving = tWeave > 0 && tWeave < 1;
+    if (weaving) clockPicks.current += Math.min(dt, 0.1) * 0.8;
+    const pick = tWeave * PICKS + (weaving ? clockPicks.current : 0);
+    const pickIdx = Math.floor(pick);
+    const frac = tWeave >= 1 ? 1 : pick - Math.floor(pick);
     const sign = pickIdx % 2 === 0 ? 1 : -1;
     const shedOpen = weaving ? Math.sin(Math.PI * Math.min(1, frac / 0.82)) : 0;
     // tiny idle "breathing" so the loom never looks frozen mid-scene
@@ -307,6 +317,10 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
     warpState.current.shed = shedAmt;
     warpState.current.pick = weaving ? pickIdx : 0;
     warpState.current.fellZ = fellZ;
+    mech.current.pick = weaving ? pickIdx : 0;
+    mech.current.advance = weaving || tWeave >= 1 ? pick : 0;
+    mech.current.shed = weaving ? LOOM.shedOpen * shedOpen : 0;
+    mech.current.weaving = weaving;
 
     // Let-off & take-up: every few picks the weaver releases the warp roller one ratchet tooth
     // and winds the cloth roller with the take-up handle. Both rotate in discrete clicks.
@@ -441,6 +455,16 @@ export function Loom({ progress, quality, assets: a }: LoomProps) {
       <mesh position={[0, (0.42 + LOOM.warpY) / 2, LOOM.backBeamZ - 0.03]} rotation={[-0.06, 0, 0]} material={a.yarn}>
         <boxGeometry args={[LOOM.warpWidth, LOOM.warpY - 0.42, 0.004]} />
       </mesh>
+
+      {/* Lease rods: keep the warp threads in order behind the heddles */}
+      {[-0.55, -0.42].map((z, i) => (
+        <mesh key={`lease${z}`} position={[0, LOOM.warpY + (i ? -0.006 : 0.006), z]} rotation={[0, 0, Math.PI / 2]} castShadow material={a.woodDark}>
+          <cylinderGeometry args={[0.011, 0.011, LOOM.warpWidth + 0.12, 10]} />
+        </mesh>
+      ))}
+
+      {/* Border jacquards: punch-card chains, harness cords, lingo weights */}
+      <Jacquard assets={a} warpThreads={quality.warpThreads} mech={mech} />
 
       {/* Heddle shafts (two, moving in opposition) */}
       {shaft(shaftA, -0.2, 0)}

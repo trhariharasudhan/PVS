@@ -9,11 +9,11 @@
 import { LOOM } from "./sceneConfig";
 
 /**
- * The hero loom follows the classic floor-loom layout (head roller, heddle shafts, beater,
- * treadles, ratchet rollers), so every warp thread is on the shafts: no jacquard threads.
- * Set BORDER_FRACTION > 0 to bring back jacquard-controlled border threads.
+ * The hero loom is a South Indian silk-saree handloom: ground shafts weave the body,
+ * a jacquard above each border lifts the border threads individually (punch cards).
+ * Fraction of the warp width on EACH side controlled by the jacquard (the borders).
  */
-export const BORDER_FRACTION = 0;
+export const BORDER_FRACTION = 0.16;
 
 export function borderCount(total: number) {
   return BORDER_FRACTION > 0 ? Math.max(4, Math.round(total * BORDER_FRACTION)) : 0;

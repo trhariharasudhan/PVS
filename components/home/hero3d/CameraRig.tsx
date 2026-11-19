@@ -10,20 +10,24 @@ type Key = { p: number; pos: [number, number, number]; tgt: [number, number, num
 
 /** Camera path after the opening turntable. Positions/targets are Catmull-Rom smoothed. */
 const KEYS: Key[] = [
-  { p: 0.15, pos: [0, 2.75, 5.9], tgt: [0, 1.25, 0] },
+  { p: 0.15, pos: [0, 2.9, 6.3], tgt: [0, 1.45, 0] },
   { p: 0.25, pos: [2.0, 2.35, 3.6], tgt: [0, 1.15, -0.1] },
   { p: 0.33, pos: [1.3, 1.78, 2.55], tgt: [0, 0.9, 0.45] },
   { p: 0.4, pos: [-1.0, 1.72, 2.95], tgt: [0, 0.82, 0.7] },
   { p: 0.5, pos: [0, 1.75, 4.7], tgt: [0, 1.15, 1.2] },
   { p: 0.6, pos: [0, 1.62, 5.6], tgt: [0, 1.5, 1.6] },
-  { p: 0.66, pos: [0.06, 1.48, 3.6], tgt: [0.05, 1.42, 1.6] },
-  { p: 0.72, pos: [0.2, 2.2, 4.3], tgt: [-0.1, 1.0, 1.6] },
-  // packing: look down at the table (lay flat → fold → box)
-  { p: 0.79, pos: [-0.2, 2.45, 3.4], tgt: [-0.35, 0.66, 1.6] },
-  { p: 0.86, pos: [0.15, 2.2, 3.6], tgt: [-0.25, 0.7, 1.6] },
+  { p: 0.66, pos: [0.36, 1.56, 3.05], tgt: [0.3, 1.52, 1.6] }, // close on the weaver's mark
+  // packing, in the air: wide for the long strip, closing in as it folds into a stack
+  { p: 0.73, pos: [0, 2.3, 5.4], tgt: [0, 0.98, 1.7] },
+  { p: 0.765, pos: [0.25, 2.45, 5.2], tgt: [0, 0.98, 1.7] },
+  { p: 0.8, pos: [0.15, 2.25, 4.4], tgt: [0, 1.0, 1.7] },
+  { p: 0.832, pos: [0.4, 1.9, 3.0], tgt: [0.22, 1.02, 1.7] },
+  { p: 0.86, pos: [0.55, 1.78, 2.55], tgt: [0.28, 1.0, 1.7] },
+  // box under the saree, tissue, lid
+  { p: 0.885, pos: [0.65, 1.62, 2.55], tgt: [0.3, 0.93, 1.7] },
+  { p: 0.915, pos: [0.8, 1.62, 2.85], tgt: [0.4, 0.92, 1.7] },
   // box travels into the bag
-  { p: 0.89, pos: [0.85, 2.15, 4.6], tgt: [0.8, 1.05, 1.6] },
-  { p: 0.94, pos: [1.2, 1.8, 4.7], tgt: [1.15, 0.9, 1.55] },
+  { p: 0.955, pos: [1.0, 1.9, 4.3], tgt: [0.85, 1.1, 1.6] },
   { p: 1.0, pos: [1.35, 1.3, 4.6], tgt: [1.3, 0.78, 1.55] },
 ];
 
@@ -84,6 +88,12 @@ export function CameraRig({ progress, framing }: Props) {
       curves.pos.getPoint(u, st.pos);
       curves.tgt.getPoint(u, st.tgt);
     }
+
+    // Handheld feel: a very slow, tiny drift so the frame is never perfectly frozen.
+    const t = performance.now() / 1000;
+    st.pos.x += Math.sin(t * 0.31) * 0.035;
+    st.pos.y += Math.sin(t * 0.23 + 1.3) * 0.022;
+    st.tgt.x += Math.sin(t * 0.19 + 0.4) * 0.012;
 
     // Portrait screens: same shot, pulled back so the subject fits the narrow frame,
     // and aimed lower so the subject sits in the top half (text lives at the bottom).

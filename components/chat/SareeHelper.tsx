@@ -30,7 +30,8 @@ export function SareeHelper() {
       const story = document.querySelector<HTMLElement>("[data-hero-story]");
       if (story && story.offsetHeight > 0) {
         const end = story.offsetTop + story.offsetHeight - window.innerHeight;
-        setVisible(window.scrollY >= end);
+        // wait until the final CTA screen has scrolled half away, so the button never covers it
+        setVisible(window.scrollY >= end + window.innerHeight * 0.5);
       } else setVisible(window.scrollY > window.innerHeight * 0.4);
     };
     onScroll();

@@ -53,9 +53,9 @@ function build(quality: QualitySettings, serif: string, sans: string): HeroAsset
   const silkParams: THREE.MeshPhysicalMaterialParameters = {
     roughness: 1,
     metalness: 1,
-    sheen: 1,
-    sheenRoughness: 0.35,
-    sheenColor: new THREE.Color("#ff8f8f"),
+    sheen: 0.8,
+    sheenRoughness: 0.42,
+    sheenColor: new THREE.Color("#ffc7a0"),
     side: THREE.DoubleSide,
   };
 
@@ -66,7 +66,8 @@ function build(quality: QualitySettings, serif: string, sans: string): HeroAsset
     brass: new THREE.MeshStandardMaterial({ color: PALETTE.antiqueGold, metalness: 0.9, roughness: 0.28 }),
     yarn: new THREE.MeshStandardMaterial({ color: "#9b1629", roughness: 0.42, emissive: "#22030a" }),
     silk: new THREE.MeshPhysicalMaterial({ ...silkParams, map: saree.map, roughnessMap: saree.orm, metalnessMap: saree.orm }),
-    loomSilk: new THREE.MeshPhysicalMaterial({ ...silkParams, map: loomMap, roughnessMap: loomOrm, metalnessMap: loomOrm }),
+    // on the loom the cloth is seen close and at grazing angles under the key light: less sheen
+    loomSilk: new THREE.MeshPhysicalMaterial({ ...silkParams, sheen: 0.35, envMapIntensity: 0.7, map: loomMap, roughnessMap: loomOrm, metalnessMap: loomOrm }),
     boxLid: new THREE.MeshStandardMaterial({ map: bag.map, roughnessMap: bag.orm, metalnessMap: bag.orm, roughness: 1, metalness: 1 }),
     boxBody: new THREE.MeshStandardMaterial({ color: "#5a1424", roughness: 0.7, metalness: 0.05 }),
     boxInner: new THREE.MeshStandardMaterial({ color: "#efe4cc", roughness: 0.85 }),

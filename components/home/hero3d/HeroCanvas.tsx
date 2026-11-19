@@ -12,6 +12,7 @@ import { Loom } from "./models/Loom";
 import { Saree } from "./models/Saree";
 import { ShoppingBag } from "./models/ShoppingBag";
 import { SareeBox } from "./models/SareeBox";
+import { DustMotes } from "./models/DustMotes";
 
 interface Props {
   progress: ProgressStore;
@@ -78,6 +79,7 @@ function Scene({ progress, quality, framing, onReady }: Omit<Props, "active" | "
           <Saree progress={progress} quality={quality} assets={assets} />
           <SareeBox progress={progress} assets={assets} />
           <ShoppingBag progress={progress} assets={assets} />
+          <DustMotes quality={quality} />
         </>
       )}
 

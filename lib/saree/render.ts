@@ -29,6 +29,8 @@ export interface SareeDesign {
   palluMotif?: MotifId | null;
   /** 0..1 lustre (pure silk ≈ 1, blends lower) */
   sheen?: number;
+  /** Shot silk: warp yarn in a different colour from the weft (body shimmers between both). */
+  shot?: string;
 }
 
 export const DEFAULT_DESIGN: SareeDesign = {
@@ -138,12 +140,12 @@ function rng(seed: number) {
 }
 
 /** Shot-silk ground: warp & weft in slightly different tones + slub irregularity. */
-function silkGround(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, hex: string, ink: Inks, seed: number) {
+function silkGround(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, hex: string, ink: Inks, seed: number, shot?: string) {
   ctx.fillStyle = ink.silk(hex);
   ctx.fillRect(x, y, w, h);
   if (ink.mode === "orm") return;
   const r = rng(seed);
-  const warp = mix(hex, 0.08);
+  const warp = shot ?? mix(hex, 0.08);
   const weft = mix(hex, -0.1);
   ctx.globalAlpha = 0.35;
   ctx.fillStyle = warp;
@@ -353,12 +355,27 @@ function borderBand(
   }
 }
 
+/** Korvai join: where the border is interlocked with the body, small teeth of each colour
+ *  bite into the other along the line, outlined by a fine zari thread. */
+function korvaiTeeth(ctx: CanvasRenderingContext2D, ink: Inks, x0: number, x1: number, y: number, s: number, dir: 1 | -1, borderHex: string) {
+  ctx.fillStyle = ink.silk(borderHex);
+  ctx.beginPath();
+  for (let x = x0; x < x1; x += s) {
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + s / 2, y + dir * s * 0.7);
+    ctx.lineTo(x + s, y);
+  }
+  ctx.fill();
+  ctx.fillStyle = ink.zari;
+  ctx.fillRect(x0, y - Math.max(1, s * 0.06) / 2, x1 - x0, Math.max(1, s * 0.06));
+}
+
 /* ------------------------------------------------------------------ body */
 
 function body(ctx: CanvasRenderingContext2D, ink: Inks, d: SareeDesign, x0: number, x1: number, y0: number, y1: number, unit: number) {
   const W = x1 - x0;
   const H = y1 - y0;
-  silkGround(ctx, x0, y0, W, H, d.body, ink, 11);
+  silkGround(ctx, x0, y0, W, H, d.body, ink, 11, d.shot);
   const cut = mix(d.body, -0.08);
   const motif = d.bodyMotif ?? "flower";
 
@@ -509,6 +526,18 @@ function pallu(ctx: CanvasRenderingContext2D, ink: Inks, d: SareeDesign, x0: num
       else drawMotif(ctx, motif, cx, cy, Math.min(cw, H / 3) * 0.78, ORM_SILK, ORM_ZARI, r % 2 === 1);
     }
   }
+  // silk rules between the motif rows, each with a fine zari-on-silk diamond chain
+  if (ink.mode === "color") {
+    for (let r = 1; r < 3; r++) {
+      const y = y0 + (H / 3) * r;
+      ctx.fillStyle = ink.silk(d.pallu);
+      ctx.fillRect(fieldX, y - unit * 0.07, fieldW, unit * 0.14);
+      diamondChain(ctx, ink, fieldX, fieldX + fieldW, y, unit * 0.04);
+    }
+    // frame lines down each motif column
+    ctx.fillStyle = ink.silk(d.pallu);
+    for (let c = 1; c < cols; c++) ctx.fillRect(fieldX + cw * c - unit * 0.025, y0, unit * 0.05, H);
+  }
   // stripes at the very end
   for (let k = 0; k < 3; k++) {
     silkGround(ctx, x1 - pad * 0.4 - k * unit * 0.3, y0, unit * 0.12, H, d.pallu, ink, 40 + k);
@@ -522,50 +551,58 @@ export interface RenderOptions {
   palluFraction?: number;
   /** Border band height as a fraction of saree width. */
   borderFraction?: number;
-  /** Name woven into the body in zari (e.g. "PVS SILKS"), centred on the saree. */
+  /** Weaver's mark woven in zari just before the pallu (e.g. "PVS SILKS"). */
   wovenText?: { text: string; sub?: string; font: string; subFont?: string };
 }
 
-/** A woven name panel: silk cartouche with zari letters and fine zari rules, like a weaver's mark. */
-function wovenName(ctx: CanvasRenderingContext2D, ink: Inks, d: SareeDesign, W: number, H: number, bh: number, wt: NonNullable<RenderOptions["wovenText"]>) {
-  const cx = W * 0.5;
-  const cy = H / 2;
-  const capH = (H - 2 * bh) * 0.3;
+/** Weaver's mark: a small silk cartouche with the name in zari, woven into the body just
+ *  before the pallu (where real silk sarees carry the weaver's / brand mark). */
+function wovenName(ctx: CanvasRenderingContext2D, ink: Inks, d: SareeDesign, palluX: number, H: number, bh: number, unit: number, wt: NonNullable<RenderOptions["wovenText"]>) {
+  const capH = (H - 2 * bh) * 0.13;
   ctx.save();
   ctx.font = `700 ${Math.round(capH)}px ${wt.font}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   const tw = ctx.measureText(wt.text).width;
-  const pw = tw + capH * 1.6;
-  const ph = capH * (wt.sub ? 2.3 : 1.7);
+  ctx.font = `600 ${Math.round(capH * 0.3)}px ${wt.subFont ?? wt.font}`;
+  const sw = wt.sub ? ctx.measureText(wt.sub).width : 0;
+  const pw = Math.max(tw, sw) + capH * 1.4;
+  const ph = capH * (wt.sub ? 2.5 : 1.9);
+  const cx = palluX - unit * 0.9 - pw / 2;
+  const cy = H / 2;
   // plain silk panel so buttas don't run through the letters
-  if (ink.mode === "color") silkGround(ctx, cx - pw / 2, cy - ph / 2, pw, ph, d.body, ink, 77);
+  if (ink.mode === "color") silkGround(ctx, cx - pw / 2, cy - ph / 2, pw, ph, d.body, ink, 77, d.shot);
   else {
     ctx.fillStyle = ORM_SILK;
     ctx.fillRect(cx - pw / 2, cy - ph / 2, pw, ph);
   }
-  // zari rules above / below with a small diamond
+  // fine zari frame with corner diamonds
+  ctx.strokeStyle = ink.zari as string;
+  ctx.lineWidth = Math.max(1.5, capH * 0.045);
+  ctx.strokeRect(cx - pw / 2 + capH * 0.15, cy - ph / 2 + capH * 0.15, pw - capH * 0.3, ph - capH * 0.3);
   ctx.fillStyle = ink.zari;
-  const rule = Math.max(1.5, capH * 0.05);
-  for (const y of [cy - ph / 2 + rule * 2, cy + ph / 2 - rule * 3]) ctx.fillRect(cx - pw / 2 + capH * 0.3, y, pw - capH * 0.6, rule);
-  for (const y of [cy - ph / 2 + rule * 2.5, cy + ph / 2 - rule * 2.5]) {
+  for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const x = cx + dx * (pw / 2 - capH * 0.15);
+    const y = cy + dy * (ph / 2 - capH * 0.15);
+    const k = capH * 0.12;
     ctx.beginPath();
-    ctx.moveTo(cx, y - capH * 0.12);
-    ctx.lineTo(cx + capH * 0.12, y);
-    ctx.lineTo(cx, y + capH * 0.12);
-    ctx.lineTo(cx - capH * 0.12, y);
+    ctx.moveTo(x, y - k);
+    ctx.lineTo(x + k, y);
+    ctx.lineTo(x, y + k);
+    ctx.lineTo(x - k, y);
     ctx.fill();
   }
-  const textY = wt.sub ? cy - capH * 0.25 : cy;
+  const textY = wt.sub ? cy - capH * 0.28 : cy;
   if (ink.mode === "color") {
     // raised zari: soft shadow under the letters
     ctx.shadowColor = "rgba(0,0,0,0.45)";
     ctx.shadowBlur = capH * 0.06;
     ctx.shadowOffsetY = capH * 0.04;
   }
+  ctx.font = `700 ${Math.round(capH)}px ${wt.font}`;
   ctx.fillText(wt.text, cx, textY);
   if (wt.sub) {
-    ctx.font = `600 ${Math.round(capH * 0.26)}px ${wt.subFont ?? wt.font}`;
+    ctx.font = `600 ${Math.round(capH * 0.3)}px ${wt.subFont ?? wt.font}`;
     ctx.fillText(wt.sub, cx, cy + capH * 0.62);
   }
   ctx.restore();
@@ -579,7 +616,7 @@ export function renderSaree(ctx: CanvasRenderingContext2D, W: number, H: number,
   const unit = H / 12;
 
   body(ctx, ink, d, 0, palluX, bh, H - bh, unit);
-  if (opts.wovenText) wovenName(ctx, ink, d, W, H, bh, opts.wovenText);
+  if (opts.wovenText) wovenName(ctx, ink, d, palluX, H, bh, unit, opts.wovenText);
   pallu(ctx, ink, d, palluX, W, bh, H - bh, unit);
 
   const top = d.border;
@@ -587,6 +624,11 @@ export function renderSaree(ctx: CanvasRenderingContext2D, W: number, H: number,
   borderBand(ctx, ink, d, top, 0, W, 0, bh, 1, 101);
   borderBand(ctx, ink, d, bottom, 0, W, H - bh, bh, -1, 202);
 
+  // korvai: border interlocked with the body (teeth along the join)
+  if (d.borderStyle !== "minimal") {
+    korvaiTeeth(ctx, ink, 0, palluX, bh, unit * 0.22, 1, top);
+    korvaiTeeth(ctx, ink, 0, palluX, H - bh, unit * 0.22, -1, bottom);
+  }
   // temple towers rising from the borders into the body (temple & Ganga Jamuna)
   if (d.borderStyle === "temple" || d.borderStyle === "gangaJamuna") {
     kovilRow(ctx, ink, 0, palluX, bh, bh * 0.42, 1, top);

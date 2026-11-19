@@ -97,4 +97,9 @@ export const PRESETS: Record<PresetId, SareeDesign> = {
 };
 
 /** The saree woven in the home-page hero (also drawn in the static fallback). */
-export const HERO_SAREE_DESIGN: SareeDesign = PRESETS.templeBride;
+export const HERO_SAREE_DESIGN: SareeDesign = {
+  ...PRESETS.templeBride,
+  // shot silk: a slightly brighter red warp under the arakku weft makes the body shimmer
+  shot: "#A3182E",
+  bodyMotif: "mango",
+};

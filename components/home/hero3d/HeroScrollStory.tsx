@@ -9,6 +9,7 @@ import { SCENES, type QualitySettings, type SceneId } from "./sceneConfig";
 import type { ProgressStore } from "./math";
 import { useI18n } from "@/i18n/I18nProvider";
 import { HeroCtas } from "./HeroCtas";
+import { FoldSteps } from "./FoldSteps";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -171,6 +172,7 @@ export function HeroScrollStory({ quality, onFatal }: Props) {
                       {c.body}
                     </p>
                   )}
+                  {id === "packaging" && <FoldSteps progress={progress} labels={t.hero.foldSteps} />}
                   {isFinal && <HeroCtas className="mt-6 sm:mt-7" compactOnMobile />}
                 </div>
               );

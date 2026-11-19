@@ -124,13 +124,39 @@ export const BAG = {
   position: [1.3, 0, 1.55] as const,
 } as const;
 
-/** Packing table + saree box (the folded saree goes into the box, the box into the bag). */
+/**
+ * Folding in the air + packing, as local times inside the "packaging" scene (0..1).
+ * Follows PVS's silk-saree folding procedure:
+ *   1 spread & align → 2 first lengthwise fold → 3 second lengthwise fold →
+ *   4 crosswise accordion folds (alternating) → 5 pallu on top → 6 square the shape →
+ *   7 quality check — then the box rises under the floating saree, tissue, lid.
+ * The closed box goes into the bag in the "final" scene.
+ */
+export const FOLD = {
+  spread: [0.0, 0.07],
+  half: [0.07, 0.17],
+  second: [0.17, 0.27],
+  accordion: [0.27, 0.55],
+  pallu: [0.55, 0.61],
+  square: [0.61, 0.66],
+  check: [0.64, 0.73],
+  boxIn: [0.66, 0.77],
+  lower: [0.76, 0.83],
+  tissue: [0.82, 0.87],
+  lid: [0.86, 0.95],
+} as const satisfies Record<string, readonly [number, number]>;
+
+/** The seven folding steps, in order (labels live in the dictionaries: hero.foldSteps). */
+export const FOLD_STEPS = ["spread", "half", "second", "accordion", "pallu", "square", "check"] as const;
+
+/** Panels in the accordion fold (odd, so the pallu end finishes face-up on top). */
+export const ACCORDION_PANELS = 11;
+
 export const PACK = {
-  tablePos: [-0.35, 0, 1.6] as const,
-  tableTop: 0.62,
-  tableSize: [1.9, 0.8] as const,
-  /** Saree scale while lying on the table (stack = panel × half width). */
-  sareeScale: 0.62,
-  /** Box outer size: x (width), y (height), z (depth). */
-  box: [0.42, 0.1, 0.46] as const,
+  /** Where the saree floats while it is folded (world). */
+  foldPos: [0.3, 1.15, 1.7] as const,
+  /** Bottom centre of the open box once it has risen under the saree. */
+  boxPos: [0.3, 0.86, 1.7] as const,
+  /** Box outer size: x (width), y (height), z (depth) — fits the folded stack (≈0.27 × 0.30). */
+  box: [0.34, 0.1, 0.38] as const,
 } as const;
